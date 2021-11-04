@@ -1,0 +1,72 @@
+openapi: 3.0.2
+info:
+  title: Adminstrative API
+  version: "1.0"
+servers:
+- description: Local development server (routes to 127.0.0.1)
+  url: http://local.suborbital.network:{port}/api/v1
+  variables:
+    port:
+      default: "8081"
+- description: Production server
+  url: '{method}://{hostname}:{port}'
+  variables:
+    method:
+      default: https
+    hostname:
+      default: 0.0.0.0
+    port:
+      default: "8081"
+paths:
+  /token/{environment}.{customerID}/{namespace}/{fnName}:
+    get:
+      description: Generates an authentication token for the given function, used
+        to secure access to the code editor
+      operationId: getToken
+      parameters:
+      - description: The root compute environment (i.e. the vendor)
+        example: com.suborbital
+        in: path
+        name: environment
+        required: true
+        schema:
+          type: string
+      - description: The vendor's customer (i.e. the user)
+        example: acmeco
+        in: path
+        name: customerID
+        required: true
+        schema:
+          type: string
+      - description: The function namespace (vendor-defined groups of functions)
+        example: default
+        in: path
+        name: namespace
+        required: true
+        schema:
+          type: string
+      - description: The function name (customer-defined)
+        example: httpget
+        in: path
+        name: fnName
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+          description: OK
+components:
+  schemas:
+    Token:
+      description: The response object for a authentication token
+      example:
+        token: XkDAWQHVgXKx1oVl0Ru76ife
+      properties:
+        token:
+          example: XkDAWQHVgXKx1oVl0Ru76ife
+          type: string
+      type: object

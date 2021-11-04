@@ -1,0 +1,98 @@
+openapi: 3.0.2
+info:
+  title: Execution API
+  version: "1.0"
+servers:
+- description: Local development server (routes to 127.0.0.1)
+  url: http://local.suborbital.network:{port}
+  variables:
+    port:
+      default: "8080"
+- description: Production server
+  url: '{method}://{hostname}:{port}'
+  variables:
+    method:
+      default: https
+    hostname:
+      default: 0.0.0.0
+    port:
+      default: "8080"
+paths:
+  /{environment}.{customerID}/{namespace}/{fnName}/{versionNumber}:
+    post:
+      operationId: runFunction
+      parameters:
+      - description: The root compute environment (i.e. the vendor)
+        example: com.suborbital
+        in: path
+        name: environment
+        required: true
+        schema:
+          type: string
+      - description: The vendor's customer (i.e. the user)
+        example: acmeco
+        in: path
+        name: customerID
+        required: true
+        schema:
+          type: string
+      - description: The function namespace (vendor-defined groups of functions)
+        example: default
+        in: path
+        name: namespace
+        required: true
+        schema:
+          type: string
+      - description: The function name (customer-defined)
+        example: httpget
+        in: path
+        name: fnName
+        required: true
+        schema:
+          type: string
+      - description: The module version
+        example: v1.0.0
+        in: path
+        name: versionNumber
+        required: true
+        schema:
+          type: string
+      - explode: false
+        in: header
+        name: X-Atmo-State
+        required: false
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+        description: The payload bytes to be used as input to the function.
+        required: true
+      responses:
+        "200":
+          description: OK
+      security:
+      - bearerAuthentication: []
+      summary: Executes the given function, with the provided body, params and state
+        loaded into the function at runtime.
+components:
+  parameters:
+    xAtmoStateParam:
+      explode: false
+      in: header
+      name: X-Atmo-State
+      required: false
+      schema:
+        type: string
+      style: simple
+  schemas: {}
+  securitySchemes:
+    bearerAuthentication:
+      bearerFormat: 'Bearer: <editor token>'
+      description: Execution API requests require a Bearer header with an editor token.
+        Obtain an editor token from the Adminstrative API.
+      scheme: bearer
+      type: http
