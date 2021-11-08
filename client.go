@@ -1,35 +1,40 @@
 package compute
 
-import "github.com/pkg/errors"
+import (
+	"io"
+	"net/http"
+
+	"github.com/pkg/errors"
+)
 
 type Client struct {
-	config *Config
-
-	adminAdapter     *adminAdapter
-	builderAdapter   *builderAdapter
-	executionAdapter *executionAdapter
+	config     *Config
+	httpClient *http.Client
 }
 
-func NewClient(config *Config) (*Client, error) {
-	failErr := errors.New("failed to NewClient")
-
+func NewClient(config *Config, httpClient *http.Client) (*Client, error) {
 	if config == nil {
-		return nil, errors.Wrap(failErr, "config cannot be nil")
+		return nil, errors.New("failed to NewClient: config cannot be nil")
+	}
+
+	if httpClient == nil {
+		return nil, errors.New("failed to NewClient: httpClient cannot be nil")
 	}
 
 	client := &Client{
-		config:           config,
-		adminAdapter:     newAdminAdapter(config.adminConfig),
-		builderAdapter:   newBuilderAdapter(config.builderConfig),
-		executionAdapter: newExecutionAdapter(config.executionConfig),
+		config:     config,
+		httpClient: httpClient,
 	}
 
 	return client, nil
 }
 
+func NewLocalClient() (*Client, error) {
+	return NewClient(LocalConfig(), http.DefaultClient)
+}
+
 func (c *Client) NewRunnable(environment, customerID, namespace, fnName string) *Runnable {
 	runnable := &Runnable{
-		client:       c,
 		environment:  environment,
 		customerID:   customerID,
 		namespace:    namespace,
@@ -37,4 +42,15 @@ func (c *Client) NewRunnable(environment, customerID, namespace, fnName string) 
 	}
 
 	return runnable
+}
+
+func (c *Client) BuildWith(runnable *Runnable, fn Function) (string, *http.Response, error) {
+	return "", nil, nil
+}
+
+func (c *Client) adminRequestBuilder(method string, endpoint string, body io.Reader) (*http.Request, error) {
+	url := *c.config.adminURL
+	url.Path = endpoint
+
+	return http.NewRequest(method, url.String(), body)
 }
