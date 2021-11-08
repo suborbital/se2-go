@@ -5,8 +5,9 @@ import "github.com/pkg/errors"
 type Client struct {
 	config *Config
 
-	adminAdapter   *adminAdapter
-	builderAdapter *builderAdapter
+	adminAdapter     *adminAdapter
+	builderAdapter   *builderAdapter
+	executionAdapter *executionAdapter
 }
 
 func NewClient(config *Config) (*Client, error) {
@@ -17,9 +18,10 @@ func NewClient(config *Config) (*Client, error) {
 	}
 
 	client := &Client{
-		config:         config,
-		adminAdapter:   newAdminAdapter(config.adminConfig),
-		builderAdapter: newBuilderAdapter(config.builderConfig),
+		config:           config,
+		adminAdapter:     newAdminAdapter(config.adminConfig),
+		builderAdapter:   newBuilderAdapter(config.builderConfig),
+		executionAdapter: newExecutionAdapter(config.executionConfig),
 	}
 
 	return client, nil
