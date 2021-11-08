@@ -17,7 +17,7 @@ func (c *Client) EditorToken(runnable *Runnable) (*http.Response, error) {
 		return nil, err
 	}
 
-	res, err := c.httpClient.Do(req)
+	res, err := c.do(req)
 	if err != nil {
 		return res, err
 	}
@@ -35,7 +35,7 @@ func (c *Client) EditorToken(runnable *Runnable) (*http.Response, error) {
 			"failed to getEditorTokenFor Runnable: [%s]", runnable.Path())
 	}
 
-	runnable.setToken(token.Token)
+	runnable.token = token.Token
 
 	return res, nil
 }

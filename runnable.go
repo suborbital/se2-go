@@ -2,7 +2,6 @@ package compute
 
 import (
 	"fmt"
-	"sync"
 )
 
 type Runnable struct {
@@ -13,8 +12,6 @@ type Runnable struct {
 	version      string
 
 	token string
-
-	lock sync.Mutex
 }
 
 func (r Runnable) Environment() string {
@@ -45,16 +42,6 @@ func (r Runnable) VersionPath() string {
 	return fmt.Sprintf("%s/%s", r.Path(), r.Version())
 }
 
-func (r *Runnable) setToken(token string) {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-
-	r.token = token
-}
-
 func (r *Runnable) Token() string {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-
 	return r.token
 }

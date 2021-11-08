@@ -54,3 +54,17 @@ func (c *Client) adminRequestBuilder(method string, endpoint string, body io.Rea
 
 	return http.NewRequest(method, url.String(), body)
 }
+
+func (c *Client) do(req *http.Request) (*http.Response, error) {
+	res, err := c.httpClient.Do(req)
+
+	if err != nil {
+		return res, err
+	}
+
+	if res.StatusCode < 200 || res.StatusCode > 299 {
+		return res, errors.Errorf("API returned non-successful status: %s", res.Status)
+	}
+
+	return res, nil
+}
