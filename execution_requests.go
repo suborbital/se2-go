@@ -9,17 +9,18 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
+	"github.com/suborbital/atmo/directive"
 )
 
-func (c *Client) Exec(runnable *Runnable, body io.Reader) ([]byte, *http.Response, error) {
-	req, err := c.execRequestBuilder(http.MethodPost, runnable.VersionPath(), body)
+func (c *Client) Exec(runnable *directive.Runnable, body io.Reader) ([]byte, *http.Response, error) {
+	req, err := c.execRequestBuilder(http.MethodPost, runnable.FQFNURI, body)
 
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "failed to Client.Exec")
 	}
 
 	res, err := c.do(req)
-	if err != nil {
+	if err != nil && res == nil {
 		return nil, res, errors.Wrap(err, "failed to Client.Exec")
 	}
 
@@ -42,7 +43,7 @@ func (c *Client) Exec(runnable *Runnable, body io.Reader) ([]byte, *http.Respons
 	return result, res, nil
 }
 
-func (c *Client) ExecString(runnable *Runnable, body string) ([]byte, *http.Response, error) {
+func (c *Client) ExecString(runnable *directive.Runnable, body string) ([]byte, *http.Response, error) {
 	buf := bytes.NewBufferString(body)
 	return c.Exec(runnable, buf)
 }

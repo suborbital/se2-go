@@ -33,21 +33,6 @@ func NewLocalClient() (*Client, error) {
 	return NewClient(LocalConfig(), http.DefaultClient)
 }
 
-func (c *Client) NewRunnable(environment, customerID, namespace, fnName string) *Runnable {
-	runnable := &Runnable{
-		environment:  environment,
-		customerID:   customerID,
-		namespace:    namespace,
-		functionName: fnName,
-	}
-
-	return runnable
-}
-
-func (c *Client) BuildWith(runnable *Runnable, fn Function) (string, *http.Response, error) {
-	return "", nil, nil
-}
-
 func (c *Client) adminRequestBuilder(method string, endpoint string, body io.Reader) (*http.Request, error) {
 	url := *c.config.adminURL
 	url.Path = endpoint

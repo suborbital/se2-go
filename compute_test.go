@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/suborbital/atmo/directive"
 	"github.com/suborbital/compute-go"
 )
 
@@ -15,19 +16,24 @@ func TestGetToken(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	runnable := client.NewRunnable(
-		"com.suborbital",
-		"customer",
-		"default",
-		"foo")
+	runnable := directive.Runnable{
+		Name:         "foo",
+		Namespace:    "default",
+		Lang:         "assemblyscript",
+		Version:      "v1.0.0",
+		DraftVersion: "v2.0.0",
+		APIVersion:   "0.12.0",
+		FQFN:         "com.suborbital.customer#default::foo@v1.0.0",
+		FQFNURI:      "/com.suborbital.customer/default/foo/v1.0.0",
+	}
 
-	_, err = client.EditorToken(runnable)
+	token, _, err := client.EditorToken(&runnable)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	expect := "L7rRBAgx8vcOtOJO2kBbjqrs"
-	if token := runnable.Token(); token != expect {
+	if token != expect {
 		t.Fatalf("got %s, wanted %s", token, expect)
 	}
 }
@@ -49,7 +55,9 @@ func TestUserFunctions(t *testing.T) {
 		t.Fatal("expected 200, got", res.StatusCode)
 	}
 
-	t.Log(fns)
+	for _, fn := range fns {
+		t.Log(fn.FQFN)
+	}
 }
 
 func TestGetAndExec(t *testing.T) {
