@@ -55,6 +55,13 @@ func (c *Client) adminRequestBuilder(method string, endpoint string, body io.Rea
 	return http.NewRequest(method, url.String(), body)
 }
 
+func (c *Client) execRequestBuilder(method string, endpoint string, body io.Reader) (*http.Request, error) {
+	url := *c.config.executionURL
+	url.Path = endpoint
+
+	return http.NewRequest(method, url.String(), body)
+}
+
 func (c *Client) do(req *http.Request) (*http.Response, error) {
 	res, err := c.httpClient.Do(req)
 

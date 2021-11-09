@@ -10,8 +10,11 @@ type Runnable struct {
 	namespace    string
 	functionName string
 	version      string
+	language     string
+	draftVersion string
+	apiVersion   string
 
-	token string
+	editorToken string
 }
 
 func (r Runnable) Environment() string {
@@ -38,10 +41,14 @@ func (r Runnable) Path() string {
 	return fmt.Sprintf("%s.%s/%s/%s", r.Environment(), r.CustomerID(), r.Namespace(), r.FunctionName())
 }
 
+func (r Runnable) String() string {
+	return r.Path()
+}
+
 func (r Runnable) VersionPath() string {
 	return fmt.Sprintf("%s/%s", r.Path(), r.Version())
 }
 
 func (r *Runnable) Token() string {
-	return r.token
+	return r.editorToken
 }
