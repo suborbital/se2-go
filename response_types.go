@@ -52,3 +52,8 @@ type EditorStateResponse struct {
 	Contents string        `json:"contents"`
 	Tests    []TestPayload `json:"tests"`
 }
+
+type BuildResult struct {
+	Succeeded bool   `json:"succeeded"`
+	OutputLog string `json:"outputLog"`
+}

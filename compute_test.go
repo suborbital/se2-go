@@ -132,7 +132,7 @@ func TestBuilderFeatures(t *testing.T) {
 	t.Log(features.Features)
 }
 
-func TestBuilderTemplate(t *testing.T) {
+func TestBuilder(t *testing.T) {
 	t.Parallel()
 
 	client, err := compute.NewLocalClient()
@@ -143,7 +143,7 @@ func TestBuilderTemplate(t *testing.T) {
 	lang := "assemblyscript"
 	namespace := "default"
 
-	t.Run("V1", func(t *testing.T) {
+	t.Run("Template/V1", func(t *testing.T) {
 		template, err := client.BuilderTemplateV1(lang, namespace)
 		if err != nil {
 			t.Fatal(err)
@@ -156,8 +156,8 @@ func TestBuilderTemplate(t *testing.T) {
 		t.Logf("got template for '%s', length: %d", template.Lang, len(template.Contents))
 	})
 
-	t.Run("V2", func(t *testing.T) {
-		template, err := client.BuilderTemplateV2(lang, namespace, "foobar")
+	t.Run("Template/V2", func(t *testing.T) {
+		template, err := client.BuilderTemplateV2(lang, namespace, "foo")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -167,5 +167,16 @@ func TestBuilderTemplate(t *testing.T) {
 		}
 
 		t.Logf("got template for '%s', length: %d", template.Lang, len(template.Contents))
+
+		t.Run("Build", func(t *testing.T) {
+			runnable := compute.NewRunnable("com.suborbital", "customer", "default", "foo", "assemblyscript")
+			buildResult, err := client.BuildFunctionString(runnable, template.Contents)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			t.Log(buildResult)
+		})
 	})
 }

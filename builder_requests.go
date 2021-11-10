@@ -1,9 +1,14 @@
 package compute
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
 	"path"
+
+	"github.com/pkg/errors"
+	"github.com/suborbital/atmo/directive"
 )
 
 func (c *Client) BuilderHealth() (bool, error) {
@@ -98,4 +103,50 @@ func (c *Client) BuilderTemplateV2(lang, namespace, fnName string) (*EditorState
 	}
 
 	return editorState, nil
+}
+
+func (c *Client) BuildFunction(runnable *directive.Runnable, functionBody io.Reader) (*BuildResult, error) {
+	if runnable == nil {
+		return nil, errors.New("Runnable cannot be nil")
+	}
+
+	if functionBody == nil {
+		return nil, errors.New("functionBody cannot be nil")
+	}
+
+	// TODO: cache somewhere in Client?
+	token, err := c.EditorToken(runnable)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to EditorToken")
+	}
+
+	p, _ := path.Split(runnable.FQFNURI) // removes version from end of URI
+
+	req, err := c.builderRequestBuilder(http.MethodPost,
+		path.Join("/api/v1/build", runnable.Lang, p), functionBody)
+	req.Header.Add("Authorization", "Bearer "+token)
+
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	buildResult := &BuildResult{}
+
+	dec := json.NewDecoder(res.Body)
+	err = dec.Decode(buildResult)
+	if err != nil {
+		return nil, err
+	}
+
+	return buildResult, nil
+}
+
+func (c *Client) BuildFunctionString(runnable *directive.Runnable, functionString string) (*BuildResult, error) {
+	buf := bytes.NewBufferString(functionString)
+	return c.BuildFunction(runnable, buf)
 }
