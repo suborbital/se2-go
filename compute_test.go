@@ -1,10 +1,32 @@
 package compute_test
 
 import (
+	"encoding/base64"
+	"os"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/suborbital/compute-go"
 )
+
+var customerID = ""
+
+func TestMain(m *testing.M) {
+	// creates a new customer for every test run
+	uuid := uuid.New()
+	raw, _ := uuid.MarshalBinary()
+
+	customerID = base64.URLEncoding.EncodeToString(raw)
+
+	// chop off base64 ==
+	customerID = customerID[:len(customerID)-2]
+
+	os.Exit(m.Run())
+}
+
+func TestCustomerID(t *testing.T) {
+	t.Logf("Using CustomerID: %s", customerID)
+}
 
 func TestGetToken(t *testing.T) {
 	t.Parallel()
@@ -14,6 +36,7 @@ func TestGetToken(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// we use "customer" here so the token output is predictable
 	runnable := compute.NewRunnable("com.suborbital", "customer", "default", "foo", "assemblyscript")
 
 	token, err := client.EditorToken(runnable)
@@ -27,6 +50,74 @@ func TestGetToken(t *testing.T) {
 	}
 }
 
+// TestBuilder must run before tests that depend on Runnables existing in SCN
+func TestBuilder(t *testing.T) {
+	client, err := compute.NewLocalClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	lang := "assemblyscript"
+	namespace := "default"
+
+	t.Run("Template/V1", func(t *testing.T) {
+		template, err := client.BuilderTemplateV1(lang, namespace)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if template.Lang != lang {
+			t.Errorf("got Lang: '%s', want '%s'", template.Lang, lang)
+		}
+
+		t.Logf("got template for '%s', length: %d", template.Lang, len(template.Contents))
+	})
+
+	t.Run("Template/V2", func(t *testing.T) {
+		template, err := client.BuilderTemplateV2(lang, namespace, "foo")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if template.Lang != lang {
+			t.Errorf("got Lang: '%s', want '%s'", template.Lang, lang)
+		}
+
+		t.Logf("got template for '%s', length: %d", template.Lang, len(template.Contents))
+
+		t.Run("Build", func(t *testing.T) {
+			runnable := compute.NewRunnable("com.suborbital", customerID, "default", "foo", "assemblyscript")
+			buildResult, err := client.BuildFunctionString(runnable, template.Contents)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			t.Log(buildResult)
+
+			t.Run("GetDraft", func(t *testing.T) {
+				editorState, err := client.GetDraft(runnable)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if editorState.Contents != template.Contents {
+					t.Error("function contents changed between build and draft")
+				}
+			})
+
+			t.Run("Promote", func(t *testing.T) {
+				promoteResponse, err := client.PromoteDraft(runnable)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				t.Logf("runnable promoted: (%s -> %s)", runnable.Version, promoteResponse.Version)
+			})
+		})
+	})
+}
+
 func TestUserFunctions(t *testing.T) {
 	t.Parallel()
 
@@ -35,7 +126,7 @@ func TestUserFunctions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fns, err := client.UserFunctions("customer", "default")
+	fns, err := client.UserFunctions(customerID, "default")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +144,7 @@ func TestGetAndExec(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fns, err := client.UserFunctions("customer", "default")
+	fns, err := client.UserFunctions(customerID, "default")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,53 +221,4 @@ func TestBuilderFeatures(t *testing.T) {
 	}
 
 	t.Log(features.Features)
-}
-
-func TestBuilder(t *testing.T) {
-	t.Parallel()
-
-	client, err := compute.NewLocalClient()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	lang := "assemblyscript"
-	namespace := "default"
-
-	t.Run("Template/V1", func(t *testing.T) {
-		template, err := client.BuilderTemplateV1(lang, namespace)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if template.Lang != lang {
-			t.Errorf("got Lang: '%s', want '%s'", template.Lang, lang)
-		}
-
-		t.Logf("got template for '%s', length: %d", template.Lang, len(template.Contents))
-	})
-
-	t.Run("Template/V2", func(t *testing.T) {
-		template, err := client.BuilderTemplateV2(lang, namespace, "foo")
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if template.Lang != lang {
-			t.Errorf("got Lang: '%s', want '%s'", template.Lang, lang)
-		}
-
-		t.Logf("got template for '%s', length: %d", template.Lang, len(template.Contents))
-
-		t.Run("Build", func(t *testing.T) {
-			runnable := compute.NewRunnable("com.suborbital", "customer", "default", "foo", "assemblyscript")
-			buildResult, err := client.BuildFunctionString(runnable, template.Contents)
-
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			t.Log(buildResult)
-		})
-	})
 }
