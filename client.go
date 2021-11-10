@@ -8,29 +8,23 @@ import (
 )
 
 type Client struct {
-	config     *Config
-	httpClient *http.Client
+	config *Config
 }
 
-func NewClient(config *Config, httpClient *http.Client) (*Client, error) {
+func NewClient(config *Config) (*Client, error) {
 	if config == nil {
 		return nil, errors.New("failed to NewClient: config cannot be nil")
 	}
 
-	if httpClient == nil {
-		return nil, errors.New("failed to NewClient: httpClient cannot be nil")
-	}
-
 	client := &Client{
-		config:     config,
-		httpClient: httpClient,
+		config: config,
 	}
 
 	return client, nil
 }
 
 func NewLocalClient() (*Client, error) {
-	return NewClient(LocalConfig(), http.DefaultClient)
+	return NewClient(LocalConfig())
 }
 
 func (c *Client) adminRequestBuilder(method string, endpoint string, body io.Reader) (*http.Request, error) {
@@ -48,7 +42,7 @@ func (c *Client) execRequestBuilder(method string, endpoint string, body io.Read
 }
 
 func (c *Client) do(req *http.Request) (*http.Response, error) {
-	res, err := c.httpClient.Do(req)
+	res, err := http.DefaultClient.Do(req)
 
 	if err != nil {
 		return res, err
