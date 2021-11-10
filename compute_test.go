@@ -1,7 +1,6 @@
 package compute_test
 
 import (
-	"net/http"
 	"testing"
 
 	"github.com/suborbital/atmo/directive"
@@ -27,7 +26,7 @@ func TestGetToken(t *testing.T) {
 		FQFNURI:      "/com.suborbital.customer/default/foo/v1.0.0",
 	}
 
-	token, _, err := client.EditorToken(&runnable)
+	token, err := client.EditorToken(&runnable)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,13 +45,9 @@ func TestUserFunctions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fns, res, err := client.UserFunctions("customer", "default")
+	fns, err := client.UserFunctions("customer", "default")
 	if err != nil {
 		t.Fatal(err)
-	}
-
-	if res.StatusCode != http.StatusOK {
-		t.Fatal("expected 200, got", res.StatusCode)
 	}
 
 	for _, fn := range fns {
@@ -68,13 +63,9 @@ func TestGetAndExec(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fns, res, err := client.UserFunctions("customer", "default")
+	fns, err := client.UserFunctions("customer", "default")
 	if err != nil {
 		t.Fatal(err)
-	}
-
-	if res.StatusCode != http.StatusOK {
-		t.Fatal("expected 200, got", res.StatusCode)
 	}
 
 	if len(fns) < 1 {
@@ -83,7 +74,7 @@ func TestGetAndExec(t *testing.T) {
 
 	runnable := fns[0]
 
-	result, _, err := client.ExecString(runnable, "world")
+	result, err := client.ExecString(runnable, "world")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,7 +83,7 @@ func TestGetAndExec(t *testing.T) {
 
 	// Tests the administrative results endpoint
 	t.Run("ExecResults", func(t *testing.T) {
-		execRes, _, err := client.FunctionExecResults(runnable)
+		execRes, err := client.FunctionExecResults(runnable)
 		if err != nil {
 			t.Fatal(err)
 		}

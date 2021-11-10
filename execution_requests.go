@@ -12,38 +12,38 @@ import (
 	"github.com/suborbital/atmo/directive"
 )
 
-func (c *Client) Exec(runnable *directive.Runnable, body io.Reader) ([]byte, *http.Response, error) {
+func (c *Client) Exec(runnable *directive.Runnable, body io.Reader) ([]byte, error) {
 	req, err := c.execRequestBuilder(http.MethodPost, runnable.FQFNURI, body)
 
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "failed to Client.Exec")
+		return nil, errors.Wrap(err, "failed to Client.Exec")
 	}
 
 	res, err := c.do(req)
 	if err != nil && res == nil {
-		return nil, res, errors.Wrap(err, "failed to Client.Exec")
+		return nil, errors.Wrap(err, "failed to Client.Exec")
 	}
 
 	result, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return nil, res, errors.Wrap(err, "failed to Client.Exec")
+		return nil, errors.Wrap(err, "failed to Client.Exec")
 	}
 
 	if res.StatusCode != http.StatusOK {
 		errRes := ExecErrorResponse{}
 		err = json.Unmarshal(result, &errRes)
 		if err != nil {
-			return nil, res, err
+			return nil, err
 		}
 		newErr := errors.Errorf("[%d]: %s", errRes.Code, errRes.Message)
 
-		return nil, res, errors.Wrap(newErr, "failed to Client.Exec")
+		return nil, errors.Wrap(newErr, "failed to Client.Exec")
 	}
 
-	return result, res, nil
+	return result, nil
 }
 
-func (c *Client) ExecString(runnable *directive.Runnable, body string) ([]byte, *http.Response, error) {
+func (c *Client) ExecString(runnable *directive.Runnable, body string) ([]byte, error) {
 	buf := bytes.NewBufferString(body)
 	return c.Exec(runnable, buf)
 }
