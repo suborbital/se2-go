@@ -30,7 +30,7 @@ func (c *Client) Exec(runnable *directive.Runnable, body io.Reader) ([]byte, err
 	}
 
 	if res.StatusCode != http.StatusOK {
-		errRes := ExecErrorResponse{}
+		errRes := ExecError{}
 		err = json.Unmarshal(result, &errRes)
 		if err != nil {
 			return nil, err

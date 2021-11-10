@@ -24,7 +24,13 @@ type ExecResultsResponse struct {
 	Results []ExecResult `json:"results"`
 }
 
+type ExecError struct {
+	UUID      string    `json:"uuid,omitempty"`
+	Timestamp time.Time `json:"timestamp,omitempty"`
+	Code      int       `json:"code"`
+	Message   string    `json:"string"`
+}
+
 type ExecErrorResponse struct {
-	Code    int    `json:"code"`
-	Message string `json:"string"`
+	Errors []ExecError `json:"errors"`
 }

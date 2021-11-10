@@ -12,8 +12,10 @@ import (
 // EditorToken gets an editor token for the provided Runnable.
 func (c *Client) EditorToken(runnable *directive.Runnable) (string, error) {
 	// GET /api/v1/token/{environment}.{customerID}/{namespace}/{fnName}
-	p, _ := path.Split(runnable.FQFNURI)
-	req, err := c.adminRequestBuilder(http.MethodGet, path.Join("/api/v1/token", p), nil)
+	p, _ := path.Split(runnable.FQFNURI) // removes version from end of URI
+	req, err := c.adminRequestBuilder(http.MethodGet,
+		path.Join("/api/v1/token", p), nil)
+
 	if err != nil {
 		return "", err
 	}
@@ -41,8 +43,9 @@ func (c *Client) EditorToken(runnable *directive.Runnable) (string, error) {
 
 func (c *Client) UserFunctions(customerID string, namespace string) ([]*directive.Runnable, error) {
 	// GET /api/v1/functions/{customerID}/{namespace}
+	req, err := c.adminRequestBuilder(http.MethodGet,
+		path.Join("/api/v1/functions", customerID, namespace), nil)
 
-	req, err := c.adminRequestBuilder(http.MethodGet, path.Join("/api/v1/functions", customerID, namespace), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -67,8 +70,8 @@ func (c *Client) UserFunctions(customerID string, namespace string) ([]*directiv
 
 func (c *Client) FunctionExecResults(runnable *directive.Runnable) (*ExecResultsResponse, error) {
 	// GET /api/v1/results/com.awesomeco.vqeiupqvp98ph2e4nvrqw98/default/create-report/v0.0.1
-	req, err := c.adminRequestBuilder(http.MethodGet, path.Join(
-		"/api/v1/results", runnable.FQFNURI), nil)
+	req, err := c.adminRequestBuilder(http.MethodGet,
+		path.Join("/api/v1/results", runnable.FQFNURI), nil)
 
 	if err != nil {
 		return nil, err
@@ -81,6 +84,33 @@ func (c *Client) FunctionExecResults(runnable *directive.Runnable) (*ExecResults
 
 	execResults := &ExecResultsResponse{
 		Results: []ExecResult{},
+	}
+
+	dec := json.NewDecoder(res.Body)
+	err = dec.Decode(execResults)
+	if err != nil {
+		return nil, err
+	}
+
+	return execResults, nil
+}
+
+func (c *Client) FunctionExecErrors(runnable *directive.Runnable) (*ExecErrorResponse, error) {
+	// GET /api/v1/errors/com.awesomeco.vqeiupqvp98ph2e4nvrqw98/default/create-report/v0.0.1
+	req, err := c.adminRequestBuilder(http.MethodGet,
+		path.Join("/api/v1/errors", runnable.FQFNURI), nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	execResults := &ExecErrorResponse{
+		Errors: []ExecError{},
 	}
 
 	dec := json.NewDecoder(res.Body)

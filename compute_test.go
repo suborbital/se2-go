@@ -85,4 +85,15 @@ func TestGetAndExec(t *testing.T) {
 		t.Log("latest result:", sample.UUID, sample.Response)
 		t.Logf("(%d total execution results)", len(execRes.Results))
 	})
+
+	// Tests the administrative results endpoint
+	t.Run("ExecErrors", func(t *testing.T) {
+		execErrs, err := client.FunctionExecErrors(runnable)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		t.Log("errors:", execErrs.Errors)
+		t.Logf("(%d total execution errors)", len(execErrs.Errors))
+	})
 }
