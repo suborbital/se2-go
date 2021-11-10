@@ -41,6 +41,13 @@ func (c *Client) execRequestBuilder(method string, endpoint string, body io.Read
 	return http.NewRequest(method, url.String(), body)
 }
 
+func (c *Client) builderRequestBuilder(method string, endpoint string, body io.Reader) (*http.Request, error) {
+	url := *c.config.builderURL
+	url.Path = endpoint
+
+	return http.NewRequest(method, url.String(), body)
+}
+
 func (c *Client) do(req *http.Request) (*http.Response, error) {
 	res, err := http.DefaultClient.Do(req)
 

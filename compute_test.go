@@ -97,3 +97,75 @@ func TestGetAndExec(t *testing.T) {
 		t.Logf("(%d total execution errors)", len(execErrs.Errors))
 	})
 }
+
+func TestBuilderHealth(t *testing.T) {
+	t.Parallel()
+
+	client, err := compute.NewLocalClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	healthy, err := client.BuilderHealth()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !healthy {
+		t.Fatal("BuilderHealth returned false, want true")
+	}
+}
+
+func TestBuilderFeatures(t *testing.T) {
+	t.Parallel()
+
+	client, err := compute.NewLocalClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	features, err := client.BuilderFeatures()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(features.Features)
+}
+
+func TestBuilderTemplate(t *testing.T) {
+	t.Parallel()
+
+	client, err := compute.NewLocalClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	lang := "assemblyscript"
+	namespace := "default"
+
+	t.Run("V1", func(t *testing.T) {
+		template, err := client.BuilderTemplateV1(lang, namespace)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if template.Lang != lang {
+			t.Errorf("got Lang: '%s', want '%s'", template.Lang, lang)
+		}
+
+		t.Logf("got template for '%s', length: %d", template.Lang, len(template.Contents))
+	})
+
+	t.Run("V2", func(t *testing.T) {
+		template, err := client.BuilderTemplateV2(lang, namespace, "foobar")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if template.Lang != lang {
+			t.Errorf("got Lang: '%s', want '%s'", template.Lang, lang)
+		}
+
+		t.Logf("got template for '%s', length: %d", template.Lang, len(template.Contents))
+	})
+}

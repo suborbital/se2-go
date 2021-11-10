@@ -34,3 +34,21 @@ type ExecError struct {
 type ExecErrorResponse struct {
 	Errors []ExecError `json:"errors"`
 }
+
+type FeaturesResponse struct {
+	Features []string `json:"features"`
+}
+
+// TestPayload is a single test for a Runnable
+type TestPayload struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Payload     string `json:"payload"`
+}
+
+// EditorStateResponse is a response to requests to get editorState
+type EditorStateResponse struct {
+	Lang     string        `json:"lang"`
+	Contents string        `json:"contents"`
+	Tests    []TestPayload `json:"tests"`
+}
