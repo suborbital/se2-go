@@ -3,7 +3,6 @@ package compute_test
 import (
 	"testing"
 
-	"github.com/suborbital/atmo/directive"
 	"github.com/suborbital/compute-go"
 )
 
@@ -15,18 +14,9 @@ func TestGetToken(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	runnable := directive.Runnable{
-		Name:         "foo",
-		Namespace:    "default",
-		Lang:         "assemblyscript",
-		Version:      "v1.0.0",
-		DraftVersion: "v2.0.0",
-		APIVersion:   "0.12.0",
-		FQFN:         "com.suborbital.customer#default::foo@v1.0.0",
-		FQFNURI:      "/com.suborbital.customer/default/foo/v1.0.0",
-	}
+	runnable := compute.NewRunnable("com.suborbital", "customer", "default", "foo", "assemblyscript")
 
-	token, err := client.EditorToken(&runnable)
+	token, err := client.EditorToken(runnable)
 	if err != nil {
 		t.Fatal(err)
 	}
