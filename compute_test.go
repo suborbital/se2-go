@@ -28,28 +28,6 @@ func TestCustomerID(t *testing.T) {
 	t.Logf("Using CustomerID: %s", customerID)
 }
 
-func TestGetToken(t *testing.T) {
-	t.Parallel()
-
-	client, err := compute.NewLocalClient()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// we use "customer" here so the token output is predictable
-	runnable := compute.NewRunnable("com.suborbital", "customer", "default", "foo", "assemblyscript")
-
-	token, err := client.EditorToken(runnable)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	expect := "L7rRBAgx8vcOtOJO2kBbjqrs"
-	if token != expect {
-		t.Fatalf("got %s, wanted %s", token, expect)
-	}
-}
-
 // TestBuilder must run before tests that depend on Runnables existing in SCN
 func TestBuilder(t *testing.T) {
 	client, err := compute.NewLocalClient()
