@@ -150,3 +150,72 @@ func (c *Client) BuildFunctionString(runnable *directive.Runnable, functionStrin
 	buf := bytes.NewBufferString(functionString)
 	return c.BuildFunction(runnable, buf)
 }
+
+func (c *Client) GetDraft(runnable *directive.Runnable) (*EditorStateResponse, error) {
+	if runnable == nil {
+		return nil, errors.New("Runnable cannot be nil")
+	}
+
+	token, err := c.EditorToken(runnable)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to EditorToken")
+	}
+
+	p, _ := path.Split(runnable.FQFNURI) // removes version from end of URI
+
+	req, err := c.builderRequestBuilder(http.MethodGet,
+		path.Join("/api/v1/draft", p), nil)
+	req.Header.Add("Authorization", "Bearer "+token)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	editorState := &EditorStateResponse{Tests: []TestPayload{}}
+
+	dec := json.NewDecoder(res.Body)
+	err = dec.Decode(editorState)
+	if err != nil {
+		return nil, err
+	}
+
+	return editorState, nil
+}
+
+func (c *Client) PromoteDraft(runnable *directive.Runnable) (*PromoteDraftResponse, error) {
+	if runnable == nil {
+		return nil, errors.New("Runnable cannot be nil")
+	}
+
+	token, err := c.EditorToken(runnable)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to EditorToken")
+	}
+	p, _ := path.Split(runnable.FQFNURI) // removes version from end of URI
+
+	req, err := c.builderRequestBuilder(http.MethodPost,
+		path.Join("/api/v1/draft", p, "promote"), nil)
+	req.Header.Add("Authorization", "Bearer "+token)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	promoteResponse := &PromoteDraftResponse{}
+
+	dec := json.NewDecoder(res.Body)
+	err = dec.Decode(promoteResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return promoteResponse, nil
+}

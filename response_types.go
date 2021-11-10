@@ -57,3 +57,7 @@ type BuildResult struct {
 	Succeeded bool   `json:"succeeded"`
 	OutputLog string `json:"outputLog"`
 }
+
+type PromoteDraftResponse struct {
+	Version string `json:"version"`
+}
