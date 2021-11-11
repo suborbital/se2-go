@@ -35,36 +35,21 @@ func TestBuilder(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	lang := "assemblyscript"
-	namespace := "default"
+	runnable := compute.NewRunnable("com.suborbital", customerID, "default", "foo", "assemblyscript")
 
-	t.Run("Template/V1", func(t *testing.T) {
-		template, err := client.BuilderTemplateV1(lang, namespace)
+	t.Run("Template", func(t *testing.T) {
+		template, err := client.BuilderTemplate(runnable)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if template.Lang != lang {
-			t.Errorf("got Lang: '%s', want '%s'", template.Lang, lang)
-		}
-
-		t.Logf("got template for '%s', length: %d", template.Lang, len(template.Contents))
-	})
-
-	t.Run("Template/V2", func(t *testing.T) {
-		template, err := client.BuilderTemplateV2(lang, namespace, "foo")
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if template.Lang != lang {
-			t.Errorf("got Lang: '%s', want '%s'", template.Lang, lang)
+		if template.Lang != runnable.Lang {
+			t.Errorf("got Lang: '%s', want '%s'", template.Lang, runnable.Lang)
 		}
 
 		t.Logf("got template for '%s', length: %d", template.Lang, len(template.Contents))
 
 		t.Run("Build", func(t *testing.T) {
-			runnable := compute.NewRunnable("com.suborbital", customerID, "default", "foo", "assemblyscript")
 			buildResult, err := client.BuildFunctionString(runnable, template.Contents)
 
 			if err != nil {

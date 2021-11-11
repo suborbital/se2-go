@@ -49,44 +49,20 @@ func (c *Client) BuilderFeatures() (*FeaturesResponse, error) {
 	return features, nil
 }
 
-func (c *Client) BuilderTemplateV1(lang, namespace string) (*EditorStateResponse, error) {
+func (c *Client) BuilderTemplate(runnable *directive.Runnable) (*EditorStateResponse, error) {
+	if runnable == nil {
+		return nil, errors.New("Runnable cannot be nil")
+	}
+
 	req, err := c.builderRequestBuilder(http.MethodGet,
-		path.Join("/api/v1/template", lang), nil)
+		path.Join("/api/v2/template", runnable.Lang, runnable.Name), nil)
 
 	if err != nil {
 		return nil, err
 	}
 
 	q := req.URL.Query()
-	q.Add("namespace", namespace)
-	req.URL.RawQuery = q.Encode()
-
-	res, err := c.do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	editorState := &EditorStateResponse{Tests: []TestPayload{}}
-
-	dec := json.NewDecoder(res.Body)
-	err = dec.Decode(editorState)
-	if err != nil {
-		return nil, err
-	}
-
-	return editorState, nil
-}
-
-func (c *Client) BuilderTemplateV2(lang, namespace, fnName string) (*EditorStateResponse, error) {
-	req, err := c.builderRequestBuilder(http.MethodGet,
-		path.Join("/api/v2/template", lang, fnName), nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	q := req.URL.Query()
-	q.Add("namespace", namespace)
+	q.Add("namespace", runnable.Namespace)
 	req.URL.RawQuery = q.Encode()
 
 	res, err := c.do(req)
@@ -186,6 +162,9 @@ func (c *Client) GetDraft(runnable *directive.Runnable) (*EditorStateResponse, e
 	return editorState, nil
 }
 
+// PromoteDraft takes the most recent build of the provided runnable and deploys it so it can be
+// run. The .Version field of the provided runnable is modified in place if the promotion is
+// successful.
 func (c *Client) PromoteDraft(runnable *directive.Runnable) (*PromoteDraftResponse, error) {
 	if runnable == nil {
 		return nil, errors.New("Runnable cannot be nil")
@@ -216,6 +195,8 @@ func (c *Client) PromoteDraft(runnable *directive.Runnable) (*PromoteDraftRespon
 	if err != nil {
 		return nil, err
 	}
+
+	runnable.Version = promoteResponse.Version
 
 	return promoteResponse, nil
 }
