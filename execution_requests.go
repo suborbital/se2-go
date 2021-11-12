@@ -28,6 +28,7 @@ func (c *Client) Exec(runnable *directive.Runnable, body io.Reader) ([]byte, err
 	if err != nil && res == nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
 	result, err := ioutil.ReadAll(res.Body)
 	if err != nil {
