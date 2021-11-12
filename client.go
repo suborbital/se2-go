@@ -7,10 +7,12 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Client is used for interacting with the Suborbital Compute API
 type Client struct {
 	config *Config
 }
 
+// NewClient creates a Client with a Config
 func NewClient(config *Config) (*Client, error) {
 	if config == nil {
 		return nil, errors.New("failed to NewClient: config cannot be nil")
@@ -23,6 +25,7 @@ func NewClient(config *Config) (*Client, error) {
 	return client, nil
 }
 
+// NewLocalClient quickly sets up a Client with a LocalConfig. Useful for testing.
 func NewLocalClient() (*Client, error) {
 	return NewClient(LocalConfig())
 }
