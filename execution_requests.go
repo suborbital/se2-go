@@ -12,6 +12,7 @@ import (
 	"github.com/suborbital/atmo/directive"
 )
 
+// Exec remotely executes the provided runnable using the body as input. See also: ExecString()
 func (c *Client) Exec(runnable *directive.Runnable, body io.Reader) ([]byte, error) {
 	if runnable == nil {
 		return nil, errors.New("Runnable cannot be nil")
@@ -47,6 +48,7 @@ func (c *Client) Exec(runnable *directive.Runnable, body io.Reader) ([]byte, err
 	return result, nil
 }
 
+// ExecString sets up a buffer with the provided string and calls Exec
 func (c *Client) ExecString(runnable *directive.Runnable, body string) ([]byte, error) {
 	buf := bytes.NewBufferString(body)
 	return c.Exec(runnable, buf)

@@ -9,9 +9,9 @@ import (
 	"github.com/suborbital/atmo/directive"
 )
 
-// EditorToken gets an editor token for the provided Runnable.
+// EditorToken gets an editor token for the provided Runnable. Note: this library
+// manages editor tokens for you, so you most likely do not need to use this function.
 func (c *Client) EditorToken(runnable *directive.Runnable) (string, error) {
-	// GET /api/v1/token/{environment}.{customerID}/{namespace}/{fnName}
 	if runnable == nil {
 		return "", errors.New("Runnable cannot be nil")
 	}
@@ -44,8 +44,8 @@ func (c *Client) EditorToken(runnable *directive.Runnable) (string, error) {
 	return token.Token, nil
 }
 
+// UserFunctions gets a list of the deployed runnables for the given customer and namespace.
 func (c *Client) UserFunctions(customerID string, namespace string) ([]*directive.Runnable, error) {
-	// GET /api/v1/functions/{customerID}/{namespace}
 	req, err := c.adminRequestBuilder(http.MethodGet,
 		path.Join("/api/v1/functions", customerID, namespace), nil)
 
@@ -71,12 +71,12 @@ func (c *Client) UserFunctions(customerID string, namespace string) ([]*directiv
 	return userFuncs.Functions, nil
 }
 
+// FunctionExecResults returns the 5 most recent successful execution results for the provided runnable.
 func (c *Client) FunctionExecResults(runnable *directive.Runnable) (*ExecResultsResponse, error) {
 	if runnable == nil {
 		return nil, errors.New("Runnable cannot be nil")
 	}
 
-	// GET /api/v1/results/com.awesomeco.vqeiupqvp98ph2e4nvrqw98/default/create-report/v0.0.1
 	req, err := c.adminRequestBuilder(http.MethodGet,
 		path.Join("/api/v1/results", runnable.FQFNURI), nil)
 
@@ -102,12 +102,12 @@ func (c *Client) FunctionExecResults(runnable *directive.Runnable) (*ExecResults
 	return execResults, nil
 }
 
+// FunctionExecResults returns the 5 most recent execution errors for the provided runnable.
 func (c *Client) FunctionExecErrors(runnable *directive.Runnable) (*ExecErrorResponse, error) {
 	if runnable == nil {
 		return nil, errors.New("Runnable cannot be nil")
 	}
 
-	// GET /api/v1/errors/com.awesomeco.vqeiupqvp98ph2e4nvrqw98/default/create-report/v0.0.1
 	req, err := c.adminRequestBuilder(http.MethodGet,
 		path.Join("/api/v1/errors", runnable.FQFNURI), nil)
 
