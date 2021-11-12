@@ -7,6 +7,9 @@ In a Go project, run
 ```bash
 go get github.com/suborbital/compute-go
 ```
+
+Every operation with Compute is done with a `compute.Client`. Here's a simple example that fetches exisiting Runnables for a customer and namespace.
+
 ```go
 package main
 
@@ -34,6 +37,4 @@ func main() {
 }
 ```
 
-
 See [examples](examples/) folder for more.
-
