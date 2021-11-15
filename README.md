@@ -8,7 +8,7 @@ In a Go project, run
 go get github.com/suborbital/compute-go
 ```
 
-Every operation with Compute is done with a `compute.Client`. Here's a simple example that fetches exisiting Runnables for a customer and namespace.
+Every operation with Compute is done with a `compute.Client`. Here's a simple example that fetches exisiting Runnables for a user and namespace.
 
 ```go
 package main
@@ -26,7 +26,7 @@ func main() {
     }
 
     // get a list of Runnables
-    runnables, err := client.UserFunctions("customerID", "namespace")
+    runnables, err := client.UserFunctions("userID", "namespace")
     if err != nil {
         log.Fatal(err)
     }

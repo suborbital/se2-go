@@ -9,23 +9,23 @@ import (
 	"github.com/suborbital/compute-go"
 )
 
-var customerID = ""
+var userID = ""
 
 func TestMain(m *testing.M) {
-	// creates a new customer for every test run
+	// creates a new user for every test run
 	uuid := uuid.New()
 	raw, _ := uuid.MarshalBinary()
 
-	customerID = base64.URLEncoding.EncodeToString(raw)
+	userID = base64.URLEncoding.EncodeToString(raw)
 
 	// chop off base64 ==
-	customerID = customerID[:len(customerID)-2]
+	userID = userID[:len(userID)-2]
 
 	os.Exit(m.Run())
 }
 
-func TestCustomerID(t *testing.T) {
-	t.Logf("Using CustomerID: %s", customerID)
+func TestUserID(t *testing.T) {
+	t.Logf("Using UserID: %s", userID)
 }
 
 // TestBuilder must run before tests that depend on Runnables existing in SCN
@@ -35,7 +35,7 @@ func TestBuilder(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	runnable := compute.NewRunnable("com.suborbital", customerID, "default", "foo", "assemblyscript")
+	runnable := compute.NewRunnable("com.suborbital", userID, "default", "foo", "assemblyscript")
 
 	t.Run("Template", func(t *testing.T) {
 		template, err := client.BuilderTemplate(runnable)
@@ -89,7 +89,7 @@ func TestUserFunctions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fns, err := client.UserFunctions(customerID, "default")
+	fns, err := client.UserFunctions(userID, "default")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,7 +107,7 @@ func TestGetAndExec(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fns, err := client.UserFunctions(customerID, "default")
+	fns, err := client.UserFunctions(userID, "default")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -13,7 +13,7 @@ func main() {
 	}
 
 	// get a list of Runnables
-	runnables, err := client.UserFunctions("customerID", "namespace")
+	runnables, err := client.UserFunctions("userID", "namespace")
 	if err != nil {
 		log.Fatal(err)
 	}
