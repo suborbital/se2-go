@@ -18,10 +18,11 @@ func (c *Client) BuilderHealth() (bool, error) {
 		return false, err
 	}
 
-	_, err = c.do(req)
+	res, err := c.do(req)
 	if err != nil {
 		return false, err
 	}
+	defer res.Body.Close()
 
 	return true, nil
 }
@@ -37,6 +38,7 @@ func (c *Client) BuilderFeatures() (*FeaturesResponse, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
 	features := &FeaturesResponse{
 		Features: []string{},
@@ -77,6 +79,7 @@ func (c *Client) BuilderTemplate(runnable *directive.Runnable) (*EditorStateResp
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
 	editorState := &EditorStateResponse{Tests: []TestPayload{}}
 
@@ -126,6 +129,7 @@ func (c *Client) BuildFunction(runnable *directive.Runnable, functionBody io.Rea
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
 	buildResult := &BuildResult{}
 
@@ -172,6 +176,7 @@ func (c *Client) GetDraft(runnable *directive.Runnable) (*EditorStateResponse, e
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
 	editorState := &EditorStateResponse{Tests: []TestPayload{}}
 
@@ -209,6 +214,7 @@ func (c *Client) PromoteDraft(runnable *directive.Runnable) (*PromoteDraftRespon
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
 	promoteResponse := &PromoteDraftResponse{}
 

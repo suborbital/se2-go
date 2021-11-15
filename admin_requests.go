@@ -28,6 +28,7 @@ func (c *Client) EditorToken(runnable *directive.Runnable) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer res.Body.Close()
 
 	token := TokenResponse{}
 	dec := json.NewDecoder(res.Body)
@@ -57,6 +58,7 @@ func (c *Client) UserFunctions(customerID string, namespace string) ([]*directiv
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
 	userFuncs := UserFunctionsResponse{
 		Functions: []*directive.Runnable{},
@@ -88,6 +90,7 @@ func (c *Client) FunctionExecResults(runnable *directive.Runnable) (*ExecResults
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
 	execResults := &ExecResultsResponse{
 		Results: []ExecResult{},
@@ -119,6 +122,7 @@ func (c *Client) FunctionExecErrors(runnable *directive.Runnable) (*ExecErrorRes
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
 	execResults := &ExecErrorResponse{
 		Errors: []ExecError{},

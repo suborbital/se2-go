@@ -55,11 +55,15 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 	res, err := http.DefaultClient.Do(req)
 
 	if err != nil {
-		return res, err
+		if res != nil && res.Body != nil {
+			res.Body.Close()
+		}
+		return nil, err
 	}
 
 	if res.StatusCode < 200 || res.StatusCode > 299 {
-		return res, errors.Errorf("API returned non-successful status: %s", res.Status)
+		res.Body.Close()
+		return nil, errors.Errorf("API returned non-successful status: %s", res.Status)
 	}
 
 	return res, nil
