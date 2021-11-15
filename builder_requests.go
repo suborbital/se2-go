@@ -11,6 +11,7 @@ import (
 	"github.com/suborbital/atmo/directive"
 )
 
+// BuilderHealth is used to check that the builder is healthy and responding to requests.
 func (c *Client) BuilderHealth() (bool, error) {
 	req, err := c.builderRequestBuilder(http.MethodGet, "/api/v1/health", nil)
 	if err != nil {
@@ -25,6 +26,7 @@ func (c *Client) BuilderHealth() (bool, error) {
 	return true, nil
 }
 
+// BuilderFeatures lists the features present on the builder, such as testing capabilities.
 func (c *Client) BuilderFeatures() (*FeaturesResponse, error) {
 	req, err := c.builderRequestBuilder(http.MethodGet, "/api/v1/features", nil)
 	if err != nil {
@@ -49,9 +51,15 @@ func (c *Client) BuilderFeatures() (*FeaturesResponse, error) {
 	return features, nil
 }
 
+// BuilderTemplate gets the function template for the provided Runnable. The Runnable must have
+// the .Lang, .Name, and .Namespace fields set.
 func (c *Client) BuilderTemplate(runnable *directive.Runnable) (*EditorStateResponse, error) {
 	if runnable == nil {
 		return nil, errors.New("Runnable cannot be nil")
+	}
+
+	if runnable.Lang == "" || runnable.Name == "" || runnable.Namespace == "" {
+		return nil, errors.New("Runnable.Lang, .Name, and .Namespace must be set")
 	}
 
 	req, err := c.builderRequestBuilder(http.MethodGet,
@@ -81,6 +89,14 @@ func (c *Client) BuilderTemplate(runnable *directive.Runnable) (*EditorStateResp
 	return editorState, nil
 }
 
+// BuildFunction triggers a remote build for the given Runnable and function body. See also: Client.BuildFunctionString()
+//
+// Example
+//
+// This function is useful for reading from a filesystem or from an http.Response.Body
+//	runnable := compute.NewRunnable("com.suborbital", "acmeco", "default", "hello", "rust")
+// 	file, _ := os.Open("hello.rs")
+//	result, err := client.BuildFunction(runnable, file)
 func (c *Client) BuildFunction(runnable *directive.Runnable, functionBody io.Reader) (*BuildResult, error) {
 	if runnable == nil {
 		return nil, errors.New("Runnable cannot be nil")
@@ -122,14 +138,20 @@ func (c *Client) BuildFunction(runnable *directive.Runnable, functionBody io.Rea
 	return buildResult, nil
 }
 
+// BuildFunctionString triggers a remote build for the given Runnable and function string. See also: Client.BuildFunction()
 func (c *Client) BuildFunctionString(runnable *directive.Runnable, functionString string) (*BuildResult, error) {
 	buf := bytes.NewBufferString(functionString)
 	return c.BuildFunction(runnable, buf)
 }
 
+// GetDraft gets the most recently build source code for the provided Runnable. Must have the .FQFNURI field set.
 func (c *Client) GetDraft(runnable *directive.Runnable) (*EditorStateResponse, error) {
 	if runnable == nil {
 		return nil, errors.New("Runnable cannot be nil")
+	}
+
+	if runnable.FQFNURI == "" {
+		return nil, errors.New("Runnable.FQFNURI must be set")
 	}
 
 	token, err := c.EditorToken(runnable)

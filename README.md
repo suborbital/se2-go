@@ -2,12 +2,39 @@
 Go client library for Suborbital Compute
 
 ## Usage
-> TODO
-## About
-The files within the `compute` directory were automatically generated from Suborbital Compute's OpenAPI specifications. This package wraps those libraries into one that is friendlier to use.
 
-## Testing
-With Suborbital Compute running on localhost, run:
+In a Go project, run
+```bash
+go get github.com/suborbital/compute-go
 ```
-go test -v
+
+Every operation with Compute is done with a `compute.Client`. Here's a simple example that fetches exisiting Runnables for a customer and namespace.
+
+```go
+package main
+
+import (
+    "log"
+
+    "github.com/suborbital/compute-go"
+)
+
+func main() {
+    client, err := compute.NewLocalClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // get a list of Runnables
+    runnables, err := client.UserFunctions("customerID", "namespace")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    for _, r := range runnables {
+        log.Println(r.FQFN)
+    }
+}
 ```
+
+See [examples](examples/) folder for more.
