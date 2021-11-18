@@ -10,37 +10,51 @@ type Config struct {
 	builderURL   *url.URL
 }
 
-// DefaultConfig takes the given host and creates a Compute config with the default ports.
-// Everything except the scheme and hostname are considered.
-func DefaultConfig(host string) (*Config, error) {
-	u, err := url.Parse(host)
+// DefaultConfig takes the given host and creates a Compute config with the K8S default ports.
+// Everything except the scheme and hostname are considered. You need to provide your builder
+// host domain.
+func DefaultConfig(builderHost string) (*Config, error) {
+	execUrl, err := url.Parse("http://scc-atmo-service.suborbital.svc.cluster.local:80")
 	if err != nil {
 		return nil, err
 	}
 
-	hostname := u.Hostname()
-	scheme := u.Scheme
+	adminUrl, err := url.Parse("http://scc-controlplane-service.suborbital.svc.cluster.local:8081")
+	if err != nil {
+		return nil, err
+	}
+
+	builderUrl, err := url.Parse(builderHost)
+	if err != nil {
+		return nil, err
+	}
+	builderUrl.Scheme = "https"
 
 	conf := &Config{
-		executionURL: &url.URL{
-			Scheme: scheme,
-			Host:   hostname + ":8080",
-		},
-		adminURL: &url.URL{
-			Scheme: scheme,
-			Host:   hostname + ":8081",
-		},
-		builderURL: &url.URL{
-			Scheme: scheme,
-			Host:   hostname + ":8082",
-		},
+		executionURL: execUrl,
+		adminURL:     adminUrl,
+		builderURL:   builderUrl,
 	}
 
 	return conf, nil
 }
 
-// LocalConfig generates a DefaultConfig() for localhost
+// LocalConfig generates a Configuration for Compute running in docker-compose
 func LocalConfig() *Config {
-	conf, _ := DefaultConfig("http://local.suborbital.network")
+	conf := &Config{
+		executionURL: &url.URL{
+			Scheme: "http",
+			Host:   "local.suborbital.network:8080",
+		},
+		adminURL: &url.URL{
+			Scheme: "http",
+			Host:   "local.suborbital.network:8081",
+		},
+		builderURL: &url.URL{
+			Scheme: "http",
+			Host:   "local.suborbital.network:8082",
+		},
+	}
+
 	return conf
 }
