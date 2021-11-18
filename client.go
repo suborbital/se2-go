@@ -9,25 +9,27 @@ import (
 
 // Client is used for interacting with the Suborbital Compute API
 type Client struct {
-	config *Config
+	config   *Config
+	envToken string
 }
 
 // NewClient creates a Client with a Config
-func NewClient(config *Config) (*Client, error) {
+func NewClient(config *Config, envToken string) (*Client, error) {
 	if config == nil {
 		return nil, errors.New("failed to NewClient: config cannot be nil")
 	}
 
 	client := &Client{
-		config: config,
+		config:   config,
+		envToken: envToken,
 	}
 
 	return client, nil
 }
 
 // NewLocalClient quickly sets up a Client with a LocalConfig. Useful for testing.
-func NewLocalClient() (*Client, error) {
-	return NewClient(LocalConfig())
+func NewLocalClient(envToken string) (*Client, error) {
+	return NewClient(LocalConfig(), envToken)
 }
 
 func (c *Client) adminRequestBuilder(method string, endpoint string, body io.Reader) (*http.Request, error) {

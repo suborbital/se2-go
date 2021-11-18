@@ -2,6 +2,7 @@ package compute_test
 
 import (
 	"encoding/base64"
+	"log"
 	"os"
 	"testing"
 
@@ -10,8 +11,15 @@ import (
 )
 
 var userID = ""
+var envToken = ""
 
 func TestMain(m *testing.M) {
+	tok, exists := os.LookupEnv("SCC_ENV_TOKEN")
+	if !exists {
+		log.Fatal("SCC_ENV_TOKEN must be set to run tests!")
+	}
+	envToken = tok
+
 	// creates a new user for every test run
 	uuid := uuid.New()
 	raw, _ := uuid.MarshalBinary()
@@ -30,7 +38,7 @@ func TestUserID(t *testing.T) {
 
 // TestBuilder must run before tests that depend on Runnables existing in SCN
 func TestBuilder(t *testing.T) {
-	client, err := compute.NewLocalClient()
+	client, err := compute.NewLocalClient(envToken)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +92,7 @@ func TestBuilder(t *testing.T) {
 func TestUserFunctions(t *testing.T) {
 	t.Parallel()
 
-	client, err := compute.NewLocalClient()
+	client, err := compute.NewLocalClient(envToken)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,7 +110,7 @@ func TestUserFunctions(t *testing.T) {
 func TestGetAndExec(t *testing.T) {
 	t.Parallel()
 
-	client, err := compute.NewLocalClient()
+	client, err := compute.NewLocalClient(envToken)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -155,7 +163,7 @@ func TestGetAndExec(t *testing.T) {
 func TestBuilderHealth(t *testing.T) {
 	t.Parallel()
 
-	client, err := compute.NewLocalClient()
+	client, err := compute.NewLocalClient(envToken)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,7 +181,7 @@ func TestBuilderHealth(t *testing.T) {
 func TestBuilderFeatures(t *testing.T) {
 	t.Parallel()
 
-	client, err := compute.NewLocalClient()
+	client, err := compute.NewLocalClient(envToken)
 	if err != nil {
 		t.Fatal(err)
 	}
