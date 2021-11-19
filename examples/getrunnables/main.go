@@ -2,12 +2,18 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/suborbital/compute-go"
 )
 
 func main() {
-	client, err := compute.NewLocalClient()
+	token, exists := os.LookupEnv("SCC_ENV_TOKEN")
+	if !exists {
+		log.Fatal("SCC_ENV_TOKEN environment variable not set")
+	}
+
+	client, err := compute.NewLocalClient(token)
 	if err != nil {
 		log.Fatal(err)
 	}

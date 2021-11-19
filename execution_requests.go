@@ -19,6 +19,7 @@ func (c *Client) Exec(runnable *directive.Runnable, body io.Reader) ([]byte, err
 	}
 
 	req, err := c.execRequestBuilder(http.MethodPost, runnable.FQFNURI, body)
+	req.Header.Set("Authorization", "Bearer "+c.envToken)
 
 	if err != nil {
 		return nil, err

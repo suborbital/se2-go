@@ -2,14 +2,17 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/suborbital/compute-go"
 )
 
 // a basic example without much error handling
 func main() {
+	token, _ := os.LookupEnv("SCC_ENV_TOKEN")
+
 	conf, _ := compute.DefaultConfig("http://localhost") // use your own base URL here
-	client, _ := compute.NewClient(conf)
+	client, _ := compute.NewClient(conf, token)
 
 	// create a runnable that can be passed into compute.Client
 	helloRunnable := compute.NewRunnable("com.suborbital", "acmeco", "default", "hello-world", "assemblyscript")
