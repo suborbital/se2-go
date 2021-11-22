@@ -5,7 +5,7 @@ Go client library for Suborbital Compute
 
 In a Go project, run
 ```bash
-go get github.com/suborbital/compute-go
+go get github.com/suborbital/compute-go@latest
 ```
 
 Every operation with Compute is done with a `compute.Client`. Here's a simple example that fetches exisiting Runnables for a user and namespace.
@@ -20,7 +20,12 @@ import (
 )
 
 func main() {
-    client, err := compute.NewLocalClient()
+	token, err := os.LookupEnv("SCC_ENV_TOKEN")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+	client, err := compute.NewClient(compute.LocalConfig(), token)
     if err != nil {
         log.Fatal(err)
     }

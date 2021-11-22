@@ -9,16 +9,25 @@ import (
 
 // a basic example without much error handling
 func main() {
-	token, _ := os.LookupEnv("SCC_ENV_TOKEN")
+	token, exists := os.LookupEnv("SCC_ENV_TOKEN")
+	if !exists {
+		log.Panic("SCC_ENV_TOKEN not set")
+	}
 
-	conf, _ := compute.DefaultConfig("http://localhost") // use your own base URL here
-	client, _ := compute.NewClient(conf, token)
+	client, err := compute.NewClient(compute.LocalConfig(), token)
+	if err != nil {
+		log.Panic(err)
+	}
 
 	// create a runnable that can be passed into compute.Client
 	helloRunnable := compute.NewRunnable("com.suborbital", "acmeco", "default", "hello-world", "assemblyscript")
 
 	// fetch an assemblyscript runnable template pre-filled with data from the above runnable
-	template, _ := client.BuilderTemplate(helloRunnable)
+	template, err := client.BuilderTemplate(helloRunnable)
+	if err != nil {
+		log.Panic(err)
+	}
+
 	log.Printf("building with template:\n%s\n", template.Contents)
 
 	// trigger a remote build of the runnable
