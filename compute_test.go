@@ -2,6 +2,7 @@ package compute_test
 
 import (
 	"encoding/base64"
+	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -10,6 +11,7 @@ import (
 	"github.com/suborbital/compute-go"
 )
 
+var environment = "com.suborbital"
 var userID = ""
 var envToken = ""
 
@@ -43,7 +45,7 @@ func TestBuilder(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	runnable := compute.NewRunnable("com.suborbital", userID, "default", "foo", "assemblyscript")
+	runnable := compute.NewRunnable(environment, userID, "default", "foo", "assemblyscript")
 
 	t.Run("Template", func(t *testing.T) {
 		template, err := client.BuilderTemplate(runnable)
@@ -97,7 +99,9 @@ func TestUserFunctions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fns, err := client.UserFunctions(userID, "default")
+	identifier := fmt.Sprintf("%s.%s", environment, userID)
+
+	fns, err := client.UserFunctions(identifier, "default")
 	if err != nil {
 		t.Fatal(err)
 	}
