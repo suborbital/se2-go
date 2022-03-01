@@ -45,10 +45,10 @@ func (c *Client) EditorToken(runnable *directive.Runnable) (string, error) {
 	return token.Token, nil
 }
 
-// UserFunctions gets a list of the deployed runnables for the given user and namespace.
-func (c *Client) UserFunctions(userID string, namespace string) ([]*directive.Runnable, error) {
+// UserFunctions gets a list of the deployed runnables for the given identifier and namespace.
+func (c *Client) UserFunctions(identifier string, namespace string) ([]*directive.Runnable, error) {
 	req, err := c.adminRequestBuilder(http.MethodGet,
-		path.Join("/api/v1/functions", userID, namespace), nil)
+		path.Join("/api/v2/functions", identifier, namespace), nil)
 
 	if err != nil {
 		return nil, err
