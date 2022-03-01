@@ -2,6 +2,7 @@ package compute
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"path"
 
@@ -73,14 +74,14 @@ func (c *Client) UserFunctions(identifier string, namespace string) ([]*directiv
 	return userFuncs.Functions, nil
 }
 
-// FunctionExecResults returns the 5 most recent successful execution results for the provided runnable.
-func (c *Client) FunctionExecResults(runnable *directive.Runnable) (*ExecResultsResponse, error) {
+// FunctionResultsMetadata returns metadata for the 5 most recent execution results for the provided runnable.
+func (c *Client) FunctionResultsMetadata(runnable *directive.Runnable) ([]ExecMetadata, error) {
 	if runnable == nil {
 		return nil, errors.New("Runnable cannot be nil")
 	}
 
 	req, err := c.adminRequestBuilder(http.MethodGet,
-		path.Join("/api/v1/results", runnable.FQFNURI), nil)
+		path.Join("/api/v2/results/by-fqfn", runnable.FQFNURI), nil)
 
 	if err != nil {
 		return nil, err
@@ -92,12 +93,10 @@ func (c *Client) FunctionExecResults(runnable *directive.Runnable) (*ExecResults
 	}
 	defer res.Body.Close()
 
-	execResults := &ExecResultsResponse{
-		Results: []ExecResult{},
-	}
+	var execResults []ExecMetadata
 
 	dec := json.NewDecoder(res.Body)
-	err = dec.Decode(execResults)
+	err = dec.Decode(&execResults)
 	if err != nil {
 		return nil, err
 	}
@@ -105,14 +104,10 @@ func (c *Client) FunctionExecResults(runnable *directive.Runnable) (*ExecResults
 	return execResults, nil
 }
 
-// FunctionExecResults returns the 5 most recent execution errors for the provided runnable.
-func (c *Client) FunctionExecErrors(runnable *directive.Runnable) (*ExecErrorResponse, error) {
-	if runnable == nil {
-		return nil, errors.New("Runnable cannot be nil")
-	}
-
+// FunctionResultMetadata returns metadata for the provided runnable execution.
+func (c *Client) FunctionResultMetadata(uuid string) (*ExecMetadata, error) {
 	req, err := c.adminRequestBuilder(http.MethodGet,
-		path.Join("/api/v1/errors", runnable.FQFNURI), nil)
+		path.Join("/api/v2/results/by-uuid", uuid), nil)
 
 	if err != nil {
 		return nil, err
@@ -124,15 +119,36 @@ func (c *Client) FunctionExecErrors(runnable *directive.Runnable) (*ExecErrorRes
 	}
 	defer res.Body.Close()
 
-	execResults := &ExecErrorResponse{
-		Errors: []ExecError{},
-	}
+	var execResult ExecMetadata
 
 	dec := json.NewDecoder(res.Body)
-	err = dec.Decode(execResults)
+	err = dec.Decode(&execResult)
 	if err != nil {
 		return nil, err
 	}
 
-	return execResults, nil
+	return &execResult, nil
+}
+
+// FunctionResult returns the result of the provided runnable execution.
+func (c *Client) FunctionResult(uuid string) ([]byte, error) {
+	req, err := c.adminRequestBuilder(http.MethodGet,
+		path.Join("/api/v2/result", uuid), nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	result, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

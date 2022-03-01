@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/suborbital/compute-go"
@@ -119,7 +120,9 @@ func TestGetAndExec(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fns, err := client.UserFunctions(userID, "default")
+	identifier := fmt.Sprintf("%s.%s", environment, userID)
+
+	fns, err := client.UserFunctions(identifier, "default")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,37 +133,49 @@ func TestGetAndExec(t *testing.T) {
 
 	runnable := fns[0]
 
-	result, err := client.ExecString(runnable, "world")
+	result, uuid, err := client.ExecString(runnable, "world")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	t.Log(string(result))
 
+	// Give the results a moment to propagate
+	time.Sleep(1 * time.Second)
+
 	// Tests the administrative results endpoint
-	t.Run("ExecResults", func(t *testing.T) {
-		execRes, err := client.FunctionExecResults(runnable)
+	t.Run("ExecResultsMetadata", func(t *testing.T) {
+		execRes, err := client.FunctionResultsMetadata(runnable)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if len(execRes.Results) < 1 {
+		if len(execRes) < 1 {
 			t.Fatal("expected at least one result")
 		}
-		sample := execRes.Results[0]
-		t.Log("latest result:", sample.UUID, sample.Response)
-		t.Logf("(%d total execution results)", len(execRes.Results))
+		sample := execRes[0]
+		t.Log("latest result:", sample.UUID)
+		t.Logf("(%d total execution results)", len(execRes))
 	})
 
 	// Tests the administrative results endpoint
-	t.Run("ExecErrors", func(t *testing.T) {
-		execErrs, err := client.FunctionExecErrors(runnable)
+	t.Run("ExecResultMetadata", func(t *testing.T) {
+		res, err := client.FunctionResultMetadata(uuid)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		t.Log("errors:", execErrs.Errors)
-		t.Logf("(%d total execution errors)", len(execErrs.Errors))
+		t.Log("result:", res.UUID)
+	})
+
+	// Tests the administrative results endpoint
+	t.Run("ExecResult", func(t *testing.T) {
+		res, err := client.FunctionResult(uuid)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		t.Log("result:", string(res))
 	})
 }
 
