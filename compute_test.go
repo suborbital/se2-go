@@ -210,5 +210,5 @@ func TestBuilderFeatures(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Log(features.Features)
+	t.Log(features)
 }

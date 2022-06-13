@@ -42,7 +42,7 @@ func main() {
 		payload := "world!"
 
 		log.Printf("Executing runnable with payload: '%s'\n", payload)
-		output, _ := client.ExecString(helloRunnable, payload)
+		output, _, _ := client.ExecString(helloRunnable, payload)
 
 		log.Println(string(output))
 	}
