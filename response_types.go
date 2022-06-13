@@ -25,8 +25,15 @@ type ExecMetadata struct {
 	Error     ExecError `json:"error"`
 }
 
+type FeatureLanguage struct {
+	ID     string `json:"identifier"`
+	Short  string `json:"short"`
+	Pretty string `json:"pretty"`
+}
+
 type FeaturesResponse struct {
-	Features []string `json:"features"`
+	Features  []string          `json:"features"`
+	Langauges []FeatureLanguage `json:"languages"`
 }
 
 // TestPayload is a single test for a Runnable

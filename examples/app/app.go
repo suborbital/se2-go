@@ -31,7 +31,7 @@ func main() {
 	client.PromoteDraft(runnable)
 
 	// Execute the function
-	result, _ := client.ExecString(runnable, "world!")
+	result, _, _ := client.ExecString(runnable, "world!")
 
 	// Log the execution output
 	log.Println(string(result))
