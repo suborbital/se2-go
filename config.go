@@ -58,3 +58,29 @@ func LocalConfig() *Config {
 
 	return conf
 }
+
+// Custom Configuration
+func CustomConfig(execHost string, adminHost string, builderHost string) (*Config, error) {
+	execUrl, err := url.Parse(execHost)
+	if err != nil {
+		return nil, err
+	}
+
+	adminUrl, err := url.Parse(adminHost)
+	if err != nil {
+		return nil, err
+	}
+
+	builderUrl, err := url.Parse(builderHost)
+	if err != nil {
+		return nil, err
+	}
+
+	conf := &Config{
+		executionURL: execUrl,
+		adminURL:     adminUrl,
+		builderURL:   builderUrl,
+	}
+
+	return conf, nil
+}
