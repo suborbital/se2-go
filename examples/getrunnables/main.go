@@ -25,6 +25,6 @@ func main() {
 	}
 
 	for _, r := range runnables {
-		log.Println(r.FQFN)
+		log.Println(r.FQMN)
 	}
 }

@@ -3,14 +3,14 @@ package compute
 import (
 	"time"
 
-	"github.com/suborbital/atmo/directive"
+	"github.com/suborbital/systemspec/tenant"
 )
 
 type TokenResponse struct {
 	Token string `json:"token"`
 }
 type UserFunctionsResponse struct {
-	Functions []*directive.Runnable `json:"functions"`
+	Functions []*tenant.Module `json:"functions"`
 }
 
 type ExecError struct {

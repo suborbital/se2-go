@@ -9,7 +9,7 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
-	"github.com/suborbital/atmo/directive"
+	"github.com/suborbital/systemspec/tenant"
 )
 
 type ExecResponse struct {
@@ -18,12 +18,12 @@ type ExecResponse struct {
 }
 
 // Exec remotely executes the provided runnable using the body as input. See also: ExecString()
-func (c *Client) Exec(runnable *directive.Runnable, body io.Reader) ([]byte, string, error) {
-	if runnable == nil {
+func (c *Client) Exec(module *tenant.Module, body io.Reader) ([]byte, string, error) {
+	if module == nil {
 		return nil, "", errors.New("Runnable cannot be nil")
 	}
 
-	req, err := c.execRequestBuilder(http.MethodPost, runnable.FQFNURI, body)
+	req, err := c.execRequestBuilder(http.MethodPost, module.URI, body)
 	req.Header.Set("Authorization", "Bearer "+c.envToken)
 
 	if err != nil {
@@ -56,7 +56,7 @@ func (c *Client) Exec(runnable *directive.Runnable, body io.Reader) ([]byte, str
 }
 
 // ExecString sets up a buffer with the provided string and calls Exec
-func (c *Client) ExecString(runnable *directive.Runnable, body string) ([]byte, string, error) {
+func (c *Client) ExecString(runnable *tenant.Module, body string) ([]byte, string, error) {
 	buf := bytes.NewBufferString(body)
 	return c.Exec(runnable, buf)
 }

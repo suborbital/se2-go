@@ -20,7 +20,7 @@ func main() {
 	}
 
 	// create a runnable that can be passed into compute.Client
-	helloRunnable := compute.NewRunnable("com.suborbital", "acmeco", "default", "hello-world", "assemblyscript")
+	helloRunnable := compute.NewModule("com.suborbital", "acmeco", "default", "hello-world", "assemblyscript")
 
 	// fetch an assemblyscript runnable template pre-filled with data from the above runnable
 	template, err := client.BuilderTemplate(helloRunnable)

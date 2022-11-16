@@ -46,22 +46,22 @@ func TestBuilder(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	runnable := compute.NewRunnable(environment, userID, "default", "foo", "assemblyscript")
+	module := compute.NewModule(environment, userID, "default", "foo", "assemblyscript")
 
 	t.Run("Template", func(t *testing.T) {
-		template, err := client.BuilderTemplate(runnable)
+		template, err := client.BuilderTemplate(module)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if template.Lang != runnable.Lang {
-			t.Errorf("got Lang: '%s', want '%s'", template.Lang, runnable.Lang)
+		if template.Lang != module.Lang {
+			t.Errorf("got Lang: '%s', want '%s'", template.Lang, module.Lang)
 		}
 
 		t.Logf("got template for '%s', length: %d", template.Lang, len(template.Contents))
 
 		t.Run("Build", func(t *testing.T) {
-			buildResult, err := client.BuildFunctionString(runnable, template.Contents)
+			buildResult, err := client.BuildFunctionString(module, template.Contents)
 
 			if err != nil {
 				t.Fatal(err)
@@ -70,7 +70,7 @@ func TestBuilder(t *testing.T) {
 			t.Log(buildResult)
 
 			t.Run("GetDraft", func(t *testing.T) {
-				editorState, err := client.GetDraft(runnable)
+				editorState, err := client.GetDraft(module)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -81,12 +81,12 @@ func TestBuilder(t *testing.T) {
 			})
 
 			t.Run("Promote", func(t *testing.T) {
-				promoteResponse, err := client.PromoteDraft(runnable)
+				promoteResponse, err := client.PromoteDraft(module)
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				t.Logf("runnable promoted: (%s -> %s)", runnable.Version, promoteResponse.Version)
+				t.Logf("runnable promoted: (%s -> %s)", module.Version, promoteResponse.Version)
 			})
 		})
 	})
@@ -108,7 +108,7 @@ func TestUserFunctions(t *testing.T) {
 	}
 
 	for _, fn := range fns {
-		t.Log(fn.FQFN)
+		t.Log(fn.FQMN)
 	}
 }
 

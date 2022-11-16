@@ -1,30 +1,28 @@
 package compute
 
 import (
-	"github.com/suborbital/atmo/directive"
-	"github.com/suborbital/atmo/fqfn"
+	"github.com/suborbital/systemspec/fqmn"
+	tenantPkg "github.com/suborbital/systemspec/tenant"
 )
 
-// NewRunnableVersion instantiates a local versioned Runnable that can be used for various calls with compute.Client.
-// Note: this constructor alone does not perform any actions on a remote Compute instance.
-func NewRunnableVersion(environment, userId, namespace, fnName, version, language string) *directive.Runnable {
-	fqfnStr := fqfn.FromParts(environment+"."+userId, namespace, fnName, version)
-	FQFN := fqfn.Parse(fqfnStr)
+func NewDraft() {
 
-	runnable := &directive.Runnable{
-		Name:      fnName,
-		Namespace: namespace,
-		Lang:      language,
-		Version:   version,
-		FQFN:      fqfnStr,
-		FQFNURI:   FQFN.HeadlessURLPath(),
-	}
-
-	return runnable
 }
 
-// NewRunnable instantiates a local v1.0.0 Runnable that can be used for various calls with compute.Client.
+// NewModule instantiates a local v1.0.0 Runnable that can be used for various calls with compute.Client.
 // Note: this constructor alone does not perform any actions on a remote Compute instance.
-func NewRunnable(environment, userId, namespace, fnName, language string) *directive.Runnable {
-	return NewRunnableVersion(environment, userId, namespace, fnName, "v1.0.0", language)
+func NewModule(tenant, namespace, module, ref, language string) (*tenantPkg.Module, error) {
+	fqmnStr, err := fqmn.FromParts(tenant, namespace, module, ref)
+	if err != nil {
+		return nil, err
+	}
+
+	runnable := &tenantPkg.Module{
+		Name:      module,
+		Namespace: namespace,
+		Lang:      language,
+		FQMN:      fqmnStr,
+	}
+
+	return runnable, nil
 }

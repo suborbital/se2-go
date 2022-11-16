@@ -7,17 +7,17 @@ import (
 	"path"
 
 	"github.com/pkg/errors"
-	"github.com/suborbital/atmo/directive"
+	"github.com/suborbital/systemspec/tenant"
 )
 
 // EditorToken gets an editor token for the provided Runnable. Note: this library
 // manages editor tokens for you, so you most likely do not need to use this function.
-func (c *Client) EditorToken(runnable *directive.Runnable) (string, error) {
+func (c *Client) EditorToken(runnable *tenant.Module) (string, error) {
 	if runnable == nil {
 		return "", errors.New("Runnable cannot be nil")
 	}
 
-	p, _ := path.Split(runnable.FQFNURI) // removes version from end of URI
+	p, _ := path.Split(runnable.URI) // removes version from end of URI
 	req, err := c.adminRequestBuilder(http.MethodGet,
 		path.Join("/api/v1/token", p), nil)
 
@@ -47,7 +47,7 @@ func (c *Client) EditorToken(runnable *directive.Runnable) (string, error) {
 }
 
 // UserFunctions gets a list of the deployed runnables for the given identifier and namespace.
-func (c *Client) UserFunctions(identifier string, namespace string) ([]*directive.Runnable, error) {
+func (c *Client) UserFunctions(identifier string, namespace string) ([]*tenant.Module, error) {
 	req, err := c.adminRequestBuilder(http.MethodGet,
 		path.Join("/api/v2/functions", identifier, namespace), nil)
 
@@ -62,7 +62,7 @@ func (c *Client) UserFunctions(identifier string, namespace string) ([]*directiv
 	defer res.Body.Close()
 
 	userFuncs := UserFunctionsResponse{
-		Functions: []*directive.Runnable{},
+		Functions: []*tenant.Module{},
 	}
 
 	dec := json.NewDecoder(res.Body)
@@ -75,13 +75,13 @@ func (c *Client) UserFunctions(identifier string, namespace string) ([]*directiv
 }
 
 // FunctionResultsMetadata returns metadata for the 5 most recent execution results for the provided runnable.
-func (c *Client) FunctionResultsMetadata(runnable *directive.Runnable) ([]ExecMetadata, error) {
+func (c *Client) FunctionResultsMetadata(runnable *tenant.Module) ([]ExecMetadata, error) {
 	if runnable == nil {
 		return nil, errors.New("Runnable cannot be nil")
 	}
 
 	req, err := c.adminRequestBuilder(http.MethodGet,
-		path.Join("/api/v2/results/by-fqfn", runnable.FQFNURI), nil)
+		path.Join("/api/v2/results/by-fqfn", runnable.URI), nil)
 
 	if err != nil {
 		return nil, err

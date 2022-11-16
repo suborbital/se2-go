@@ -10,7 +10,7 @@ func main() {
 	client := client()
 
 	// This is a local reference to some Runnable. Nothing has run in Compute at this point.
-	runnable := compute.NewRunnable("com.suborbital", "acmeco", "default", "rs-hello-world", "rust")
+	runnable := compute.NewModule("com.suborbital", "acmeco", "default", "rs-hello-world", "rust")
 
 	// Request template source code for the above Runnable.
 	template, _ := client.BuilderTemplate(runnable)
