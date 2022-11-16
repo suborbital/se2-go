@@ -1,4 +1,4 @@
-module github.com/suborbital/compute-go
+module github.com/suborbital/se2-go
 
 go 1.18
 

@@ -1,15 +1,15 @@
-package compute
+package se2
 
 import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"path"
 
 	"io/ioutil"
 	"net/http"
 
 	"github.com/pkg/errors"
-	"github.com/suborbital/systemspec/tenant"
 )
 
 type ExecResponse struct {
@@ -17,13 +17,9 @@ type ExecResponse struct {
 	UUID     string
 }
 
-// Exec remotely executes the provided runnable using the body as input. See also: ExecString()
-func (c *Client) Exec(module *tenant.Module, body io.Reader) ([]byte, string, error) {
-	if module == nil {
-		return nil, "", errors.New("Runnable cannot be nil")
-	}
-
-	req, err := c.execRequestBuilder(http.MethodPost, module.URI, body)
+// execModule remotely executes the provided module using the body as input. See also: ExecString()
+func (c *Client) execModule(endpoint string, body io.Reader) ([]byte, string, error) {
+	req, err := c.execRequestBuilder(http.MethodPost, endpoint, body)
 	req.Header.Set("Authorization", "Bearer "+c.envToken)
 
 	if err != nil {
@@ -52,11 +48,31 @@ func (c *Client) Exec(module *tenant.Module, body io.Reader) ([]byte, string, er
 		return nil, "", newErr
 	}
 
-	return result, res.Header.Get("x-atmo-requestid"), nil
+	return result, res.Header.Get("x-suborbital-requestid"), nil
+}
+
+// Exec remotely executes the provided module using the body as input. See also: ExecString()
+func (c *Client) Exec(module *Module, body io.Reader) ([]byte, string, error) {
+	if module == nil {
+		return nil, "", errors.New("Module cannot be nil")
+	}
+
+	return c.execModule(path.Join("/name", module.URI()), body)
 }
 
 // ExecString sets up a buffer with the provided string and calls Exec
-func (c *Client) ExecString(runnable *tenant.Module, body string) ([]byte, string, error) {
+func (c *Client) ExecString(module *Module, body string) ([]byte, string, error) {
 	buf := bytes.NewBufferString(body)
-	return c.Exec(runnable, buf)
+	return c.Exec(module, buf)
+}
+
+// ExecRef remotely executes the provided module using the body as input, by module reference. See also: ExecRefString()
+func (c *Client) ExecRef(ref string, body io.Reader) ([]byte, string, error) {
+	return c.execModule(path.Join("/ref", ref), body)
+}
+
+// ExecRefString sets up a buffer with the provided string and calls ExecRef
+func (c *Client) ExecRefString(ref string, body string) ([]byte, string, error) {
+	buf := bytes.NewBufferString(body)
+	return c.ExecRef(ref, buf)
 }

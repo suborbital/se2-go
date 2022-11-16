@@ -1,4 +1,4 @@
-package compute
+package se2
 
 import (
 	"time"
@@ -36,7 +36,7 @@ type FeaturesResponse struct {
 	Langauges []FeatureLanguage `json:"languages"`
 }
 
-// TestPayload is a single test for a Runnable
+// TestPayload is a single test for a Module
 type TestPayload struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`

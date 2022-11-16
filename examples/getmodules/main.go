@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/suborbital/compute-go"
+	"github.com/suborbital/se2-go"
 )
 
 func main() {
@@ -13,18 +13,18 @@ func main() {
 		log.Fatal("SCC_ENV_TOKEN environment variable not set")
 	}
 
-	client, err := compute.NewLocalClient(token)
+	client, err := se2.NewLocalClient(token)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// get a list of Runnables
-	runnables, err := client.UserFunctions("userID", "namespace")
+	// get a list of Modules
+	modules, err := client.UserFunctions("userID", "namespace")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, r := range runnables {
+	for _, r := range modules {
 		log.Println(r.FQMN)
 	}
 }
