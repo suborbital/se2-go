@@ -1,4 +1,4 @@
-package compute
+package se2
 
 import (
 	"bytes"
@@ -8,7 +8,6 @@ import (
 	"path"
 
 	"github.com/pkg/errors"
-	"github.com/suborbital/atmo/directive"
 )
 
 // BuilderHealth is used to check that the builder is healthy and responding to requests.
@@ -53,26 +52,21 @@ func (c *Client) BuilderFeatures() (*FeaturesResponse, error) {
 	return features, nil
 }
 
-// BuilderTemplate gets the function template for the provided Runnable. The Runnable must have
-// the .Lang, .Name, and .Namespace fields set.
-func (c *Client) BuilderTemplate(runnable *directive.Runnable) (*EditorStateResponse, error) {
-	if runnable == nil {
-		return nil, errors.New("Runnable cannot be nil")
-	}
-
-	if runnable.Lang == "" || runnable.Name == "" || runnable.Namespace == "" {
-		return nil, errors.New("Runnable.Lang, .Name, and .Namespace must be set")
+// BuilderTemplate gets the function template for the provided Module and template name.
+func (c *Client) BuilderTemplate(module *Module, template string) (*EditorStateResponse, error) {
+	if module == nil {
+		return nil, errors.New("Module cannot be nil")
 	}
 
 	req, err := c.builderRequestBuilder(http.MethodGet,
-		path.Join("/api/v2/template", runnable.Lang, runnable.Name), nil)
+		path.Join("/api/v2/template", template, module.Name), nil)
 
 	if err != nil {
 		return nil, err
 	}
 
 	q := req.URL.Query()
-	q.Add("namespace", runnable.Namespace)
+	q.Add("namespace", module.Namespace)
 	req.URL.RawQuery = q.Encode()
 
 	res, err := c.do(req)
@@ -92,17 +86,18 @@ func (c *Client) BuilderTemplate(runnable *directive.Runnable) (*EditorStateResp
 	return editorState, nil
 }
 
-// BuildFunction triggers a remote build for the given Runnable and function body. See also: Client.BuildFunctionString()
+// BuildFunction triggers a remote build for the given Module and function body. See also: Client.BuildFunctionString()
 //
-// Example
+// # Example
 //
 // This function is useful for reading from a filesystem or from an http.Response.Body
-//	runnable := compute.NewRunnable("com.suborbital", "acmeco", "default", "hello", "rust")
-// 	file, _ := os.Open("hello.rs")
-//	result, err := client.BuildFunction(runnable, file)
-func (c *Client) BuildFunction(runnable *directive.Runnable, functionBody io.Reader) (*BuildResult, error) {
-	if runnable == nil {
-		return nil, errors.New("Runnable cannot be nil")
+//
+//	module := compute.NewModule("com.suborbital", "acmeco", "default", "hello", "rust")
+//	file, _ := os.Open("hello.rs")
+//	result, err := client.BuildFunction(module, file)
+func (c *Client) BuildFunction(module *Module, template string, functionBody io.Reader) (*BuildResult, error) {
+	if module == nil {
+		return nil, errors.New("Module cannot be nil")
 	}
 
 	if functionBody == nil {
@@ -110,15 +105,13 @@ func (c *Client) BuildFunction(runnable *directive.Runnable, functionBody io.Rea
 	}
 
 	// TODO: cache somewhere in Client?
-	token, err := c.EditorToken(runnable)
+	token, err := c.EditorToken(module)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to EditorToken")
 	}
 
-	p, _ := path.Split(runnable.FQFNURI) // removes version from end of URI
-
 	req, err := c.builderRequestBuilder(http.MethodPost,
-		path.Join("/api/v1/build", runnable.Lang, p), functionBody)
+		path.Join("/api/v1/build", template, module.URI()), functionBody)
 	req.Header.Add("Authorization", "Bearer "+token)
 
 	if err != nil {
@@ -142,31 +135,25 @@ func (c *Client) BuildFunction(runnable *directive.Runnable, functionBody io.Rea
 	return buildResult, nil
 }
 
-// BuildFunctionString triggers a remote build for the given Runnable and function string. See also: Client.BuildFunction()
-func (c *Client) BuildFunctionString(runnable *directive.Runnable, functionString string) (*BuildResult, error) {
+// BuildFunctionString triggers a remote build for the given Module and function string. See also: Client.BuildFunction()
+func (c *Client) BuildFunctionString(module *Module, template, functionString string) (*BuildResult, error) {
 	buf := bytes.NewBufferString(functionString)
-	return c.BuildFunction(runnable, buf)
+	return c.BuildFunction(module, template, buf)
 }
 
-// GetDraft gets the most recently build source code for the provided Runnable. Must have the .FQFNURI field set.
-func (c *Client) GetDraft(runnable *directive.Runnable) (*EditorStateResponse, error) {
-	if runnable == nil {
-		return nil, errors.New("Runnable cannot be nil")
+// GetDraft gets the most recently build source code for the provided Module. Must have the .FQFNURI field set.
+func (c *Client) GetDraft(module *Module) (*EditorStateResponse, error) {
+	if module == nil {
+		return nil, errors.New("Module cannot be nil")
 	}
 
-	if runnable.FQFNURI == "" {
-		return nil, errors.New("Runnable.FQFNURI must be set")
-	}
-
-	token, err := c.EditorToken(runnable)
+	token, err := c.EditorToken(module)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to EditorToken")
 	}
 
-	p, _ := path.Split(runnable.FQFNURI) // removes version from end of URI
-
 	req, err := c.builderRequestBuilder(http.MethodGet,
-		path.Join("/api/v1/draft", p), nil)
+		path.Join("/api/v1/draft", module.URI()), nil)
 	req.Header.Add("Authorization", "Bearer "+token)
 	if err != nil {
 		return nil, err
@@ -189,22 +176,20 @@ func (c *Client) GetDraft(runnable *directive.Runnable) (*EditorStateResponse, e
 	return editorState, nil
 }
 
-// PromoteDraft takes the most recent build of the provided runnable and deploys it so it can be
-// run. The .Version field of the provided runnable is modified in place if the promotion is
-// successful.
-func (c *Client) PromoteDraft(runnable *directive.Runnable) (*PromoteDraftResponse, error) {
-	if runnable == nil {
-		return nil, errors.New("Runnable cannot be nil")
+// PromoteDraft takes the most recent build of the provided module and deploys it so it can be
+// run.
+func (c *Client) PromoteDraft(module *Module) (*PromoteDraftResponse, error) {
+	if module == nil {
+		return nil, errors.New("Module cannot be nil")
 	}
 
-	token, err := c.EditorToken(runnable)
+	token, err := c.EditorToken(module)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to EditorToken")
 	}
-	p, _ := path.Split(runnable.FQFNURI) // removes version from end of URI
 
 	req, err := c.builderRequestBuilder(http.MethodPost,
-		path.Join("/api/v1/draft", p, "promote"), nil)
+		path.Join("/api/v1/draft", module.URI(), "promote"), nil)
 	req.Header.Add("Authorization", "Bearer "+token)
 	if err != nil {
 		return nil, err
@@ -223,8 +208,6 @@ func (c *Client) PromoteDraft(runnable *directive.Runnable) (*PromoteDraftRespon
 	if err != nil {
 		return nil, err
 	}
-
-	runnable.Version = promoteResponse.Version
 
 	return promoteResponse, nil
 }

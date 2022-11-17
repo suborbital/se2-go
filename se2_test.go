@@ -1,4 +1,4 @@
-package compute_test
+package se2_test
 
 import (
 	"encoding/base64"
@@ -9,12 +9,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/suborbital/compute-go"
+	"github.com/suborbital/se2-go"
 )
 
 var environment = "com.suborbital"
 var userID = ""
 var envToken = ""
+
+var tmpl = "assemblyscript"
 
 func TestMain(m *testing.M) {
 	tok, exists := os.LookupEnv("SCC_ENV_TOKEN")
@@ -39,29 +41,25 @@ func TestUserID(t *testing.T) {
 	t.Logf("Using UserID: %s", userID)
 }
 
-// TestBuilder must run before tests that depend on Runnables existing in SCN
+// TestBuilder must run before tests that depend on Modules existing in SCN
 func TestBuilder(t *testing.T) {
-	client, err := compute.NewLocalClient(envToken)
+	client, err := se2.NewLocalClient(envToken)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	runnable := compute.NewRunnable(environment, userID, "default", "foo", "assemblyscript")
+	module := se2.NewModule(environment, userID, "default", "foo")
 
 	t.Run("Template", func(t *testing.T) {
-		template, err := client.BuilderTemplate(runnable)
+		template, err := client.BuilderTemplate(module, tmpl)
 		if err != nil {
 			t.Fatal(err)
-		}
-
-		if template.Lang != runnable.Lang {
-			t.Errorf("got Lang: '%s', want '%s'", template.Lang, runnable.Lang)
 		}
 
 		t.Logf("got template for '%s', length: %d", template.Lang, len(template.Contents))
 
 		t.Run("Build", func(t *testing.T) {
-			buildResult, err := client.BuildFunctionString(runnable, template.Contents)
+			buildResult, err := client.BuildFunctionString(module, tmpl, template.Contents)
 
 			if err != nil {
 				t.Fatal(err)
@@ -70,7 +68,7 @@ func TestBuilder(t *testing.T) {
 			t.Log(buildResult)
 
 			t.Run("GetDraft", func(t *testing.T) {
-				editorState, err := client.GetDraft(runnable)
+				editorState, err := client.GetDraft(module)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -81,12 +79,12 @@ func TestBuilder(t *testing.T) {
 			})
 
 			t.Run("Promote", func(t *testing.T) {
-				promoteResponse, err := client.PromoteDraft(runnable)
+				promoteResponse, err := client.PromoteDraft(module)
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				t.Logf("runnable promoted: (%s -> %s)", runnable.Version, promoteResponse.Version)
+				t.Logf("module promoted to %s", promoteResponse.Version)
 			})
 		})
 	})
@@ -95,7 +93,7 @@ func TestBuilder(t *testing.T) {
 func TestUserFunctions(t *testing.T) {
 	t.Parallel()
 
-	client, err := compute.NewLocalClient(envToken)
+	client, err := se2.NewLocalClient(envToken)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -108,14 +106,14 @@ func TestUserFunctions(t *testing.T) {
 	}
 
 	for _, fn := range fns {
-		t.Log(fn.FQFN)
+		t.Log(fn.FQMN)
 	}
 }
 
 func TestGetAndExec(t *testing.T) {
 	t.Parallel()
 
-	client, err := compute.NewLocalClient(envToken)
+	client, err := se2.NewLocalClient(envToken)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,12 +126,17 @@ func TestGetAndExec(t *testing.T) {
 	}
 
 	if len(fns) < 1 {
-		t.Skip("no runnables defined")
+		t.Skip("no modules defined")
 	}
 
-	runnable := fns[0]
+	module := se2.Module{
+		Environment: environment,
+		Tenant:      userID,
+		Namespace:   fns[0].Namespace,
+		Name:        fns[0].Name,
+	}
 
-	result, uuid, err := client.ExecString(runnable, "world")
+	result, uuid, err := client.ExecString(&module, "world")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,7 +148,7 @@ func TestGetAndExec(t *testing.T) {
 
 	// Tests the administrative results endpoint
 	t.Run("ExecResultsMetadata", func(t *testing.T) {
-		execRes, err := client.FunctionResultsMetadata(runnable)
+		execRes, err := client.FunctionResultsMetadata(&module)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -182,7 +185,7 @@ func TestGetAndExec(t *testing.T) {
 func TestBuilderHealth(t *testing.T) {
 	t.Parallel()
 
-	client, err := compute.NewLocalClient(envToken)
+	client, err := se2.NewLocalClient(envToken)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,7 +203,7 @@ func TestBuilderHealth(t *testing.T) {
 func TestBuilderFeatures(t *testing.T) {
 	t.Parallel()
 
-	client, err := compute.NewLocalClient(envToken)
+	client, err := se2.NewLocalClient(envToken)
 	if err != nil {
 		t.Fatal(err)
 	}

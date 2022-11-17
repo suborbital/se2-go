@@ -1,4 +1,4 @@
-package compute
+package se2
 
 import (
 	"encoding/json"
@@ -7,19 +7,17 @@ import (
 	"path"
 
 	"github.com/pkg/errors"
-	"github.com/suborbital/atmo/directive"
+	"github.com/suborbital/systemspec/tenant"
 )
 
-// EditorToken gets an editor token for the provided Runnable. Note: this library
+// EditorToken gets an editor token for the provided Module. Note: this library
 // manages editor tokens for you, so you most likely do not need to use this function.
-func (c *Client) EditorToken(runnable *directive.Runnable) (string, error) {
-	if runnable == nil {
-		return "", errors.New("Runnable cannot be nil")
+func (c *Client) EditorToken(module *Module) (string, error) {
+	if module == nil {
+		return "", errors.New("Module cannot be nil")
 	}
 
-	p, _ := path.Split(runnable.FQFNURI) // removes version from end of URI
-	req, err := c.adminRequestBuilder(http.MethodGet,
-		path.Join("/api/v1/token", p), nil)
+	req, err := c.adminRequestBuilder(http.MethodGet, path.Join("/api/v1/token", module.URI()), nil)
 
 	if err != nil {
 		return "", err
@@ -46,8 +44,8 @@ func (c *Client) EditorToken(runnable *directive.Runnable) (string, error) {
 	return token.Token, nil
 }
 
-// UserFunctions gets a list of the deployed runnables for the given identifier and namespace.
-func (c *Client) UserFunctions(identifier string, namespace string) ([]*directive.Runnable, error) {
+// UserFunctions gets a list of the deployed modules for the given identifier and namespace.
+func (c *Client) UserFunctions(identifier string, namespace string) ([]*tenant.Module, error) {
 	req, err := c.adminRequestBuilder(http.MethodGet,
 		path.Join("/api/v2/functions", identifier, namespace), nil)
 
@@ -62,7 +60,7 @@ func (c *Client) UserFunctions(identifier string, namespace string) ([]*directiv
 	defer res.Body.Close()
 
 	userFuncs := UserFunctionsResponse{
-		Functions: []*directive.Runnable{},
+		Functions: []*tenant.Module{},
 	}
 
 	dec := json.NewDecoder(res.Body)
@@ -74,14 +72,14 @@ func (c *Client) UserFunctions(identifier string, namespace string) ([]*directiv
 	return userFuncs.Functions, nil
 }
 
-// FunctionResultsMetadata returns metadata for the 5 most recent execution results for the provided runnable.
-func (c *Client) FunctionResultsMetadata(runnable *directive.Runnable) ([]ExecMetadata, error) {
-	if runnable == nil {
-		return nil, errors.New("Runnable cannot be nil")
+// FunctionResultsMetadata returns metadata for the 5 most recent execution results for the provided module.
+func (c *Client) FunctionResultsMetadata(module *Module) ([]ExecMetadata, error) {
+	if module == nil {
+		return nil, errors.New("Module cannot be nil")
 	}
 
 	req, err := c.adminRequestBuilder(http.MethodGet,
-		path.Join("/api/v2/results/by-fqfn", runnable.FQFNURI), nil)
+		path.Join("/api/v2/results/by-fqmn", module.URI()), nil)
 
 	if err != nil {
 		return nil, err
@@ -104,7 +102,7 @@ func (c *Client) FunctionResultsMetadata(runnable *directive.Runnable) ([]ExecMe
 	return execResults, nil
 }
 
-// FunctionResultMetadata returns metadata for the provided runnable execution.
+// FunctionResultMetadata returns metadata for the provided module execution.
 func (c *Client) FunctionResultMetadata(uuid string) (*ExecMetadata, error) {
 	req, err := c.adminRequestBuilder(http.MethodGet,
 		path.Join("/api/v2/results/by-uuid", uuid), nil)
@@ -130,7 +128,7 @@ func (c *Client) FunctionResultMetadata(uuid string) (*ExecMetadata, error) {
 	return &execResult, nil
 }
 
-// FunctionResult returns the result of the provided runnable execution.
+// FunctionResult returns the result of the provided module execution.
 func (c *Client) FunctionResult(uuid string) ([]byte, error) {
 	req, err := c.adminRequestBuilder(http.MethodGet,
 		path.Join("/api/v2/result", uuid), nil)

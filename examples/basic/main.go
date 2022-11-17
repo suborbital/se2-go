@@ -4,8 +4,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/suborbital/compute-go"
+	"github.com/suborbital/se2-go"
 )
+
+var tmpl = "assemblyscript"
 
 // a basic example without much error handling
 func main() {
@@ -14,35 +16,35 @@ func main() {
 		log.Panic("SCC_ENV_TOKEN not set")
 	}
 
-	client, err := compute.NewClient(compute.LocalConfig(), token)
+	client, err := se2.NewClient(se2.LocalConfig(), token)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	// create a runnable that can be passed into compute.Client
-	helloRunnable := compute.NewRunnable("com.suborbital", "acmeco", "default", "hello-world", "assemblyscript")
+	// create a module that can be passed into se2.Client
+	helloModule := se2.NewModule("com.suborbital", "acmeco", "default", "hello-world")
 
-	// fetch an assemblyscript runnable template pre-filled with data from the above runnable
-	template, err := client.BuilderTemplate(helloRunnable)
+	// fetch an assemblyscript module template pre-filled with data from the above module
+	template, err := client.BuilderTemplate(helloModule, tmpl)
 	if err != nil {
 		log.Panic(err)
 	}
 
 	log.Printf("building with template:\n%s\n", template.Contents)
 
-	// trigger a remote build of the runnable
-	buildResult, _ := client.BuildFunctionString(helloRunnable, template.Contents)
+	// trigger a remote build of the module
+	buildResult, _ := client.BuildFunctionString(helloModule, tmpl, template.Contents)
 
 	// if the build succeeds, run it
 	if buildResult.Succeeded {
 		log.Println("build succeeded!")
 
-		client.PromoteDraft(helloRunnable)
+		client.PromoteDraft(helloModule)
 
 		payload := "world!"
 
-		log.Printf("Executing runnable with payload: '%s'\n", payload)
-		output, _, _ := client.ExecString(helloRunnable, payload)
+		log.Printf("Executing module with payload: '%s'\n", payload)
+		output, _, _ := client.ExecString(helloModule, payload)
 
 		log.Println(string(output))
 	}

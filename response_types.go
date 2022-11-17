@@ -1,16 +1,16 @@
-package compute
+package se2
 
 import (
 	"time"
 
-	"github.com/suborbital/atmo/directive"
+	"github.com/suborbital/systemspec/tenant"
 )
 
 type TokenResponse struct {
 	Token string `json:"token"`
 }
 type UserFunctionsResponse struct {
-	Functions []*directive.Runnable `json:"functions"`
+	Functions []*tenant.Module `json:"functions"`
 }
 
 type ExecError struct {
@@ -36,7 +36,7 @@ type FeaturesResponse struct {
 	Langauges []FeatureLanguage `json:"languages"`
 }
 
-// TestPayload is a single test for a Runnable
+// TestPayload is a single test for a Module
 type TestPayload struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
