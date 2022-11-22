@@ -7,7 +7,7 @@ import (
 )
 
 func client() *se2.Client {
-	token, _ := os.LookupEnv("SCC_ENV_TOKEN")
+	token, _ := os.LookupEnv("SE2_ENV_TOKEN")
 	client, _ := se2.NewClient(se2.LocalConfig(), token)
 
 	return client

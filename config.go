@@ -14,12 +14,12 @@ type Config struct {
 // Everything except the scheme and hostname are considered. You need to provide your builder
 // host domain.
 func DefaultConfig(builderHost string) (*Config, error) {
-	execUrl, err := url.Parse("http://scc-atmo-service.suborbital.svc.cluster.local:80")
+	execUrl, err := url.Parse("http://e2core-service.suborbital.svc.cluster.local:80")
 	if err != nil {
 		return nil, err
 	}
 
-	adminUrl, err := url.Parse("http://scc-controlplane-service.suborbital.svc.cluster.local:8081")
+	adminUrl, err := url.Parse("http://se2-controlplane-service.suborbital.svc.cluster.local:8081")
 	if err != nil {
 		return nil, err
 	}
