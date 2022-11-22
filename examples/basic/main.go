@@ -11,9 +11,9 @@ var tmpl = "assemblyscript"
 
 // a basic example without much error handling
 func main() {
-	token, exists := os.LookupEnv("SCC_ENV_TOKEN")
+	token, exists := os.LookupEnv("SE2_ENV_TOKEN")
 	if !exists {
-		log.Panic("SCC_ENV_TOKEN not set")
+		log.Panic("SE2_ENV_TOKEN not set")
 	}
 
 	client, err := se2.NewClient(se2.LocalConfig(), token)

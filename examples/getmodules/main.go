@@ -8,9 +8,9 @@ import (
 )
 
 func main() {
-	token, exists := os.LookupEnv("SCC_ENV_TOKEN")
+	token, exists := os.LookupEnv("SE2_ENV_TOKEN")
 	if !exists {
-		log.Fatal("SCC_ENV_TOKEN environment variable not set")
+		log.Fatal("SE2_ENV_TOKEN environment variable not set")
 	}
 
 	client, err := se2.NewLocalClient(token)

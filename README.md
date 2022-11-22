@@ -22,12 +22,12 @@ import (
 )
 
 func main() {
-	token, err := os.LookupEnv("SCC_ENV_TOKEN")
+    token, err := os.LookupEnv("SE2_ENV_TOKEN")
     if err != nil {
         log.Fatal(err)
     }
 
-	client, err := se2.NewClient(se2.LocalConfig(), token)
+    client, err := se2.NewClient(se2.LocalConfig(), token)
     if err != nil {
         log.Fatal(err)
     }

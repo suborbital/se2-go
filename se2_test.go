@@ -19,9 +19,9 @@ var envToken = ""
 var tmpl = "assemblyscript"
 
 func TestMain(m *testing.M) {
-	tok, exists := os.LookupEnv("SCC_ENV_TOKEN")
+	tok, exists := os.LookupEnv("SE2_ENV_TOKEN")
 	if !exists {
-		log.Fatal("SCC_ENV_TOKEN must be set to run tests!")
+		log.Fatal("SE2_ENV_TOKEN must be set to run tests!")
 	}
 	envToken = tok
 
@@ -41,7 +41,7 @@ func TestUserID(t *testing.T) {
 	t.Logf("Using UserID: %s", userID)
 }
 
-// TestBuilder must run before tests that depend on Modules existing in SCN
+// TestBuilder must run before tests that depend on modules existing in SE2
 func TestBuilder(t *testing.T) {
 	client, err := se2.NewLocalClient(envToken)
 	if err != nil {
