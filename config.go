@@ -3,14 +3,14 @@ package se2
 import "net/url"
 
 // Config combines the common configuration options for the three
-// Suborbital Compute APIs (Administrative, Builder, and Execution)
+// Suborbital Extension Engine APIs (Administrative, Builder, and Execution)
 type Config struct {
 	executionURL *url.URL
 	adminURL     *url.URL
 	builderURL   *url.URL
 }
 
-// DefaultConfig takes the given host and creates a Compute config with the K8S default ports.
+// DefaultConfig takes the given host and creates a SE2 config with the K8S default ports.
 // Everything except the scheme and hostname are considered. You need to provide your builder
 // host domain.
 func DefaultConfig(builderHost string) (*Config, error) {
@@ -39,7 +39,7 @@ func DefaultConfig(builderHost string) (*Config, error) {
 	return conf, nil
 }
 
-// LocalConfig generates a Configuration for Compute running in docker-compose
+// LocalConfig generates a Configuration for SE2 running in docker-compose
 func LocalConfig() *Config {
 	conf := &Config{
 		executionURL: &url.URL{

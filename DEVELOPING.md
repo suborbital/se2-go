@@ -1,6 +1,6 @@
 ## Testing
 
-With Suborbital Compute running on localhost, run:
+With SE2 running on localhost, run:
 
 ```console
 go test -v

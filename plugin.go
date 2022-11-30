@@ -9,8 +9,8 @@ type Plugin struct {
 	Name        string
 }
 
-// NewPlugin instantiates a local v1.0.0 Plugin that can be used for various calls with compute.Client.
-// Note: this constructor alone does not perform any actions on a remote Compute instance.
+// NewPlugin instantiates a local v1.0.0 Plugin that can be used for various calls with se2.Client.
+// Note: this constructor alone does not perform any actions on a remote SE2 instance.
 func NewPlugin(environment, tenant, namespace, name string) *Plugin {
 	plugin := &Plugin{
 		Environment: environment,

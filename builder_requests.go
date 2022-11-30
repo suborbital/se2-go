@@ -52,7 +52,7 @@ func (c *Client) BuilderFeatures() (*FeaturesResponse, error) {
 	return features, nil
 }
 
-// BuilderTemplate gets the function template for the provided Plugin and template name.
+// BuilderTemplate gets the plugin template for the provided Plugin and template name.
 func (c *Client) BuilderTemplate(plugin *Plugin, template string) (*EditorStateResponse, error) {
 	if plugin == nil {
 		return nil, errors.New("Plugin cannot be nil")
@@ -86,22 +86,22 @@ func (c *Client) BuilderTemplate(plugin *Plugin, template string) (*EditorStateR
 	return editorState, nil
 }
 
-// BuildFunction triggers a remote build for the given Plugin and function body. See also: Client.BuildFunctionString()
+// BuildPlugin triggers a remote build for the given Plugin and source code. See also: Client.BuildPluginString()
 //
 // # Example
 //
-// This function is useful for reading from a filesystem or from an http.Response.Body
+// This plugin is useful for reading from a filesystem or from an http.Response.Body
 //
-//	plugin := compute.NewPlugin("com.suborbital", "acmeco", "default", "hello", "rust")
+//	plugin := se2.NewPlugin("com.suborbital", "acmeco", "default", "hello")
 //	file, _ := os.Open("hello.rs")
-//	result, err := client.BuildFunction(plugin, file)
-func (c *Client) BuildFunction(plugin *Plugin, template string, functionBody io.Reader) (*BuildResult, error) {
+//	result, err := client.BuildPlugin(plugin, file)
+func (c *Client) BuildPlugin(plugin *Plugin, template string, source io.Reader) (*BuildResult, error) {
 	if plugin == nil {
 		return nil, errors.New("Plugin cannot be nil")
 	}
 
-	if functionBody == nil {
-		return nil, errors.New("functionBody cannot be nil")
+	if source == nil {
+		return nil, errors.New("source cannot be nil")
 	}
 
 	// TODO: cache somewhere in Client?
@@ -111,7 +111,7 @@ func (c *Client) BuildFunction(plugin *Plugin, template string, functionBody io.
 	}
 
 	req, err := c.builderRequestBuilder(http.MethodPost,
-		path.Join("/api/v1/build", template, plugin.URI()), functionBody)
+		path.Join("/api/v1/build", template, plugin.URI()), source)
 	req.Header.Add("Authorization", "Bearer "+token)
 
 	if err != nil {
@@ -135,10 +135,10 @@ func (c *Client) BuildFunction(plugin *Plugin, template string, functionBody io.
 	return buildResult, nil
 }
 
-// BuildFunctionString triggers a remote build for the given Plugin and function string. See also: Client.BuildFunction()
-func (c *Client) BuildFunctionString(plugin *Plugin, template, functionString string) (*BuildResult, error) {
-	buf := bytes.NewBufferString(functionString)
-	return c.BuildFunction(plugin, template, buf)
+// BuildPluginString triggers a remote build for the given Plugin and source code. See also: Client.BuildPlugin()
+func (c *Client) BuildPluginString(plugin *Plugin, template, source string) (*BuildResult, error) {
+	buf := bytes.NewBufferString(source)
+	return c.BuildPlugin(plugin, template, buf)
 }
 
 // GetDraft gets the most recently build source code for the provided Plugin. Must have the .FQFNURI field set.

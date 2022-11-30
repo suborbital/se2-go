@@ -128,8 +128,8 @@ func (c *Client) ResultMetadata(uuid string) (*ExecMetadata, error) {
 	return &execResult, nil
 }
 
-// FunctionResult returns the result of the provided plugin execution.
-func (c *Client) FunctionResult(uuid string) ([]byte, error) {
+// ExecutionResult returns the result of the provided plugin execution.
+func (c *Client) ExecutionResult(uuid string) ([]byte, error) {
 	req, err := c.adminRequestBuilder(http.MethodGet,
 		path.Join("/api/v2/result", uuid), nil)
 

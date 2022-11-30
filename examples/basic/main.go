@@ -33,7 +33,7 @@ func main() {
 	log.Printf("building with template:\n%s\n", template.Contents)
 
 	// trigger a remote build of the plugin
-	buildResult, _ := client.BuildFunctionString(helloPlugin, tmpl, template.Contents)
+	buildResult, _ := client.BuildPluginString(helloPlugin, tmpl, template.Contents)
 
 	// if the build succeeds, run it
 	if buildResult.Succeeded {

@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Client is used for interacting with the Suborbital Compute API
+// Client is used for interacting with the SE2 API
 type Client struct {
 	config   *Config
 	envToken string

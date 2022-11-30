@@ -59,7 +59,7 @@ func TestBuilder(t *testing.T) {
 		t.Logf("got template for '%s', length: %d", template.Lang, len(template.Contents))
 
 		t.Run("Build", func(t *testing.T) {
-			buildResult, err := client.BuildFunctionString(plugin, tmpl, template.Contents)
+			buildResult, err := client.BuildPluginString(plugin, tmpl, template.Contents)
 
 			if err != nil {
 				t.Fatal(err)
@@ -74,7 +74,7 @@ func TestBuilder(t *testing.T) {
 				}
 
 				if editorState.Contents != template.Contents {
-					t.Error("function contents changed between build and draft")
+					t.Error("plugin contents changed between build and draft")
 				}
 			})
 
@@ -85,13 +85,13 @@ func TestBuilder(t *testing.T) {
 				}
 
 				t.Logf("plugin promoted to %s", promoteResponse.Version)
-				time.Sleep(time.Second)
+				time.Sleep(time.Second * 2)
 			})
 		})
 	})
 }
 
-func TestUserFunctions(t *testing.T) {
+func TestUserPlugins(t *testing.T) {
 	t.Parallel()
 
 	client, err := se2.NewLocalClient(envToken)
@@ -174,7 +174,7 @@ func TestGetAndExec(t *testing.T) {
 
 	// Tests the administrative results endpoint
 	t.Run("ExecResult", func(t *testing.T) {
-		res, err := client.FunctionResult(uuid)
+		res, err := client.ExecutionResult(uuid)
 		if err != nil {
 			t.Fatal(err)
 		}

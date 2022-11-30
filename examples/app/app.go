@@ -12,7 +12,7 @@ import (
 func main() {
 	client := client()
 
-	// This is a local reference to some Plugin. Nothing has run in Compute at this point.
+	// This is a local reference to some Plugin. Nothing has run in SE2 at this point.
 	plugin := se2.NewPlugin("com.suborbital", "acmeco", "default", "tinygo-hey")
 
 	// Request template source code for the above Plugin.
@@ -24,7 +24,7 @@ func main() {
 
 	// Run a remote build for the provided Plugin and the modified 'goodbye world'
 	// template.
-	build, err := client.BuildFunctionString(plugin, "tinygo", modified)
+	build, err := client.BuildPluginString(plugin, "tinygo", modified)
 
 	if err != nil {
 		log.Fatal(err)
@@ -35,12 +35,12 @@ func main() {
 		log.Fatal(build.OutputLog)
 	}
 
-	// Deploy the function and get the new reference
+	// Deploy the plugin and get the new reference
 	ref, _ := client.PromoteDraft(plugin)
 
-	// Roll the credits
+	// Hello!
 	time.Sleep(time.Second * 2)
-	for _, name := range []string{"Connor", "Dan", "Dylan", "Flaki", "Gabor", "Jagger", "Jessica", "Laura", "Nyah", "Oscar", "Ramón", "Ryan", "Taryn"} {
+	for _, name := range []string{"Europa", "Io", "Ganymede", "Callisto"} {
 		time.Sleep(time.Millisecond * 300)
 		result, _, err := client.ExecRefString(ref.Version, name)
 		if err != nil {
