@@ -10,7 +10,7 @@ type TokenResponse struct {
 	Token string `json:"token"`
 }
 type UserFunctionsResponse struct {
-	Functions []*tenant.Module `json:"functions"`
+	Functions []*tenant.Module `json:"modules"`
 }
 
 type ExecError struct {
