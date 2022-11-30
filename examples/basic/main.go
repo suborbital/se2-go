@@ -21,30 +21,30 @@ func main() {
 		log.Panic(err)
 	}
 
-	// create a module that can be passed into se2.Client
-	helloModule := se2.NewModule("com.suborbital", "acmeco", "default", "hello-world")
+	// create a plugin that can be passed into se2.Client
+	helloPlugin := se2.NewPlugin("com.suborbital", "acmeco", "default", "hello-world")
 
-	// fetch an assemblyscript module template pre-filled with data from the above module
-	template, err := client.BuilderTemplate(helloModule, tmpl)
+	// fetch an assemblyscript plugin template pre-filled with data from the above plugin
+	template, err := client.BuilderTemplate(helloPlugin, tmpl)
 	if err != nil {
 		log.Panic(err)
 	}
 
 	log.Printf("building with template:\n%s\n", template.Contents)
 
-	// trigger a remote build of the module
-	buildResult, _ := client.BuildFunctionString(helloModule, tmpl, template.Contents)
+	// trigger a remote build of the plugin
+	buildResult, _ := client.BuildFunctionString(helloPlugin, tmpl, template.Contents)
 
 	// if the build succeeds, run it
 	if buildResult.Succeeded {
 		log.Println("build succeeded!")
 
-		client.PromoteDraft(helloModule)
+		client.PromoteDraft(helloPlugin)
 
 		payload := "world!"
 
-		log.Printf("Executing module with payload: '%s'\n", payload)
-		output, _, _ := client.ExecString(helloModule, payload)
+		log.Printf("Executing plugin with payload: '%s'\n", payload)
+		output, _, _ := client.ExecString(helloPlugin, payload)
 
 		log.Println(string(output))
 	}

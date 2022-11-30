@@ -52,21 +52,21 @@ func (c *Client) BuilderFeatures() (*FeaturesResponse, error) {
 	return features, nil
 }
 
-// BuilderTemplate gets the function template for the provided Module and template name.
-func (c *Client) BuilderTemplate(module *Module, template string) (*EditorStateResponse, error) {
-	if module == nil {
-		return nil, errors.New("Module cannot be nil")
+// BuilderTemplate gets the function template for the provided Plugin and template name.
+func (c *Client) BuilderTemplate(plugin *Plugin, template string) (*EditorStateResponse, error) {
+	if plugin == nil {
+		return nil, errors.New("Plugin cannot be nil")
 	}
 
 	req, err := c.builderRequestBuilder(http.MethodGet,
-		path.Join("/api/v2/template", template, module.Name), nil)
+		path.Join("/api/v2/template", template, plugin.Name), nil)
 
 	if err != nil {
 		return nil, err
 	}
 
 	q := req.URL.Query()
-	q.Add("namespace", module.Namespace)
+	q.Add("namespace", plugin.Namespace)
 	req.URL.RawQuery = q.Encode()
 
 	res, err := c.do(req)
@@ -86,18 +86,18 @@ func (c *Client) BuilderTemplate(module *Module, template string) (*EditorStateR
 	return editorState, nil
 }
 
-// BuildFunction triggers a remote build for the given Module and function body. See also: Client.BuildFunctionString()
+// BuildFunction triggers a remote build for the given Plugin and function body. See also: Client.BuildFunctionString()
 //
 // # Example
 //
 // This function is useful for reading from a filesystem or from an http.Response.Body
 //
-//	module := compute.NewModule("com.suborbital", "acmeco", "default", "hello", "rust")
+//	plugin := compute.NewPlugin("com.suborbital", "acmeco", "default", "hello", "rust")
 //	file, _ := os.Open("hello.rs")
-//	result, err := client.BuildFunction(module, file)
-func (c *Client) BuildFunction(module *Module, template string, functionBody io.Reader) (*BuildResult, error) {
-	if module == nil {
-		return nil, errors.New("Module cannot be nil")
+//	result, err := client.BuildFunction(plugin, file)
+func (c *Client) BuildFunction(plugin *Plugin, template string, functionBody io.Reader) (*BuildResult, error) {
+	if plugin == nil {
+		return nil, errors.New("Plugin cannot be nil")
 	}
 
 	if functionBody == nil {
@@ -105,13 +105,13 @@ func (c *Client) BuildFunction(module *Module, template string, functionBody io.
 	}
 
 	// TODO: cache somewhere in Client?
-	token, err := c.EditorToken(module)
+	token, err := c.EditorToken(plugin)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to EditorToken")
 	}
 
 	req, err := c.builderRequestBuilder(http.MethodPost,
-		path.Join("/api/v1/build", template, module.URI()), functionBody)
+		path.Join("/api/v1/build", template, plugin.URI()), functionBody)
 	req.Header.Add("Authorization", "Bearer "+token)
 
 	if err != nil {
@@ -135,25 +135,25 @@ func (c *Client) BuildFunction(module *Module, template string, functionBody io.
 	return buildResult, nil
 }
 
-// BuildFunctionString triggers a remote build for the given Module and function string. See also: Client.BuildFunction()
-func (c *Client) BuildFunctionString(module *Module, template, functionString string) (*BuildResult, error) {
+// BuildFunctionString triggers a remote build for the given Plugin and function string. See also: Client.BuildFunction()
+func (c *Client) BuildFunctionString(plugin *Plugin, template, functionString string) (*BuildResult, error) {
 	buf := bytes.NewBufferString(functionString)
-	return c.BuildFunction(module, template, buf)
+	return c.BuildFunction(plugin, template, buf)
 }
 
-// GetDraft gets the most recently build source code for the provided Module. Must have the .FQFNURI field set.
-func (c *Client) GetDraft(module *Module) (*EditorStateResponse, error) {
-	if module == nil {
-		return nil, errors.New("Module cannot be nil")
+// GetDraft gets the most recently build source code for the provided Plugin. Must have the .FQFNURI field set.
+func (c *Client) GetDraft(plugin *Plugin) (*EditorStateResponse, error) {
+	if plugin == nil {
+		return nil, errors.New("Plugin cannot be nil")
 	}
 
-	token, err := c.EditorToken(module)
+	token, err := c.EditorToken(plugin)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to EditorToken")
 	}
 
 	req, err := c.builderRequestBuilder(http.MethodGet,
-		path.Join("/api/v1/draft", module.URI()), nil)
+		path.Join("/api/v1/draft", plugin.URI()), nil)
 	req.Header.Add("Authorization", "Bearer "+token)
 	if err != nil {
 		return nil, err
@@ -176,20 +176,20 @@ func (c *Client) GetDraft(module *Module) (*EditorStateResponse, error) {
 	return editorState, nil
 }
 
-// PromoteDraft takes the most recent build of the provided module and deploys it so it can be
+// PromoteDraft takes the most recent build of the provided plugin and deploys it so it can be
 // run.
-func (c *Client) PromoteDraft(module *Module) (*PromoteDraftResponse, error) {
-	if module == nil {
-		return nil, errors.New("Module cannot be nil")
+func (c *Client) PromoteDraft(plugin *Plugin) (*PromoteDraftResponse, error) {
+	if plugin == nil {
+		return nil, errors.New("Plugin cannot be nil")
 	}
 
-	token, err := c.EditorToken(module)
+	token, err := c.EditorToken(plugin)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to EditorToken")
 	}
 
 	req, err := c.builderRequestBuilder(http.MethodPost,
-		path.Join("/api/v1/draft", module.URI(), "promote"), nil)
+		path.Join("/api/v1/draft", plugin.URI(), "promote"), nil)
 	req.Header.Add("Authorization", "Bearer "+token)
 	if err != nil {
 		return nil, err

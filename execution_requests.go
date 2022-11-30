@@ -17,8 +17,8 @@ type ExecResponse struct {
 	UUID     string
 }
 
-// execModule remotely executes the provided module using the body as input. See also: ExecString()
-func (c *Client) execModule(endpoint string, body io.Reader) ([]byte, string, error) {
+// execPlugin remotely executes the provided plugin using the body as input. See also: ExecString()
+func (c *Client) execPlugin(endpoint string, body io.Reader) ([]byte, string, error) {
 	req, err := c.execRequestBuilder(http.MethodPost, endpoint, body)
 	req.Header.Set("Authorization", "Bearer "+c.envToken)
 
@@ -51,24 +51,24 @@ func (c *Client) execModule(endpoint string, body io.Reader) ([]byte, string, er
 	return result, res.Header.Get("x-suborbital-requestid"), nil
 }
 
-// Exec remotely executes the provided module using the body as input. See also: ExecString()
-func (c *Client) Exec(module *Module, body io.Reader) ([]byte, string, error) {
-	if module == nil {
-		return nil, "", errors.New("Module cannot be nil")
+// Exec remotely executes the provided plugin using the body as input. See also: ExecString()
+func (c *Client) Exec(plugin *Plugin, body io.Reader) ([]byte, string, error) {
+	if plugin == nil {
+		return nil, "", errors.New("Plugin cannot be nil")
 	}
 
-	return c.execModule(path.Join("/name", module.URI()), body)
+	return c.execPlugin(path.Join("/name", plugin.URI()), body)
 }
 
 // ExecString sets up a buffer with the provided string and calls Exec
-func (c *Client) ExecString(module *Module, body string) ([]byte, string, error) {
+func (c *Client) ExecString(plugin *Plugin, body string) ([]byte, string, error) {
 	buf := bytes.NewBufferString(body)
-	return c.Exec(module, buf)
+	return c.Exec(plugin, buf)
 }
 
-// ExecRef remotely executes the provided module using the body as input, by module reference. See also: ExecRefString()
+// ExecRef remotely executes the provided plugin using the body as input, by plugin reference. See also: ExecRefString()
 func (c *Client) ExecRef(ref string, body io.Reader) ([]byte, string, error) {
-	return c.execModule(path.Join("/ref", ref), body)
+	return c.execPlugin(path.Join("/ref", ref), body)
 }
 
 // ExecRefString sets up a buffer with the provided string and calls ExecRef

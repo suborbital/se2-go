@@ -10,7 +10,7 @@ In a Go project, run
 go get github.com/suborbital/se2-go@latest
 ```
 
-Every operation with Compute is done with a `se2.Client`. Here's a simple example that fetches exisiting Modules for a user and namespace.
+Every operation with Compute is done with a `se2.Client`. Here's a simple example that fetches exisiting Plugins for a user and namespace.
 
 ```go
 package main
@@ -22,9 +22,9 @@ import (
 )
 
 func main() {
-    token, err := os.LookupEnv("SE2_ENV_TOKEN")
-    if err != nil {
-        log.Fatal(err)
+    token, exists := os.LookupEnv("SE2_ENV_TOKEN")
+    if !exists {
+        log.Fatal("could not find token")
     }
 
     client, err := se2.NewClient(se2.LocalConfig(), token)
@@ -32,13 +32,13 @@ func main() {
         log.Fatal(err)
     }
 
-    // get a list of Modules
-    modules, err := client.UserFunctions("userID", "namespace")
+    // get a list of Plugins
+    plugins, err := client.UserFunctions("userID", "namespace")
     if err != nil {
         log.Fatal(err)
     }
 
-    for _, r := range modules {
+    for _, r := range plugins {
         log.Println(r.FQMN)
     }
 }
