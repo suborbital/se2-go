@@ -10,7 +10,7 @@ In a Go project, run
 go get github.com/suborbital/se2-go@latest
 ```
 
-Every operation with SE2 is done with a `se2.Client`. Here's a simple example that fetches exisiting Plugins for a user and namespace.
+Every operation with SE2 is done with a `se2.Client`. Here's a simple example that fetches exisiting plugins for a user and namespace.
 
 ```go
 package main
@@ -32,7 +32,7 @@ func main() {
         log.Fatal(err)
     }
 
-    // get a list of Plugins
+    // get a list of plugins
     plugins, err := client.UserPlugins("userID", "namespace")
     if err != nil {
         log.Fatal(err)

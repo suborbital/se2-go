@@ -52,7 +52,7 @@ func (c *Client) BuilderFeatures() (*FeaturesResponse, error) {
 	return features, nil
 }
 
-// BuilderTemplate gets the plugin template for the provided Plugin and template name.
+// BuilderTemplate gets the plugin template for the provided plugin and template name.
 func (c *Client) BuilderTemplate(plugin *Plugin, template string) (*EditorStateResponse, error) {
 	if plugin == nil {
 		return nil, errors.New("Plugin cannot be nil")
@@ -86,7 +86,7 @@ func (c *Client) BuilderTemplate(plugin *Plugin, template string) (*EditorStateR
 	return editorState, nil
 }
 
-// BuildPlugin triggers a remote build for the given Plugin and source code. See also: Client.BuildPluginString()
+// BuildPlugin triggers a remote build for the given plugin and source code. See also: Client.BuildPluginString()
 //
 // # Example
 //
@@ -135,13 +135,13 @@ func (c *Client) BuildPlugin(plugin *Plugin, template string, source io.Reader) 
 	return buildResult, nil
 }
 
-// BuildPluginString triggers a remote build for the given Plugin and source code. See also: Client.BuildPlugin()
+// BuildPluginString triggers a remote build for the given plugin and source code. See also: Client.BuildPlugin()
 func (c *Client) BuildPluginString(plugin *Plugin, template, source string) (*BuildResult, error) {
 	buf := bytes.NewBufferString(source)
 	return c.BuildPlugin(plugin, template, buf)
 }
 
-// GetDraft gets the most recently build source code for the provided Plugin. Must have the .FQFNURI field set.
+// GetDraft gets the most recently build source code for the provided plugin. Must have the .FQFMURI field set.
 func (c *Client) GetDraft(plugin *Plugin) (*EditorStateResponse, error) {
 	if plugin == nil {
 		return nil, errors.New("Plugin cannot be nil")

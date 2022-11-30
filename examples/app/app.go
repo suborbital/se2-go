@@ -12,17 +12,17 @@ import (
 func main() {
 	client := client()
 
-	// This is a local reference to some Plugin. Nothing has run in SE2 at this point.
+	// This is a local reference to some plugin. Nothing has run in SE2 at this point.
 	plugin := se2.NewPlugin("com.suborbital", "acmeco", "default", "tinygo-hey")
 
-	// Request template source code for the above Plugin.
+	// Request template source code for the above plugin.
 	template, _ := client.BuilderTemplate(plugin, "tinygo")
 
 	// Modify the default template
 	modified := strings.Replace(template.Contents, "Hello", "Hey there", 1)
 	log.Println(modified)
 
-	// Run a remote build for the provided Plugin and the modified 'goodbye world'
+	// Run a remote build for the provided plugin and the modified 'goodbye world'
 	// template.
 	build, err := client.BuildPluginString(plugin, "tinygo", modified)
 

@@ -36,7 +36,7 @@ type FeaturesResponse struct {
 	Langauges []FeatureLanguage `json:"languages"`
 }
 
-// TestPayload is a single test for a Plugin
+// TestPayload is a single test for a plugin
 type TestPayload struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`

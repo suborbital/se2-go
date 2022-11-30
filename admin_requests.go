@@ -10,7 +10,7 @@ import (
 	"github.com/suborbital/systemspec/tenant"
 )
 
-// EditorToken gets an editor token for the provided Plugin. Note: this library
+// EditorToken gets an editor token for the provided plugin. Note: this library
 // manages editor tokens for you, so you most likely do not need to use this function.
 func (c *Client) EditorToken(plugin *Plugin) (string, error) {
 	if plugin == nil {
@@ -72,8 +72,8 @@ func (c *Client) UserPlugins(identifier string, namespace string) ([]*tenant.Mod
 	return userPlugins.Plugins, nil
 }
 
-// ResultsMetadata returns metadata for the 5 most recent execution results for the provided plugin.
-func (c *Client) ResultsMetadata(plugin *Plugin) ([]ExecMetadata, error) {
+// ExecutionResultsMetadata returns metadata for the 5 most recent execution results for the provided plugin.
+func (c *Client) ExecutionResultsMetadata(plugin *Plugin) ([]ExecMetadata, error) {
 	if plugin == nil {
 		return nil, errors.New("Plugin cannot be nil")
 	}
@@ -102,8 +102,8 @@ func (c *Client) ResultsMetadata(plugin *Plugin) ([]ExecMetadata, error) {
 	return execResults, nil
 }
 
-// ResultMetadata returns metadata for the provided plugin execution.
-func (c *Client) ResultMetadata(uuid string) (*ExecMetadata, error) {
+// ExecutionResultMetadata returns metadata for the provided plugin execution.
+func (c *Client) ExecutionResultMetadata(uuid string) (*ExecMetadata, error) {
 	req, err := c.adminRequestBuilder(http.MethodGet,
 		path.Join("/api/v2/results/by-uuid", uuid), nil)
 

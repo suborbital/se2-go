@@ -148,8 +148,8 @@ func TestGetAndExec(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	// Tests the administrative results endpoint
-	t.Run("ExecResultsMetadata", func(t *testing.T) {
-		execRes, err := client.ResultsMetadata(&plugin)
+	t.Run("ExecutionResultsMetadata", func(t *testing.T) {
+		execRes, err := client.ExecutionResultsMetadata(&plugin)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -163,8 +163,8 @@ func TestGetAndExec(t *testing.T) {
 	})
 
 	// Tests the administrative results endpoint
-	t.Run("ExecResultMetadata", func(t *testing.T) {
-		res, err := client.ResultMetadata(uuid)
+	t.Run("ExecutionResultMetadata", func(t *testing.T) {
+		res, err := client.ExecutionResultMetadata(uuid)
 		if err != nil {
 			t.Fatal(err)
 		}

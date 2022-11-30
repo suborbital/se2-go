@@ -18,7 +18,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// get a list of Plugins
+	// get a list of plugins
 	plugins, err := client.UserPlugins("userID", "namespace")
 	if err != nil {
 		log.Fatal(err)
