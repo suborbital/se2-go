@@ -9,8 +9,8 @@ import (
 type TokenResponse struct {
 	Token string `json:"token"`
 }
-type UserFunctionsResponse struct {
-	Functions []*tenant.Module `json:"functions"`
+type UserPluginsResponse struct {
+	Plugins []*tenant.Module `json:"modules"`
 }
 
 type ExecError struct {
@@ -36,7 +36,7 @@ type FeaturesResponse struct {
 	Langauges []FeatureLanguage `json:"languages"`
 }
 
-// TestPayload is a single test for a Module
+// TestPayload is a single test for a plugin
 type TestPayload struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`

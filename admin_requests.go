@@ -10,14 +10,14 @@ import (
 	"github.com/suborbital/systemspec/tenant"
 )
 
-// EditorToken gets an editor token for the provided Module. Note: this library
+// EditorToken gets an editor token for the provided plugin. Note: this library
 // manages editor tokens for you, so you most likely do not need to use this function.
-func (c *Client) EditorToken(module *Module) (string, error) {
-	if module == nil {
-		return "", errors.New("Module cannot be nil")
+func (c *Client) EditorToken(plugin *Plugin) (string, error) {
+	if plugin == nil {
+		return "", errors.New("Plugin cannot be nil")
 	}
 
-	req, err := c.adminRequestBuilder(http.MethodGet, path.Join("/api/v1/token", module.URI()), nil)
+	req, err := c.adminRequestBuilder(http.MethodGet, path.Join("/api/v1/token", plugin.URI()), nil)
 
 	if err != nil {
 		return "", err
@@ -44,8 +44,8 @@ func (c *Client) EditorToken(module *Module) (string, error) {
 	return token.Token, nil
 }
 
-// UserFunctions gets a list of the deployed modules for the given identifier and namespace.
-func (c *Client) UserFunctions(identifier string, namespace string) ([]*tenant.Module, error) {
+// UserPlugins gets a list of the deployed plugins for the given identifier and namespace.
+func (c *Client) UserPlugins(identifier string, namespace string) ([]*tenant.Module, error) {
 	req, err := c.adminRequestBuilder(http.MethodGet,
 		path.Join("/api/v2/functions", identifier, namespace), nil)
 
@@ -59,27 +59,27 @@ func (c *Client) UserFunctions(identifier string, namespace string) ([]*tenant.M
 	}
 	defer res.Body.Close()
 
-	userFuncs := UserFunctionsResponse{
-		Functions: []*tenant.Module{},
+	userPlugins := UserPluginsResponse{
+		Plugins: []*tenant.Module{},
 	}
 
 	dec := json.NewDecoder(res.Body)
-	err = dec.Decode(&userFuncs)
+	err = dec.Decode(&userPlugins)
 	if err != nil {
 		return nil, err
 	}
 
-	return userFuncs.Functions, nil
+	return userPlugins.Plugins, nil
 }
 
-// FunctionResultsMetadata returns metadata for the 5 most recent execution results for the provided module.
-func (c *Client) FunctionResultsMetadata(module *Module) ([]ExecMetadata, error) {
-	if module == nil {
-		return nil, errors.New("Module cannot be nil")
+// ExecutionResultsMetadata returns metadata for the 5 most recent execution results for the provided plugin.
+func (c *Client) ExecutionResultsMetadata(plugin *Plugin) ([]ExecMetadata, error) {
+	if plugin == nil {
+		return nil, errors.New("Plugin cannot be nil")
 	}
 
 	req, err := c.adminRequestBuilder(http.MethodGet,
-		path.Join("/api/v2/results/by-fqmn", module.URI()), nil)
+		path.Join("/api/v2/results/by-fqmn", plugin.URI()), nil)
 
 	if err != nil {
 		return nil, err
@@ -102,8 +102,8 @@ func (c *Client) FunctionResultsMetadata(module *Module) ([]ExecMetadata, error)
 	return execResults, nil
 }
 
-// FunctionResultMetadata returns metadata for the provided module execution.
-func (c *Client) FunctionResultMetadata(uuid string) (*ExecMetadata, error) {
+// ExecutionResultMetadata returns metadata for the provided plugin execution.
+func (c *Client) ExecutionResultMetadata(uuid string) (*ExecMetadata, error) {
 	req, err := c.adminRequestBuilder(http.MethodGet,
 		path.Join("/api/v2/results/by-uuid", uuid), nil)
 
@@ -128,8 +128,8 @@ func (c *Client) FunctionResultMetadata(uuid string) (*ExecMetadata, error) {
 	return &execResult, nil
 }
 
-// FunctionResult returns the result of the provided module execution.
-func (c *Client) FunctionResult(uuid string) ([]byte, error) {
+// ExecutionResult returns the result of the provided plugin execution.
+func (c *Client) ExecutionResult(uuid string) ([]byte, error) {
 	req, err := c.adminRequestBuilder(http.MethodGet,
 		path.Join("/api/v2/result", uuid), nil)
 

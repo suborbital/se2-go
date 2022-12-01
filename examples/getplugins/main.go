@@ -18,13 +18,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// get a list of Modules
-	modules, err := client.UserFunctions("userID", "namespace")
+	// get a list of plugins
+	plugins, err := client.UserPlugins("userID", "namespace")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, r := range modules {
+	for _, r := range plugins {
 		log.Println(r.FQMN)
 	}
 }

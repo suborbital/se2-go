@@ -16,7 +16,7 @@ var environment = "com.suborbital"
 var userID = ""
 var envToken = ""
 
-var tmpl = "assemblyscript"
+var tmpl = "tinygo"
 
 func TestMain(m *testing.M) {
 	tok, exists := os.LookupEnv("SE2_ENV_TOKEN")
@@ -41,17 +41,17 @@ func TestUserID(t *testing.T) {
 	t.Logf("Using UserID: %s", userID)
 }
 
-// TestBuilder must run before tests that depend on modules existing in SE2
+// TestBuilder must run before tests that depend on plugins existing in SE2
 func TestBuilder(t *testing.T) {
 	client, err := se2.NewLocalClient(envToken)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	module := se2.NewModule(environment, userID, "default", "foo")
+	plugin := se2.NewPlugin(environment, userID, "default", "foo")
 
 	t.Run("Template", func(t *testing.T) {
-		template, err := client.BuilderTemplate(module, tmpl)
+		template, err := client.BuilderTemplate(plugin, tmpl)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -59,7 +59,7 @@ func TestBuilder(t *testing.T) {
 		t.Logf("got template for '%s', length: %d", template.Lang, len(template.Contents))
 
 		t.Run("Build", func(t *testing.T) {
-			buildResult, err := client.BuildFunctionString(module, tmpl, template.Contents)
+			buildResult, err := client.BuildPluginString(plugin, tmpl, template.Contents)
 
 			if err != nil {
 				t.Fatal(err)
@@ -68,29 +68,30 @@ func TestBuilder(t *testing.T) {
 			t.Log(buildResult)
 
 			t.Run("GetDraft", func(t *testing.T) {
-				editorState, err := client.GetDraft(module)
+				editorState, err := client.GetDraft(plugin)
 				if err != nil {
 					t.Fatal(err)
 				}
 
 				if editorState.Contents != template.Contents {
-					t.Error("function contents changed between build and draft")
+					t.Error("plugin contents changed between build and draft")
 				}
 			})
 
 			t.Run("Promote", func(t *testing.T) {
-				promoteResponse, err := client.PromoteDraft(module)
+				promoteResponse, err := client.PromoteDraft(plugin)
 				if err != nil {
 					t.Fatal(err)
 				}
 
-				t.Logf("module promoted to %s", promoteResponse.Version)
+				t.Logf("plugin promoted to %s", promoteResponse.Version)
+				time.Sleep(time.Second * 2)
 			})
 		})
 	})
 }
 
-func TestUserFunctions(t *testing.T) {
+func TestUserPlugins(t *testing.T) {
 	t.Parallel()
 
 	client, err := se2.NewLocalClient(envToken)
@@ -100,7 +101,7 @@ func TestUserFunctions(t *testing.T) {
 
 	identifier := fmt.Sprintf("%s.%s", environment, userID)
 
-	fns, err := client.UserFunctions(identifier, "default")
+	fns, err := client.UserPlugins(identifier, "default")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,23 +121,23 @@ func TestGetAndExec(t *testing.T) {
 
 	identifier := fmt.Sprintf("%s.%s", environment, userID)
 
-	fns, err := client.UserFunctions(identifier, "default")
+	fns, err := client.UserPlugins(identifier, "default")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if len(fns) < 1 {
-		t.Skip("no modules defined")
+		t.Skip("no plugins defined")
 	}
 
-	module := se2.Module{
+	plugin := se2.Plugin{
 		Environment: environment,
 		Tenant:      userID,
 		Namespace:   fns[0].Namespace,
 		Name:        fns[0].Name,
 	}
 
-	result, uuid, err := client.ExecString(&module, "world")
+	result, uuid, err := client.ExecString(&plugin, "world")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -147,8 +148,8 @@ func TestGetAndExec(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	// Tests the administrative results endpoint
-	t.Run("ExecResultsMetadata", func(t *testing.T) {
-		execRes, err := client.FunctionResultsMetadata(&module)
+	t.Run("ExecutionResultsMetadata", func(t *testing.T) {
+		execRes, err := client.ExecutionResultsMetadata(&plugin)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -162,8 +163,8 @@ func TestGetAndExec(t *testing.T) {
 	})
 
 	// Tests the administrative results endpoint
-	t.Run("ExecResultMetadata", func(t *testing.T) {
-		res, err := client.FunctionResultMetadata(uuid)
+	t.Run("ExecutionResultMetadata", func(t *testing.T) {
+		res, err := client.ExecutionResultMetadata(uuid)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -173,7 +174,7 @@ func TestGetAndExec(t *testing.T) {
 
 	// Tests the administrative results endpoint
 	t.Run("ExecResult", func(t *testing.T) {
-		res, err := client.FunctionResult(uuid)
+		res, err := client.ExecutionResult(uuid)
 		if err != nil {
 			t.Fatal(err)
 		}
