@@ -4,10 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"path"
-
-	"io/ioutil"
 	"net/http"
+	"path"
 
 	"github.com/pkg/errors"
 )
@@ -32,7 +30,7 @@ func (c *Client) execPlugin(endpoint string, body io.Reader) ([]byte, string, er
 	}
 	defer res.Body.Close()
 
-	result, err := ioutil.ReadAll(res.Body)
+	result, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, "", err
 	}
