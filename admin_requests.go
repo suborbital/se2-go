@@ -3,11 +3,11 @@ package se2
 import (
 	"encoding/json"
 	"io"
-
 	"net/http"
 	"path"
 
 	"github.com/pkg/errors"
+
 	"github.com/suborbital/systemspec/tenant"
 )
 

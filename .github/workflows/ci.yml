@@ -1,0 +1,56 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+
+jobs:
+  examples-list:
+    runs-on: ubuntu-latest
+    outputs:
+      folders: ${{ steps.script.outputs.folders }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: script
+        run: |
+          list=""
+          for folder in $(ls examples/); do
+            list+="\"$folder\","
+          done
+          output="[${list::-1}]"
+          echo $output
+          echo folders=$output >> $GITHUB_OUTPUT
+
+  examples:
+    runs-on: ubuntu-latest
+    needs: examples-list
+    strategy:
+      matrix:
+        folder: ${{ fromJSON(needs.examples-list.outputs.folders) }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - run: go build examples/${{ matrix.folder }}/*.go
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          skip-cache: true
