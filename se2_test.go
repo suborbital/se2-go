@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"testing"
 	"time"
@@ -13,6 +14,7 @@ import (
 	"github.com/suborbital/se2-go"
 )
 
+var client *se2.Client
 var environment = "com.suborbital"
 var userID = ""
 var envToken = ""
@@ -20,11 +22,27 @@ var envToken = ""
 var tmpl = "tinygo"
 
 func TestMain(m *testing.M) {
-	tok, exists := os.LookupEnv("SE2_ENV_TOKEN")
+	t, exists := os.LookupEnv("SE2_ENV_TOKEN")
 	if !exists {
 		log.Fatal("SE2_ENV_TOKEN must be set to run tests!")
 	}
-	envToken = tok
+	envToken = t
+	config := se2.LocalConfig()
+
+	ci, exists := os.LookupEnv("CI")
+	if exists && ci == "true" {
+		config = &se2.Config{
+			ExecutionURL: &url.URL{Scheme: "http", Host: "localhost:8080"},
+			AdminURL:     &url.URL{Scheme: "http", Host: "localhost:8081"},
+			BuilderURL:   &url.URL{Scheme: "http", Host: "localhost:8082"},
+		}
+	}
+
+	var err error
+	client, err = se2.NewClient(config, envToken)
+	if err != nil {
+		log.Fatal("could not initialize client: ", err)
+	}
 
 	// creates a new user for every test run
 	uuid := uuid.New()
@@ -44,11 +62,6 @@ func TestUserID(t *testing.T) {
 
 // TestBuilder must run before tests that depend on plugins existing in SE2
 func TestBuilder(t *testing.T) {
-	client, err := se2.NewLocalClient(envToken)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	plugin := se2.NewPlugin(environment, userID, "default", "foo")
 
 	t.Run("Template", func(t *testing.T) {
@@ -94,12 +107,6 @@ func TestBuilder(t *testing.T) {
 
 func TestUserPlugins(t *testing.T) {
 	t.Parallel()
-
-	client, err := se2.NewLocalClient(envToken)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	identifier := fmt.Sprintf("%s.%s", environment, userID)
 
 	fns, err := client.UserPlugins(identifier, "default")
@@ -114,12 +121,6 @@ func TestUserPlugins(t *testing.T) {
 
 func TestGetAndExec(t *testing.T) {
 	t.Parallel()
-
-	client, err := se2.NewLocalClient(envToken)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	identifier := fmt.Sprintf("%s.%s", environment, userID)
 
 	fns, err := client.UserPlugins(identifier, "default")
@@ -187,11 +188,6 @@ func TestGetAndExec(t *testing.T) {
 func TestBuilderHealth(t *testing.T) {
 	t.Parallel()
 
-	client, err := se2.NewLocalClient(envToken)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	healthy, err := client.BuilderHealth()
 	if err != nil {
 		t.Fatal(err)
@@ -204,11 +200,6 @@ func TestBuilderHealth(t *testing.T) {
 
 func TestBuilderFeatures(t *testing.T) {
 	t.Parallel()
-
-	client, err := se2.NewLocalClient(envToken)
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	features, err := client.BuilderFeatures()
 	if err != nil {

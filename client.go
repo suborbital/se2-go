@@ -33,21 +33,21 @@ func NewLocalClient(envToken string) (*Client, error) {
 }
 
 func (c *Client) adminRequestBuilder(method string, endpoint string, body io.Reader) (*http.Request, error) {
-	url := *c.config.adminURL
+	url := *c.config.AdminURL
 	url.Path = endpoint
 
 	return http.NewRequest(method, url.String(), body)
 }
 
 func (c *Client) execRequestBuilder(method string, endpoint string, body io.Reader) (*http.Request, error) {
-	url := *c.config.executionURL
+	url := *c.config.ExecutionURL
 	url.Path = endpoint
 
 	return http.NewRequest(method, url.String(), body)
 }
 
 func (c *Client) builderRequestBuilder(method string, endpoint string, body io.Reader) (*http.Request, error) {
-	url := *c.config.builderURL
+	url := *c.config.BuilderURL
 	url.Path = endpoint
 
 	return http.NewRequest(method, url.String(), body)

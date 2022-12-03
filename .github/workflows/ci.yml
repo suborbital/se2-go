@@ -15,7 +15,8 @@ jobs:
       folders: ${{ steps.script.outputs.folders }}
     steps:
       - uses: actions/checkout@v3
-      - id: script
+      - name: Get examples list
+        id: script
         run: |
           list=""
           for folder in $(ls examples/); do
@@ -54,3 +55,50 @@ jobs:
         with:
           version: latest
           skip-cache: true
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      e2core:
+        image: suborbital/e2core
+        ports:
+          - 8080:8080
+        options: >-
+          --health-cmd "curl --fail http://localhost:8080/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --env "E2CORE_CONTROL_PLANE=localhost:8081"
+      builder:
+        image: suborbital/se2-builder
+        ports:
+          - 8082:8082
+        options: >-
+          --health-cmd "curl --fail http://localhost:8082/api/v1/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --entrypoint "/usr/local/bin/builder"
+      controlplane:
+        image: suborbital/se2-controlplane
+        ports:
+          - 8081:8081
+        options: >-
+          --health-cmd "curl --fail http://localhost:8081/api/v1/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --entrypoint "/usr/local/bin/controlplane"
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version-file: go.mod
+          cache: true
+      - run: go mod download
+
+      - run: docker ps -a
+      - run: go test -v .
+        env:
+          SE2_ENV_TOKEN: ${{ secrets.SE2_ENV_TOKEN }}

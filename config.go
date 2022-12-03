@@ -5,9 +5,9 @@ import "net/url"
 // Config combines the common configuration options for the three
 // Suborbital Extension Engine APIs (Administrative, Builder, and Execution)
 type Config struct {
-	executionURL *url.URL
-	adminURL     *url.URL
-	builderURL   *url.URL
+	ExecutionURL *url.URL
+	AdminURL     *url.URL
+	BuilderURL   *url.URL
 }
 
 // DefaultConfig takes the given host and creates a SE2 config with the K8S default ports.
@@ -31,9 +31,9 @@ func DefaultConfig(builderHost string) (*Config, error) {
 	builderUrl.Scheme = "https"
 
 	conf := &Config{
-		executionURL: execUrl,
-		adminURL:     adminUrl,
-		builderURL:   builderUrl,
+		ExecutionURL: execUrl,
+		AdminURL:     adminUrl,
+		BuilderURL:   builderUrl,
 	}
 
 	return conf, nil
@@ -42,15 +42,15 @@ func DefaultConfig(builderHost string) (*Config, error) {
 // LocalConfig generates a Configuration for SE2 running in docker-compose
 func LocalConfig() *Config {
 	conf := &Config{
-		executionURL: &url.URL{
+		ExecutionURL: &url.URL{
 			Scheme: "http",
 			Host:   "local.suborbital.network:8080",
 		},
-		adminURL: &url.URL{
+		AdminURL: &url.URL{
 			Scheme: "http",
 			Host:   "local.suborbital.network:8081",
 		},
-		builderURL: &url.URL{
+		BuilderURL: &url.URL{
 			Scheme: "http",
 			Host:   "local.suborbital.network:8082",
 		},
@@ -77,9 +77,9 @@ func CustomConfig(execHost string, adminHost string, builderHost string) (*Confi
 	}
 
 	conf := &Config{
-		executionURL: execUrl,
-		adminURL:     adminUrl,
-		builderURL:   builderUrl,
+		ExecutionURL: execUrl,
+		AdminURL:     adminUrl,
+		BuilderURL:   builderUrl,
 	}
 
 	return conf, nil
