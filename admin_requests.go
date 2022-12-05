@@ -2,7 +2,8 @@ package se2
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
+
 	"net/http"
 	"path"
 
@@ -143,7 +144,7 @@ func (c *Client) ExecutionResult(uuid string) ([]byte, error) {
 	}
 	defer res.Body.Close()
 
-	result, err := ioutil.ReadAll(res.Body)
+	result, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}
