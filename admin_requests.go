@@ -2,13 +2,14 @@ package se2
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 
 	"net/http"
 	"path"
 
 	"github.com/pkg/errors"
-	"github.com/suborbital/systemspec/tenant"
+	systemspec "github.com/suborbital/systemspec/tenant"
 )
 
 // EditorToken gets an editor token for the provided plugin. Note: this library
@@ -46,9 +47,9 @@ func (c *Client) EditorToken(plugin *Plugin) (string, error) {
 }
 
 // UserPlugins gets a list of the deployed plugins for the given identifier and namespace.
-func (c *Client) UserPlugins(identifier string, namespace string) ([]*tenant.Module, error) {
+func (c *Client) UserPlugins(environment string, tenant string, namespace string) ([]*Plugin, error) {
 	req, err := c.adminRequestBuilder(http.MethodGet,
-		path.Join("/api/v2/functions", identifier, namespace), nil)
+		path.Join("/api/v2/functions", fmt.Sprintf("%s.%s", environment, tenant), namespace), nil)
 
 	if err != nil {
 		return nil, err
@@ -61,7 +62,7 @@ func (c *Client) UserPlugins(identifier string, namespace string) ([]*tenant.Mod
 	defer res.Body.Close()
 
 	userPlugins := UserPluginsResponse{
-		Plugins: []*tenant.Module{},
+		Plugins: []*systemspec.Module{},
 	}
 
 	dec := json.NewDecoder(res.Body)
@@ -70,7 +71,15 @@ func (c *Client) UserPlugins(identifier string, namespace string) ([]*tenant.Mod
 		return nil, err
 	}
 
-	return userPlugins.Plugins, nil
+	plugins := make([]*Plugin, len(userPlugins.Plugins))
+	for i, module := range userPlugins.Plugins {
+		plugins[i].Environment = environment
+		plugins[i].Tenant = tenant
+		plugins[i].Namespace = namespace
+		plugins[i].Name = module.Name
+	}
+
+	return plugins, nil
 }
 
 // ExecutionResultsMetadata returns metadata for the 5 most recent execution results for the provided plugin.

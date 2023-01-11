@@ -13,22 +13,21 @@ type Config struct {
 // DefaultConfig takes the given host and creates a SE2 config with the K8S default ports.
 // Everything except the scheme and hostname are considered. You need to provide your builder
 // host domain.
-func DefaultConfig(builderHost string) (*Config, error) {
-	execUrl, err := url.Parse("http://e2core-service.suborbital.svc.cluster.local:80")
+func DefaultConfig() (*Config, error) {
+	execUrl, err := url.Parse("https://edge.suborbital.network")
 	if err != nil {
 		return nil, err
 	}
 
-	adminUrl, err := url.Parse("http://se2-controlplane-service.suborbital.svc.cluster.local:8081")
+	adminUrl, err := url.Parse("https://api.suborbital.network")
 	if err != nil {
 		return nil, err
 	}
 
-	builderUrl, err := url.Parse(builderHost)
+	builderUrl, err := url.Parse("https://builder.suborbital.network")
 	if err != nil {
 		return nil, err
 	}
-	builderUrl.Scheme = "https"
 
 	conf := &Config{
 		executionURL: execUrl,
