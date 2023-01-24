@@ -2,7 +2,6 @@ package se2_test
 
 import (
 	"encoding/base64"
-	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -99,15 +98,13 @@ func TestUserPlugins(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	identifier := fmt.Sprintf("%s.%s", environment, userID)
-
-	fns, err := client.UserPlugins(identifier, "default")
+	plugins, err := client.UserPlugins(environment, userID, "default")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	for _, fn := range fns {
-		t.Log(fn.FQMN)
+	for _, plugin := range plugins {
+		t.Log(plugin.Name)
 	}
 }
 
@@ -119,25 +116,16 @@ func TestGetAndExec(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	identifier := fmt.Sprintf("%s.%s", environment, userID)
-
-	fns, err := client.UserPlugins(identifier, "default")
+	plugins, err := client.UserPlugins(environment, userID, "default")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(fns) < 1 {
+	if len(plugins) < 1 {
 		t.Skip("no plugins defined")
 	}
 
-	plugin := se2.Plugin{
-		Environment: environment,
-		Tenant:      userID,
-		Namespace:   fns[0].Namespace,
-		Name:        fns[0].Name,
-	}
-
-	result, uuid, err := client.ExecString(&plugin, "world")
+	result, uuid, err := client.ExecString(plugins[0], "world")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -149,7 +137,7 @@ func TestGetAndExec(t *testing.T) {
 
 	// Tests the administrative results endpoint
 	t.Run("ExecutionResultsMetadata", func(t *testing.T) {
-		execRes, err := client.ExecutionResultsMetadata(&plugin)
+		execRes, err := client.ExecutionResultsMetadata(plugins[0])
 		if err != nil {
 			t.Fatal(err)
 		}
