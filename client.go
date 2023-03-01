@@ -3,7 +3,6 @@ package se2
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -40,10 +39,14 @@ type Client2 struct {
 
 type ClientOption func(*Client2)
 
+// NewClient2 returns a configured instance of a configured client for SE2. Required parameters are the endpoint,
+// whether it's the production or the staging environment, and an access key you can grab from the SE2 admin area for
+// an environment.
+//
+// By default the underlying http client has a 60 second timeout. Otherwise you can use the WithHttpClient(*http.Client)
+// function to use your own configured version for it.
 func NewClient2(host ServerURL, ak string, options ...ClientOption) (*Client2, error) {
-	fmt.Printf("len ak: %d\n", len(ak))
 	if len(ak) < minAccessKeyLength {
-		fmt.Printf("returning because it's too bla")
 		return nil, ErrNoAccessKey
 	}
 
@@ -55,7 +58,7 @@ func NewClient2(host ServerURL, ak string, options ...ClientOption) (*Client2, e
 	var akUnmarshaled accessKey
 	err = json.Unmarshal(decoded, &akUnmarshaled)
 	if err != nil {
-		return nil, errors.Wrap(err, ErrNoAccessKey.Error())
+		return nil, ErrNoAccessKey
 	}
 
 	nc := Client2{
@@ -73,6 +76,13 @@ func NewClient2(host ServerURL, ak string, options ...ClientOption) (*Client2, e
 func defaultHttpClient() *http.Client {
 	return &http.Client{
 		Timeout: 60 * time.Second,
+	}
+}
+
+// WithHttpClient allows you to configure the http.Client used in the SE2 client.
+func WithHttpClient(client *http.Client) func(*Client2) {
+	return func(c *Client2) {
+		c.httpClient = client
 	}
 }
 
