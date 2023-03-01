@@ -33,7 +33,7 @@ type FeatureLanguage struct {
 
 type FeaturesResponse struct {
 	Features  []string          `json:"features"`
-	Langauges []FeatureLanguage `json:"languages"`
+	Languages []FeatureLanguage `json:"languages"`
 }
 
 // TestPayload is a single test for a plugin
