@@ -1,6 +1,7 @@
 package se2
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"io"
@@ -35,6 +36,7 @@ type accessKey struct {
 type Client2 struct {
 	httpClient *http.Client
 	host       ServerURL
+	token      string
 }
 
 type ClientOption func(*Client2)
@@ -64,6 +66,7 @@ func NewClient2(host ServerURL, ak string, options ...ClientOption) (*Client2, e
 	nc := Client2{
 		httpClient: defaultHttpClient(),
 		host:       host,
+		token:      ak,
 	}
 
 	for _, o := range options {
@@ -84,6 +87,14 @@ func WithHttpClient(client *http.Client) func(*Client2) {
 	return func(c *Client2) {
 		c.httpClient = client
 	}
+}
+
+// do is the meat of the client, every other exported method sets up the request and the context.
+func (nc *Client2) do(ctx context.Context, req *http.Request) (*http.Response, error) {
+	req = req.WithContext(ctx)
+	req.Header.Set("Authorization", nc.token)
+
+	return nc.httpClient.Do(req)
 }
 
 // NewClient creates a Client with a Config
