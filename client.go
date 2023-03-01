@@ -1,8 +1,12 @@
 package se2
 
 import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -11,6 +15,65 @@ import (
 type Client struct {
 	config   *Config
 	envToken string
+}
+
+const (
+	Production         ServerURL = "https://api.suborbital.network"
+	Staging            ServerURL = "https://stg.api.suborbital.network"
+	minAccessKeyLength           = 60
+)
+
+var (
+	ErrNoAccessKey = errors.New("No access key provided, or it's likely malformed")
+)
+
+type ServerURL string
+type accessKey struct {
+	Key    int    `json:"key"`
+	Secret string `json:"secret"`
+}
+
+type Client2 struct {
+	httpClient *http.Client
+	host       ServerURL
+}
+
+type ClientOption func(*Client2)
+
+func NewClient2(host ServerURL, ak string, options ...ClientOption) (*Client2, error) {
+	fmt.Printf("len ak: %d\n", len(ak))
+	if len(ak) < minAccessKeyLength {
+		fmt.Printf("returning because it's too bla")
+		return nil, ErrNoAccessKey
+	}
+
+	decoded, err := base64.StdEncoding.DecodeString(ak)
+	if err != nil {
+		return nil, ErrNoAccessKey
+	}
+
+	var akUnmarshaled accessKey
+	err = json.Unmarshal(decoded, &akUnmarshaled)
+	if err != nil {
+		return nil, errors.Wrap(err, ErrNoAccessKey.Error())
+	}
+
+	nc := Client2{
+		httpClient: defaultHttpClient(),
+		host:       host,
+	}
+
+	for _, o := range options {
+		o(&nc)
+	}
+
+	return &nc, nil
+}
+
+func defaultHttpClient() *http.Client {
+	return &http.Client{
+		Timeout: 60 * time.Second,
+	}
 }
 
 // NewClient creates a Client with a Config
