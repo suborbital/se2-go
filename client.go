@@ -92,7 +92,7 @@ func WithHttpClient(client *http.Client) func(*Client2) {
 // do is the meat of the client, every other exported method sets up the request and the context.
 func (c *Client2) do(ctx context.Context, req *http.Request) (*http.Response, error) {
 	req = req.WithContext(ctx)
-	req.Header.Set("Authorization", c.token)
+	req.Header.Set("Authorization", "Bearer "+c.token)
 
 	return c.httpClient.Do(req)
 }
