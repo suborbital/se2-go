@@ -18,8 +18,8 @@ type Client struct {
 }
 
 const (
-	Production         ServerURL = "https://api.suborbital.network"
-	Staging            ServerURL = "https://stg.api.suborbital.network"
+	HostProduction     ServerURL = "https://api.suborbital.network"
+	HostStaging        ServerURL = "https://stg.api.suborbital.network"
 	minAccessKeyLength           = 60
 )
 
@@ -35,7 +35,7 @@ type accessKey struct {
 
 type Client2 struct {
 	httpClient *http.Client
-	host       ServerURL
+	host       string
 	token      string
 }
 
@@ -65,7 +65,7 @@ func NewClient2(host ServerURL, ak string, options ...ClientOption) (*Client2, e
 
 	nc := Client2{
 		httpClient: defaultHttpClient(),
-		host:       host,
+		host:       string(host),
 		token:      ak,
 	}
 
@@ -90,11 +90,11 @@ func WithHttpClient(client *http.Client) func(*Client2) {
 }
 
 // do is the meat of the client, every other exported method sets up the request and the context.
-func (nc *Client2) do(ctx context.Context, req *http.Request) (*http.Response, error) {
+func (c *Client2) do(ctx context.Context, req *http.Request) (*http.Response, error) {
 	req = req.WithContext(ctx)
-	req.Header.Set("Authorization", nc.token)
+	req.Header.Set("Authorization", c.token)
 
-	return nc.httpClient.Do(req)
+	return c.httpClient.Do(req)
 }
 
 // NewClient creates a Client with a Config

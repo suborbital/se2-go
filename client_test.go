@@ -21,7 +21,7 @@ func TestNewClient2(t *testing.T) {
 		{
 			name: "correct for production, valid key, no options",
 			args: args{
-				host: se2.Production,
+				host: se2.HostProduction,
 				ak:   "eyJrZXkiOjQwNywic2VjcmV0IjoiZWsvNFV3VTBnZ2VHUjdQanF1MmlyaWJacGR1MXZvcWNhMXl3eDE3aWhpTT0ifQ==",
 			},
 			wantErr: assert.NoError,
@@ -29,7 +29,7 @@ func TestNewClient2(t *testing.T) {
 		{
 			name: "correct for staging, valid key, no options",
 			args: args{
-				host: se2.Staging,
+				host: se2.HostStaging,
 				ak:   "eyJrZXkiOjQwNywic2VjcmV0IjoiZWsvNFV3VTBnZ2VHUjdQanF1MmlyaWJacGR1MXZvcWNhMXl3eDE3aWhpTT0ifQ==",
 			},
 			wantErr: assert.NoError,
@@ -37,7 +37,7 @@ func TestNewClient2(t *testing.T) {
 		{
 			name: "correct for prod, empty key, no options",
 			args: args{
-				host: se2.Production,
+				host: se2.HostProduction,
 				ak:   "",
 			},
 			wantErr: assert.Error,
@@ -45,7 +45,7 @@ func TestNewClient2(t *testing.T) {
 		{
 			name: "correct for prod, decode error key, no options",
 			args: args{
-				host: se2.Production,
+				host: se2.HostProduction,
 				ak:   "eJrZXkiOjQwNywic2VjcmV0IjoiZWs3VTBnZ2VHUjdQanF1MmlyaWJacGR1MXZvcWNheDE3aWhpTT0ifQ",
 			},
 			wantErr: assert.Error,
@@ -53,7 +53,7 @@ func TestNewClient2(t *testing.T) {
 		{
 			name: "correct for prod, short key, no options",
 			args: args{
-				host: se2.Production,
+				host: se2.HostProduction,
 				ak:   "eJrZXkiOjQwNywic2VjcmV0IjoiZWs3VTB",
 			},
 			wantErr: assert.Error,
