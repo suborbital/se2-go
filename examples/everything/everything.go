@@ -63,34 +63,29 @@ func main() {
 
 	// Update the tenant by its name to use a different name and description.
 	newName := ulid.Make()
-	log.Printf("changing name from %s -> %s\n", sessionName, newName)
+	log.Printf("trying to change name from %s -> %s\n", sessionName, newName)
 	updated, err := client.UpdateTenantByName(ctx, sessionName.String(), "newDescription")
 	if err != nil {
 		log.Fatalf("update tenant errored: %s", err.Error())
 	}
 	log.Printf("updated tenant is this:\n%#v\n\n", updated)
 
-	// Try to get tenant by its old name. It should fail.
-	oldTenant, err := client.GetTenantByName(ctx, sessionName.String())
+	// Try to get tenant by its new name. It should fail.
+	tenantDidNotChange, err := client.GetTenantByName(ctx, newName.String())
 	if err == nil {
-		log.Fatalf("get tenant by old name after having changed the name returns nil error.")
+		log.Fatalf("get tenant by new name after having patched the tenant returns nil error. It should not\n%#v\n", tenantDidNotChange)
 	}
-	log.Printf("getting old tenant by its name resulted in this error: %s\n"+
-		"the old tenant should be a nil value: %#v\n", err.Error(), oldTenant)
+	log.Printf("getting tenant by its new name resulted in this error: %s\n"+
+		"the new tenant should be a zero value: %#v\n", err.Error(), tenantDidNotChange)
 
-	newTenantByName, err := client.GetTenantByName(ctx, newName.String())
+	tenantStillExists, err := client.GetTenantByName(ctx, sessionName.String())
 	if err != nil {
-		log.Fatalf("getting tenant by name after update failed: %s", err.Error())
+		log.Fatalf("getting tenant by name, after the update, failed: %s", err.Error())
 	}
-	log.Printf("new tenant is this: %#v\n", newTenantByName)
+	log.Printf("we still have the tenant: %#v\n", tenantStillExists)
 
 	// Delete tenant by name
 	err = client.DeleteTenantByName(ctx, sessionName.String())
-	if err == nil {
-		log.Fatalf("deleting tenant by its old name should have failed. It did not")
-	}
-
-	err = client.DeleteTenantByName(ctx, newName.String())
 	if err != nil {
 		log.Fatalf("deleting tenant by its new name should not have failed. It did: %s", err.Error())
 	}

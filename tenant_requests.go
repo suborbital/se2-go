@@ -17,7 +17,11 @@ const (
 )
 
 type GetTenantResponse struct {
-	id, environment, name, description string
+	AuthorizedParty string `json:"authorized_party"`
+	Id              string `json:"id"`
+	Environment     string `json:"environment"`
+	Name            string `json:"name"`
+	Description     string `json:"description"`
 }
 
 // GetTenantByName returns the tenant
@@ -134,42 +138,37 @@ type UpdateTenantRequest struct {
 	Description string `json:"description"`
 }
 
-type UpdateTenantResponse struct {
-	GetTenantResponse
-	AuthorizedParty string `json:"authorized_party"`
-}
-
-func (c *Client2) UpdateTenantByName(ctx context.Context, name, description string) (UpdateTenantResponse, error) {
+func (c *Client2) UpdateTenantByName(ctx context.Context, name, description string) (GetTenantResponse, error) {
 	if name == "" {
-		return UpdateTenantResponse{}, errors.New("UpdateTenantByName: tenant name cannot be empty")
+		return GetTenantResponse{}, errors.New("UpdateTenantByName: tenant name cannot be empty")
 	}
 
 	m, err := json.Marshal(UpdateTenantRequest{Name: name, Description: description})
 	if err != nil {
-		return UpdateTenantResponse{}, errors.Wrap(err, "UpdateTenantByName: json marshal update tenant request")
+		return GetTenantResponse{}, errors.Wrap(err, "UpdateTenantByName: json marshal update tenant request")
 	}
 
 	req, err := http.NewRequest(http.MethodPatch, c.host+fmt.Sprintf(pathTenantByName, name), bytes.NewReader(m))
 	if err != nil {
-		return UpdateTenantResponse{}, errors.Wrap(err, "UpdateTenantByName: http.NewRequest for POST create tenant")
+		return GetTenantResponse{}, errors.Wrap(err, "UpdateTenantByName: http.NewRequest for POST create tenant")
 	}
 
 	res, err := c.do(ctx, req)
 	if err != nil {
-		return UpdateTenantResponse{}, errors.Wrap(err, "UpdateTenantByName: c.do")
+		return GetTenantResponse{}, errors.Wrap(err, "UpdateTenantByName: c.do")
 	}
 
 	defer func() {
 		_ = res.Body.Close()
 	}()
 
-	var t UpdateTenantResponse
+	var t GetTenantResponse
 
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
-		return UpdateTenantResponse{}, errors.Wrap(err, "UpdateTenantByName: dec.Decode")
+		return GetTenantResponse{}, errors.Wrap(err, "UpdateTenantByName: dec.Decode")
 	}
 
 	return t, nil
@@ -179,7 +178,7 @@ func (c *Client2) DeleteTenantByName(ctx context.Context, name string) error {
 	if name == "" {
 		return errors.New("DeleteTenantByName: tenant name cannot be empty")
 	}
-	req, err := http.NewRequest(http.MethodDelete, c.host+pathTenantByName, nil)
+	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf(c.host+pathTenantByName, name), nil)
 	if err != nil {
 		return errors.Wrap(err, "DeleteTenantByName: http.NewRequest")
 	}
