@@ -62,16 +62,18 @@ type CreateTenantResponse struct {
 	ID              string `json:"id"`
 }
 
-func (c *Client2) CreateTenantByName(ctx context.Context, name, description string) (CreateTenantResponse, error) {
+// CreateTenantByName creates a new tenant with the given name and description. Description is optional, it can be an
+// empty string.
+func (c *Client2) CreateTenantByName(ctx context.Context, name, description string) (GetTenantResponse, error) {
 	if name == "" {
-		return CreateTenantResponse{}, errors.New("CreateTenantByName: tenant name cannot be empty")
+		return GetTenantResponse{}, errors.New("CreateTenantByName: tenant name cannot be empty")
 	}
 
 	var requestBody io.Reader
 	if description != "" {
 		m, err := json.Marshal(CreateTenantRequest{Description: description})
 		if err != nil {
-			return CreateTenantResponse{}, errors.Wrap(err, "CreateTenantByName: json marshal create tenant request with description")
+			return GetTenantResponse{}, errors.Wrap(err, "CreateTenantByName: json marshal create tenant request with description")
 		}
 
 		requestBody = bytes.NewReader(m)
@@ -79,34 +81,36 @@ func (c *Client2) CreateTenantByName(ctx context.Context, name, description stri
 
 	req, err := http.NewRequest(http.MethodPost, c.host+fmt.Sprintf(pathTenantByName, name), requestBody)
 	if err != nil {
-		return CreateTenantResponse{}, errors.Wrap(err, "CreateTenantByName: http.NewRequest for POST create tenant")
+		return GetTenantResponse{}, errors.Wrap(err, "CreateTenantByName: http.NewRequest for POST create tenant")
 	}
 
 	res, err := c.do(ctx, req)
 	if err != nil {
-		return CreateTenantResponse{}, errors.Wrap(err, "CreateTenantByName: c.do")
+		return GetTenantResponse{}, errors.Wrap(err, "CreateTenantByName: c.do")
 	}
 
 	defer func() {
 		_ = res.Body.Close()
 	}()
 
-	var t CreateTenantResponse
+	var t GetTenantResponse
 
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
-		return CreateTenantResponse{}, errors.Wrap(err, "CreateTenantByName: dec.Decode")
+		return GetTenantResponse{}, errors.Wrap(err, "CreateTenantByName: dec.Decode")
 	}
 
 	return t, nil
 }
 
+// ListTenantResponse is the unmarshaled response from the endpoint.
 type ListTenantResponse struct {
 	Tenants []GetTenantResponse
 }
 
+// ListTenants will list the tenants that the configured API key can access.
 func (c *Client2) ListTenants(ctx context.Context) (ListTenantResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, c.host+pathTenant, nil)
 	if err != nil {
@@ -133,17 +137,19 @@ func (c *Client2) ListTenants(ctx context.Context) (ListTenantResponse, error) {
 	return t, nil
 }
 
-type UpdateTenantRequest struct {
-	Name        string `json:"name"`
+// updateTenantRequest is a struct to help constrain the data and marshal the json based on it that ends up in a request
+// body. It's internal only, users of the client do not need to know about the existence of this struct.
+type updateTenantRequest struct {
 	Description string `json:"description"`
 }
 
+// UpdateTenantByName updates the description of the tenant identified by its name. A tenant's name cannot be changed.
 func (c *Client2) UpdateTenantByName(ctx context.Context, name, description string) (GetTenantResponse, error) {
 	if name == "" {
 		return GetTenantResponse{}, errors.New("UpdateTenantByName: tenant name cannot be empty")
 	}
 
-	m, err := json.Marshal(UpdateTenantRequest{Name: name, Description: description})
+	m, err := json.Marshal(updateTenantRequest{Description: description})
 	if err != nil {
 		return GetTenantResponse{}, errors.Wrap(err, "UpdateTenantByName: json marshal update tenant request")
 	}
@@ -174,6 +180,7 @@ func (c *Client2) UpdateTenantByName(ctx context.Context, name, description stri
 	return t, nil
 }
 
+// DeleteTenantByName deletes the tenant identified by its name.
 func (c *Client2) DeleteTenantByName(ctx context.Context, name string) error {
 	if name == "" {
 		return errors.New("DeleteTenantByName: tenant name cannot be empty")

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/oklog/ulid/v2"
@@ -30,14 +31,16 @@ func main() {
 	// List existing tenants. This should be empty.
 	tenants, err := client.ListTenants(ctx)
 	if err != nil {
-		log.Fatalf("list tenants: %s", err.Error())
+		log.Fatalf("list tenants L33: %s", err.Error())
 	}
 
-	fmt.Printf("list tenants is\n%#v\n\n", tenants)
+	printHeader("List tenants should be an empty list")
+	fmt.Printf("%#v\n", tenants)
 
 	// Create a new fake name for this run.
+	printHeader("Creating a new tenant")
 	sessionName := ulid.Make()
-	log.Printf("\nSession name to start: %s\n\n", sessionName)
+	log.Printf("Session name to start: %s\n", sessionName)
 
 	// Create a new tenant by this name.
 	newTenant, err := client.CreateTenantByName(ctx, sessionName.String(), "everythingDescription")
@@ -45,52 +48,41 @@ func main() {
 		log.Fatalf("create tenant by name errorred: %s", err.Error())
 	}
 
-	log.Printf("created tenant is\n%#v\n\n", newTenant)
+	log.Printf("Created tenant is\n%#v\n", newTenant)
 
+	printHeader("Listing tenants again to see new tenant being picked up")
 	// List tenants again, this should have the new tenant in it.
 	tenants, err = client.ListTenants(ctx)
 	if err != nil {
 		log.Fatalf("list tenants number 2: %s", err.Error())
 	}
-	log.Printf("list tenants again\n%#v\n\n", tenants)
+	log.Printf("%#v\n", tenants)
 
 	// Fetch the individual tenant by its name.
+	printHeader("Fetching the same created tenant by its name")
 	tenant, err := client.GetTenantByName(ctx, sessionName.String())
 	if err != nil {
 		log.Fatalf("get tenant by name: %s", err.Error())
 	}
-	log.Printf("the fetched tenant is\n%#v\n\n", tenant)
+	log.Printf("%#v\n", tenant)
 
 	// Update the tenant by its name to use a different name and description.
-	newName := ulid.Make()
-	log.Printf("trying to change name from %s -> %s\n", sessionName, newName)
+	printHeader("Updating the tenant's description")
 	updated, err := client.UpdateTenantByName(ctx, sessionName.String(), "newDescription")
 	if err != nil {
 		log.Fatalf("update tenant errored: %s", err.Error())
 	}
-	log.Printf("updated tenant is this:\n%#v\n\n", updated)
-
-	// Try to get tenant by its new name. It should fail.
-	tenantDidNotChange, err := client.GetTenantByName(ctx, newName.String())
-	if err == nil {
-		log.Fatalf("get tenant by new name after having patched the tenant returns nil error. It should not\n%#v\n", tenantDidNotChange)
-	}
-	log.Printf("getting tenant by its new name resulted in this error: %s\n"+
-		"the new tenant should be a zero value: %#v\n", err.Error(), tenantDidNotChange)
-
-	tenantStillExists, err := client.GetTenantByName(ctx, sessionName.String())
-	if err != nil {
-		log.Fatalf("getting tenant by name, after the update, failed: %s", err.Error())
-	}
-	log.Printf("we still have the tenant: %#v\n", tenantStillExists)
+	log.Printf("%#v\n", updated)
 
 	// Delete tenant by name
+	printHeader("Deleting tenant by its name")
 	err = client.DeleteTenantByName(ctx, sessionName.String())
 	if err != nil {
 		log.Fatalf("deleting tenant by its new name should not have failed. It did: %s", err.Error())
 	}
 
 	// List tenants should be empty after this
+	printHeader("Listing tenants again to see that the tenant no longer exists")
 	listTenants, err := client.ListTenants(ctx)
 	if err != nil {
 		log.Fatalf("list tenants after deletion should have succeeded. It failed with %s", err.Error())
@@ -98,11 +90,21 @@ func main() {
 	log.Printf("this is the list tenants (length: %d)\n%#v\n", len(listTenants.Tenants), listTenants)
 
 	// Getting tenant by its new name should fail
-	deleted, err := client.GetTenantByName(ctx, newName.String())
+	printHeader("Fetching tenant by its name to see that it fails")
+	deleted, err := client.GetTenantByName(ctx, sessionName.String())
 	if err == nil {
 		log.Fatalf("grabbing tenant by its name should have failed. It did not")
 	}
 	log.Printf("deleted should be a zero value tenant: %#v\n", deleted)
 
 	log.Println("All done")
+}
+
+func printHeader(msg string) {
+	sep := strings.Repeat("=", len(msg))
+
+	fmt.Printf("\n"+
+		"%s\n"+
+		"%s\n"+
+		"%s\n\n", sep, msg, sep)
 }
