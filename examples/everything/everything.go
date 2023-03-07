@@ -15,8 +15,8 @@ func main() {
 		log.Fatalf("There is no token set. Get an environment access key from the se2 admin area, and set it to the EVERYTHING_TOKEN env var.")
 	}
 
-	// Set up the client to point at staging with a valid access token.
-	client, err := se2.NewClient2(se2.HostStaging, token)
+	// Set up the client to point at staging (admin and builder) with a valid access token.
+	client, err := se2.NewClient2(se2.HostStaging, se2.BuilderHostStaging, token)
 	if err != nil {
 		log.Fatalf("encountered new client error: %s", err.Error())
 	}

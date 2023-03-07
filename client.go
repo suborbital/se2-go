@@ -18,9 +18,11 @@ type Client struct {
 }
 
 const (
-	HostProduction     ServerURL = "https://api.suborbital.network"
-	HostStaging        ServerURL = "https://stg.api.suborbital.network"
-	minAccessKeyLength           = 60
+	HostProduction        ServerURL = "https://api.suborbital.network"
+	HostStaging           ServerURL = "https://stg.api.suborbital.network"
+	BuilderHostProduction ServerURL = "https://builder.suborbital.network"
+	BuilderHostStaging    ServerURL = "https://stg.builder.suborbital.network"
+	minAccessKeyLength              = 60
 )
 
 var (
@@ -34,9 +36,10 @@ type accessKey struct {
 }
 
 type Client2 struct {
-	httpClient *http.Client
-	host       string
-	token      string
+	httpClient  *http.Client
+	host        string
+	builderHost string
+	token       string
 }
 
 type ClientOption func(*Client2)
@@ -45,9 +48,9 @@ type ClientOption func(*Client2)
 // whether it's the production or the staging environment, and an access key you can grab from the SE2 admin area for
 // an environment.
 //
-// By default the underlying http client has a 60 second timeout. Otherwise you can use the WithHttpClient(*http.Client)
-// function to use your own configured version for it.
-func NewClient2(host ServerURL, ak string, options ...ClientOption) (*Client2, error) {
+// By default, the underlying http client has a 60-second timeout. Otherwise, you can use the
+// WithHttpClient(*http.Client) function to use your own configured version for it.
+func NewClient2(adminHost, builderHost ServerURL, ak string, options ...ClientOption) (*Client2, error) {
 	if len(ak) < minAccessKeyLength {
 		return nil, ErrNoAccessKey
 	}
@@ -64,9 +67,10 @@ func NewClient2(host ServerURL, ak string, options ...ClientOption) (*Client2, e
 	}
 
 	nc := Client2{
-		httpClient: defaultHttpClient(),
-		host:       string(host),
-		token:      ak,
+		httpClient:  defaultHttpClient(),
+		host:        string(adminHost),
+		builderHost: string(builderHost),
+		token:       ak,
 	}
 
 	for _, o := range options {
