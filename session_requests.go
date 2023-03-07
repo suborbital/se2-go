@@ -18,6 +18,7 @@ type CreateSessionRequest struct {
 }
 
 type CreateSessionResponse struct {
+	Token string `json:"token"`
 }
 
 // CreateSession will create a session for a given tenant, namespace, and plugin to be used in the builder.
