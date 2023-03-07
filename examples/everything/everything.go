@@ -22,7 +22,9 @@ func main() {
 	}
 
 	// Function
-	tenants(client)
+	// tenants(client)
+
+	builderSession(client)
 
 }
 
