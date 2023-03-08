@@ -14,12 +14,15 @@ import (
 const (
 	pathTemplate       = "/template/v1"
 	pathTemplateByName = pathTemplate + "/%s"
+	pathTemplateImport = pathTemplate + "/import"
 )
 
+// ListTemplatesResponse is used to marshal returned json from the SE2 backend into a struct.
 type ListTemplatesResponse struct {
 	Templates []Template `json:"templates"`
 }
 
+// Template holds information about a singular template.
 type Template struct {
 	Name    string `json:"name"`
 	Lang    string `json:"lang"`
@@ -27,6 +30,8 @@ type Template struct {
 	Version string `json:"api_version"`
 }
 
+// ListTemplates will return a ListTemplatesResponse which contains a slice of Template that are available to the
+// environment specified by the API key of the client.
 func (c *Client2) ListTemplates(ctx context.Context) (ListTemplatesResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, c.host+pathTemplate, nil)
 	if err != nil {
@@ -61,6 +66,8 @@ func (c *Client2) ListTemplates(ctx context.Context) (ListTemplatesResponse, err
 	return t, nil
 }
 
+// GetTemplate takes a name and will return information about a template by that name, or an error if no templates are
+// found.
 func (c *Client2) GetTemplate(ctx context.Context, name string) (Template, error) {
 	if name == "" {
 		return Template{}, errors.New("name cannot be blank")
@@ -94,4 +101,72 @@ func (c *Client2) GetTemplate(ctx context.Context, name string) (Template, error
 	}
 
 	return t, nil
+}
+
+// ImportRequest is the shape of the data we need to send to the SE2 backend.
+type ImportRequest struct {
+	Source string `json:"source"`
+	Params struct {
+		Repo string `json:"repo"`
+		Ref  string `json:"ref"`
+		Path string `json:"path"`
+	}
+}
+
+// ImportTemplatesFromGitHub takes a repo, ref, and a path as arguments. It will call the appropriate endpoint on the
+// configured SE2 backend. The values are ultimately used to download the source code of a given repository at a given
+// reference point - either commit sha or tag reference.
+//
+// https://github.com/{repo}/archive/{ref}.tar.gz is the pattern.
+// ref can take shape in one of the following ways:
+// - 755721878465402d2f574635f8b411172f9f8482 (example) if it's a commit sha. At least 6 characters usually works well
+// - refs/tags/v0.3.2 if it's a reference to a tag
+//
+// The repository needs to be publicly accessible; private repositories are not supported. Right now only GitHub is the
+// only available provider we can pull source code from.
+func (c *Client2) ImportTemplatesFromGitHub(ctx context.Context, repo, ref, path string) error {
+	if repo == "" {
+		return errors.New("repo cannot be blank")
+	}
+
+	if ref == "" {
+		return errors.New("ref cannot be blank")
+	}
+
+	if path == "" {
+		return errors.New("path cannot be blank. If files are on the root of the repository, use '.'")
+	}
+
+	var requestBody bytes.Buffer
+	err := json.NewEncoder(&requestBody).Encode(ImportRequest{
+		Source: "git",
+		Params: struct {
+			Repo string `json:"repo"`
+			Ref  string `json:"ref"`
+			Path string `json:"path"`
+		}{
+			Repo: repo,
+			Ref:  ref,
+			Path: path,
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "ImportTemplatesFromGit: json.NewEncoder.Encode")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, c.host+pathTemplateImport, &requestBody)
+	if err != nil {
+		return errors.Wrap(err, "ImportTemplatesFromGit: http.NewRequest")
+	}
+
+	res, err := c.do(ctx, req)
+	if err != nil {
+		return errors.Wrap(err, "ImportTemplatesFromGit: c.do")
+	}
+
+	if res.StatusCode != http.StatusCreated {
+		return fmt.Errorf("ImportTemplatesFromGit: expected response to be %d, got %d instead", http.StatusOK, res.StatusCode)
+	}
+
+	return nil
 }
