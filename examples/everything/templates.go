@@ -18,4 +18,16 @@ func templates(client *se2.Client2) {
 	}
 
 	fmt.Printf("templates are:\n\n%#v\n", templates)
+
+	if len(templates.Templates) == 0 {
+		log.Fatalf("got empty templates list, should have the defaults in it")
+	}
+
+	template, err := client.GetTemplate(ctx, templates.Templates[0].Name)
+	if err != nil {
+		log.Fatalf("client.GetTemplate: %s", err.Error())
+	}
+
+	fmt.Printf("template:\n%#v\n", template)
+
 }

@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	pathTemplates = "/template/v1"
+	pathTemplate       = "/template/v1"
+	pathTemplateByName = pathTemplate + "/%s"
 )
 
 type ListTemplatesResponse struct {
@@ -27,7 +28,7 @@ type Template struct {
 }
 
 func (c *Client2) ListTemplates(ctx context.Context) (ListTemplatesResponse, error) {
-	req, err := http.NewRequest(http.MethodGet, c.host+pathTemplates, nil)
+	req, err := http.NewRequest(http.MethodGet, c.host+pathTemplate, nil)
 	if err != nil {
 		return ListTemplatesResponse{}, errors.Wrap(err, "ListTemplates: http.NewRequest")
 	}
@@ -42,7 +43,7 @@ func (c *Client2) ListTemplates(ctx context.Context) (ListTemplatesResponse, err
 	}()
 
 	if res.StatusCode != http.StatusOK {
-		return ListTemplatesResponse{}, fmt.Errorf("unexpected status code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
+		return ListTemplatesResponse{}, fmt.Errorf("ListTemplates: unexpected status code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
 	}
 
 	b, _ := io.ReadAll(res.Body)
@@ -54,7 +55,42 @@ func (c *Client2) ListTemplates(ctx context.Context) (ListTemplatesResponse, err
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
-		return ListTemplatesResponse{}, errors.Wrap(err, "GetBuilderFeatures: dec.Decode")
+		return ListTemplatesResponse{}, errors.Wrap(err, "ListTemplates: dec.Decode")
+	}
+
+	return t, nil
+}
+
+func (c *Client2) GetTemplate(ctx context.Context, name string) (Template, error) {
+	if name == "" {
+		return Template{}, errors.New("name cannot be blank")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(c.host+pathTemplateByName, name), nil)
+	if err != nil {
+		return Template{}, errors.Wrap(err, "GetTemplate: http.NewRequest")
+	}
+
+	res, err := c.do(ctx, req)
+	if err != nil {
+		return Template{}, errors.Wrap(err, "GetTemplate: c.do")
+	}
+
+	defer func() {
+		_ = res.Body.Close()
+	}()
+
+	b, _ := io.ReadAll(res.Body)
+
+	fmt.Printf("gettemplate body:\n%s\n\n", string(b))
+
+	var t Template
+
+	dec := json.NewDecoder(bytes.NewReader(b))
+	dec.DisallowUnknownFields()
+	err = dec.Decode(&t)
+	if err != nil {
+		return Template{}, errors.Wrap(err, "GetTemplate: dec.Decode")
 	}
 
 	return t, nil
