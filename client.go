@@ -18,18 +18,23 @@ type Client struct {
 }
 
 const (
-	HostProduction        ServerURL = "https://api.suborbital.network"
-	HostStaging           ServerURL = "https://stg.api.suborbital.network"
-	BuilderHostProduction ServerURL = "https://builder.suborbital.network"
-	BuilderHostStaging    ServerURL = "https://stg.builder.suborbital.network"
-	minAccessKeyLength              = 60
+	modeUnset serverMode = iota
+	ModeStaging
+	ModeProduction
+	hostProduction        string = "https://api.suborbital.network"
+	hostStaging           string = "https://stg.api.suborbital.network"
+	builderHostProduction string = "https://builder.suborbital.network"
+	builderHostStaging    string = "https://stg.builder.suborbital.network"
+	minAccessKeyLength           = 60
 )
 
 var (
-	ErrNoAccessKey = errors.New("No access key provided, or it's likely malformed")
+	ErrNoAccessKey = errors.New("No access key provided, or it's likely malformed.")
+	ErrUnknownMode = errors.New("Unknown client mode set. Use one of the ModeStaging or ModeProduction constants.")
 )
 
-type ServerURL string
+type serverMode int
+
 type accessKey struct {
 	Key    int    `json:"key"`
 	Secret string `json:"secret"`
@@ -50,29 +55,46 @@ type ClientOption func(*Client2)
 //
 // By default, the underlying http client has a 60-second timeout. Otherwise, you can use the
 // WithHttpClient(*http.Client) function to use your own configured version for it.
-func NewClient2(adminHost, builderHost ServerURL, ak string, options ...ClientOption) (*Client2, error) {
-	if len(ak) < minAccessKeyLength {
+func NewClient2(mode serverMode, token string, options ...ClientOption) (*Client2, error) {
+	// Create zero value client with default http client.
+	nc := Client2{
+		httpClient: defaultHttpClient(),
+	}
+
+	// Set hosts based on mode, if somehow it's an unknown mode, return error.
+	switch mode {
+	case ModeStaging:
+		nc.host = hostStaging
+		nc.builderHost = builderHostStaging
+	case ModeProduction:
+		nc.host = hostProduction
+		nc.builderHost = builderHostProduction
+	default:
+		return nil, ErrUnknownMode
+	}
+
+	// If access key is too short after modifiers, return error.
+	if len(token) < minAccessKeyLength {
 		return nil, ErrNoAccessKey
 	}
 
-	decoded, err := base64.StdEncoding.DecodeString(ak)
+	// If access key is not a base64 encoded string, return error.
+	decoded, err := base64.StdEncoding.DecodeString(token)
 	if err != nil {
 		return nil, ErrNoAccessKey
 	}
 
+	// If access key is not a valid JSON base64 encoded, return error.
 	var akUnmarshaled accessKey
 	err = json.Unmarshal(decoded, &akUnmarshaled)
 	if err != nil {
 		return nil, ErrNoAccessKey
 	}
 
-	nc := Client2{
-		httpClient:  defaultHttpClient(),
-		host:        string(adminHost),
-		builderHost: string(builderHost),
-		token:       ak,
-	}
+	// Save the good token to the client.
+	nc.token = token
 
+	// Apply all the modifiers.
 	for _, o := range options {
 		o(&nc)
 	}
