@@ -16,6 +16,7 @@ const (
 	pathTenantByName = pathTenant + "/%s"
 )
 
+// TenantResponse captures the JSON data returned from the endpoints.
 type TenantResponse struct {
 	AuthorizedParty string `json:"authorized_party"`
 	Id              string `json:"id"`
@@ -24,7 +25,7 @@ type TenantResponse struct {
 	Description     string `json:"description"`
 }
 
-// GetTenantByName returns the tenant
+// GetTenantByName returns the tenant by name.
 func (c *Client2) GetTenantByName(ctx context.Context, name string) (TenantResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, c.host+fmt.Sprintf(pathTenantByName, name), nil)
 	if err != nil {
@@ -41,7 +42,6 @@ func (c *Client2) GetTenantByName(ctx context.Context, name string) (TenantRespo
 	}()
 
 	var t TenantResponse
-
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
@@ -52,7 +52,9 @@ func (c *Client2) GetTenantByName(ctx context.Context, name string) (TenantRespo
 	return t, nil
 }
 
-type CreateTenantRequest struct {
+// createTenantRequest is used to format the incoming description into a JSON body. Users of this client library should
+// not need to use this struct directly.
+type createTenantRequest struct {
 	Description string `json:"description"`
 }
 
@@ -65,7 +67,7 @@ func (c *Client2) CreateTenant(ctx context.Context, name, description string) (T
 
 	var requestBody io.Reader
 	if description != "" {
-		m, err := json.Marshal(CreateTenantRequest{Description: description})
+		m, err := json.Marshal(createTenantRequest{Description: description})
 		if err != nil {
 			return TenantResponse{}, errors.Wrap(err, "CreateTenant: json marshal create tenant request with description")
 		}
@@ -88,7 +90,6 @@ func (c *Client2) CreateTenant(ctx context.Context, name, description string) (T
 	}()
 
 	var t TenantResponse
-
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
@@ -163,7 +164,6 @@ func (c *Client2) UpdateTenantByName(ctx context.Context, name, description stri
 	}()
 
 	var t TenantResponse
-
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
@@ -188,6 +188,10 @@ func (c *Client2) DeleteTenantByName(ctx context.Context, name string) error {
 	if err != nil {
 		return errors.Wrap(err, "DeleteTenantByName: c.do")
 	}
+
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("response code is not 200, got %d", res.StatusCode)

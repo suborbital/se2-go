@@ -5,29 +5,29 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/pkg/errors"
 )
 
 const (
-	pathBuilderPrefix      = "/builder/v1"
-	pathBuilderFeatures    = pathBuilderPrefix + "/features"
-	pathBuilderFeaturesOld = "/api/v1/features"
-	pathDraft              = pathBuilderPrefix + "/draft"
-	pathBuild              = pathDraft + "/build"
-	pathTest               = pathDraft + "/test"
-	pathPromote            = pathDraft + "/deploy"
+	pathBuilderFeatures = "/api/v1/features"
+	pathBuilderPrefix   = "/builder/v1"
+	pathDraft           = pathBuilderPrefix + "/draft"
+	pathBuild           = pathDraft + "/build"
+	pathTest            = pathDraft + "/test"
+	pathPromote         = pathDraft + "/deploy"
 )
 
-type BuildPluginRequest struct{}
-
+// BuildPluginResponse captures the json body into a struct for a  build attempt.
 type BuildPluginResponse struct {
 	Succeeded bool   `json:"succeeded"`
 	OutputLog string `json:"outputLog"`
 }
 
+// BuildPlugin will attempt to build a plugin supplied by the raw byteslice in the context of the current session. The
+// language is set by the template, which you can control by calling the CreatePluginDraft method with the template
+// name.
 func (c *Client2) BuildPlugin(ctx context.Context, pluginCode []byte, token CreateSessionResponse) (BuildPluginResponse, error) {
 	if len(pluginCode) == 0 {
 		return BuildPluginResponse{}, errors.New("can not build empty code")
@@ -43,8 +43,11 @@ func (c *Client2) BuildPlugin(ctx context.Context, pluginCode []byte, token Crea
 		return BuildPluginResponse{}, errors.Wrap(err, "BuildPlugin: c.builderDo")
 	}
 
-	var t BuildPluginResponse
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
+	var t BuildPluginResponse
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
@@ -55,6 +58,7 @@ func (c *Client2) BuildPlugin(ctx context.Context, pluginCode []byte, token Crea
 	return t, nil
 }
 
+// BuilderFeaturesResponse captures the json response from the features endpoint.
 type BuilderFeaturesResponse struct {
 	Features  []string `json:"features"`
 	Languages []struct {
@@ -64,8 +68,9 @@ type BuilderFeaturesResponse struct {
 	}
 }
 
+// GetBuilderFeatures will return the features that the builder can provide.
 func (c *Client2) GetBuilderFeatures(ctx context.Context) (BuilderFeaturesResponse, error) {
-	req, err := http.NewRequest(http.MethodGet, c.host+pathBuilderFeaturesOld, nil)
+	req, err := http.NewRequest(http.MethodGet, c.host+pathBuilderFeatures, nil)
 	if err != nil {
 		return BuilderFeaturesResponse{}, errors.Wrap(err, "GetBuilderFeatures: http.NewRequest")
 	}
@@ -74,6 +79,10 @@ func (c *Client2) GetBuilderFeatures(ctx context.Context) (BuilderFeaturesRespon
 	if err != nil {
 		return BuilderFeaturesResponse{}, errors.Wrap(err, "GetBuilderFeatures: c.do")
 	}
+
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	if res.StatusCode != http.StatusOK {
 		return BuilderFeaturesResponse{}, fmt.Errorf("GetBuilderFeatures: received non-200 response %d", res.StatusCode)
@@ -92,11 +101,13 @@ func (c *Client2) GetBuilderFeatures(ctx context.Context) (BuilderFeaturesRespon
 	return t, nil
 }
 
+// runError captures the structure that the Error in the test draft response can take.
 type runError struct {
 	Code    int    `json:"code,omitempty"`
 	Message string `json:"message,omitempty"`
 }
 
+// TestPluginDraftResponse is the response of the test call with the given input data.
 type TestPluginDraftResponse struct {
 	Result string   `json:"result"`
 	Error  runError `json:"error"`
@@ -115,16 +126,16 @@ func (c *Client2) TestPluginDraft(ctx context.Context, testData []byte, token Cr
 		return TestPluginDraftResponse{}, errors.Wrap(err, "TestPluginDraft: c.builderDo")
 	}
 
+	defer func() {
+		_ = res.Body.Close()
+	}()
+
 	if res.StatusCode != http.StatusOK {
 		return TestPluginDraftResponse{}, fmt.Errorf("TestPluginDraft: unexpected response code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
 	}
 
-	b, _ := io.ReadAll(res.Body)
-
-	fmt.Printf("response body after test\n\n%s\n", string(b))
-
 	var t TestPluginDraftResponse
-	dec := json.NewDecoder(bytes.NewReader(b))
+	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
@@ -147,12 +158,12 @@ func (c *Client2) GetPluginDraft(ctx context.Context, token CreateSessionRespons
 		return DraftResponse{}, errors.Wrap(err, "GetPluginDraft: c.builderDo")
 	}
 
-	b, _ := io.ReadAll(res.Body)
-
-	fmt.Printf("all the body:\n%s\n", string(b))
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	var t DraftResponse
-	dec := json.NewDecoder(bytes.NewReader(b))
+	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
@@ -204,15 +215,12 @@ func (c *Client2) CreatePluginDraft(ctx context.Context, templateName string, to
 		_ = res.Body.Close()
 	}()
 
-	body, _ := io.ReadAll(res.Body)
-	fmt.Printf("returned body from create draft plugin\n\n%s\n\n", string(body))
-
 	if res.StatusCode != http.StatusOK {
 		return DraftResponse{}, fmt.Errorf("CreatePluginDraft: unexpected response code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
 	}
 
 	var t DraftResponse
-	dec := json.NewDecoder(bytes.NewReader(body))
+	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
@@ -222,10 +230,12 @@ func (c *Client2) CreatePluginDraft(ctx context.Context, templateName string, to
 	return t, nil
 }
 
+// PromotePluginDraftResponse captures the json returned by a successful call to the promote endpoint.
 type PromotePluginDraftResponse struct {
 	Version string `json:"version"`
 }
 
+// PromotePluginDraft promotes the current version of the draft to the live version of the plugin.
 func (c *Client2) PromotePluginDraft(ctx context.Context, token CreateSessionResponse) (PromotePluginDraftResponse, error) {
 	req, err := http.NewRequest(http.MethodPost, c.host+pathPromote, nil)
 	if err != nil {

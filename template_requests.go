@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -51,12 +50,8 @@ func (c *Client2) ListTemplates(ctx context.Context) (ListTemplatesResponse, err
 		return ListTemplatesResponse{}, fmt.Errorf("ListTemplates: unexpected status code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
 	}
 
-	b, _ := io.ReadAll(res.Body)
-	fmt.Printf("%s\n\n", string(b))
-
 	var t ListTemplatesResponse
-
-	dec := json.NewDecoder(bytes.NewReader(b))
+	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
@@ -87,13 +82,8 @@ func (c *Client2) GetTemplate(ctx context.Context, name string) (Template, error
 		_ = res.Body.Close()
 	}()
 
-	b, _ := io.ReadAll(res.Body)
-
-	fmt.Printf("gettemplate body:\n%s\n\n", string(b))
-
 	var t Template
-
-	dec := json.NewDecoder(bytes.NewReader(b))
+	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
@@ -163,6 +153,10 @@ func (c *Client2) ImportTemplatesFromGitHub(ctx context.Context, repo, ref, path
 	if err != nil {
 		return errors.Wrap(err, "ImportTemplatesFromGit: c.do")
 	}
+
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	if res.StatusCode != http.StatusCreated {
 		return fmt.Errorf("ImportTemplatesFromGit: expected response to be %d, got %d instead", http.StatusOK, res.StatusCode)
