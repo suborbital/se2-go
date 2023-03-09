@@ -90,6 +90,7 @@ export const run = (input) => {
     return message;
 };`)
 
+	// Synchronous builds take a while, we need a bigger timeout than what's on the previous context.
 	buildCtx, buildCxl := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer buildCxl()
 
@@ -99,6 +100,17 @@ export const run = (input) => {
 	}
 
 	fmt.Printf("this is the response to having built the plugin:\n\n%#v\n", built)
+
+	printHeader("Grab the current draft again, it should be the new plugin code")
+
+	draft, err := client.GetPluginDraft(buildCtx, s)
+	if err != nil {
+		log.Fatalf("getting plugin draft after a build failed with: %s", err.Error())
+	}
+
+	fmt.Printf("Current draft after a build is:\n\n%#v\n\n", draft)
+
+	printHeader("deleting tenant of the session")
 
 	err = client.DeleteTenantByName(ctx, sessionTenant.Name)
 	if err != nil {
