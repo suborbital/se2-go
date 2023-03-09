@@ -89,6 +89,8 @@ func (c *Client2) TestPluginDraft(ctx context.Context) (TestPluginDraftResponse,
 	return TestPluginDraftResponse{}, nil
 }
 
+// GetPluginDraft returns the currently set plugin draft for the given session token. To change the draft or the
+// language you can use the CreatePluginDraft method instead with the name of a template.
 func (c *Client2) GetPluginDraft(ctx context.Context, token CreateSessionResponse) (DraftResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, c.host+pathDraft, nil)
 	if err != nil {
@@ -115,15 +117,22 @@ func (c *Client2) GetPluginDraft(ctx context.Context, token CreateSessionRespons
 	return t, nil
 }
 
+// DraftResponse is a struct the captures the response from the CreatePluginDraft and GetDraft endpoints.
 type DraftResponse struct {
 	Lang     string `json:"lang"`
 	Contents string `json:"contents"`
 }
 
+// createDraftRequest is a helper struct to encode an incoming template name into a correct json structure we can send
+// to the API. Users of this client library should not need to interact with this struct directly.
 type createDraftRequest struct {
 	Template string `json:"template"`
 }
 
+// CreatePluginDraft takes in a template name and a session token, and will set the current session to use the named
+// template for building and executing.
+//
+// To see available templates, use the ListTemplates method.
 func (c *Client2) CreatePluginDraft(ctx context.Context, templateName string, token CreateSessionResponse) (DraftResponse, error) {
 	if templateName == "" {
 		return DraftResponse{}, errors.New("template name cannot be blank")
@@ -174,6 +183,8 @@ func (c *Client2) PromotePluginDraft(ctx context.Context) (PromotePluginDraftRes
 	return PromotePluginDraftResponse{}, nil
 }
 
+// builderDo is a common method to work with requests against the builder where a session token is needed instead of the
+// environment token that the do method uses.
 func (c *Client2) builderDo(ctx context.Context, req *http.Request, token CreateSessionResponse) (*http.Response, error) {
 	req = req.WithContext(ctx)
 	req.Header.Add("Authorization", "Bearer "+token.Token)
