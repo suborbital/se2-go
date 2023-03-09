@@ -61,6 +61,12 @@ func builderSession(client *se2.Client2) {
 		fmt.Printf("returned draft response is\n\n%#v\n\n", draft)
 	}
 
+	printHeader("Set the template to 'javascript'")
+	_, err = client.CreatePluginDraft(ctx, "javascript", s)
+	if err != nil {
+		log.Fatalf("setting draft to javascript failed with %s", err.Error())
+	}
+
 	printHeader("getting plugin drafts saved on session")
 
 	pd, err := client.GetPluginDraft(ctx, s)
@@ -69,6 +75,30 @@ func builderSession(client *se2.Client2) {
 	}
 
 	log.Printf("plugin draft is\n%#v\n", pd)
+
+	printHeader("building a js plugin synchronously")
+
+	newPlugin := []byte(`import { log } from "@suborbital/plugin";
+
+export const run = (input) => {
+    let message = "Hello, " + input;
+
+    message = message.split("").reverse().join("")
+
+    log.info(message);
+
+    return message;
+};`)
+
+	buildCtx, buildCxl := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer buildCxl()
+
+	built, err := client.BuildPlugin(buildCtx, newPlugin, s)
+	if err != nil {
+		log.Fatalf("building plugin failed with error:\n%s\n", err.Error())
+	}
+
+	fmt.Printf("this is the response to having built the plugin:\n\n%#v\n", built)
 
 	err = client.DeleteTenantByName(ctx, sessionTenant.Name)
 	if err != nil {

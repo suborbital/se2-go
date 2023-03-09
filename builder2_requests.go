@@ -21,10 +21,17 @@ const (
 
 type BuildPluginRequest struct{}
 
-type BuildPluginResponse struct{}
+type BuildPluginResponse struct {
+	Succeeded bool   `json:"succeeded"`
+	OutputLog string `json:"outputLog"`
+}
 
-func (c *Client2) BuildPlugin(ctx context.Context, token CreateSessionResponse) (BuildPluginResponse, error) {
-	req, err := http.NewRequest(http.MethodPost, c.host+pathBuild, nil)
+func (c *Client2) BuildPlugin(ctx context.Context, pluginCode []byte, token CreateSessionResponse) (BuildPluginResponse, error) {
+	if len(pluginCode) == 0 {
+		return BuildPluginResponse{}, errors.New("can not build empty code")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, c.host+pathBuild, bytes.NewReader(pluginCode))
 	if err != nil {
 		return BuildPluginResponse{}, errors.Wrap(err, "BuildPlugin: http.NewRequest")
 	}
