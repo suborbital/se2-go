@@ -21,11 +21,9 @@ const (
 	modeUnset serverMode = iota
 	ModeStaging
 	ModeProduction
-	hostProduction        string = "https://api.suborbital.network"
-	hostStaging           string = "https://stg.api.suborbital.network"
-	builderHostProduction string = "https://builder.suborbital.network"
-	builderHostStaging    string = "https://stg.builder.suborbital.network"
-	minAccessKeyLength           = 60
+	hostProduction     string = "https://api.suborbital.network"
+	hostStaging        string = "https://stg.api.suborbital.network"
+	minAccessKeyLength        = 60
 )
 
 var (
@@ -41,10 +39,9 @@ type accessKey struct {
 }
 
 type Client2 struct {
-	httpClient  *http.Client
-	host        string
-	builderHost string
-	token       string
+	httpClient *http.Client
+	host       string
+	token      string
 }
 
 type ClientOption func(*Client2)
@@ -65,10 +62,8 @@ func NewClient2(mode serverMode, token string, options ...ClientOption) (*Client
 	switch mode {
 	case ModeStaging:
 		nc.host = hostStaging
-		nc.builderHost = builderHostStaging
 	case ModeProduction:
 		nc.host = hostProduction
-		nc.builderHost = builderHostProduction
 	default:
 		return nil, ErrUnknownMode
 	}

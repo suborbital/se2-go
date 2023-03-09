@@ -24,9 +24,9 @@ func main() {
 	// Function
 	// tenants(client)
 
-	// builderSession(client)
+	// templates(client)
 
-	templates(client)
+	builderSession(client)
 
 }
 

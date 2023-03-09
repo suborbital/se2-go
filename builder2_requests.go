@@ -36,7 +36,7 @@ type BuilderFeaturesResponse struct {
 }
 
 func (c *Client2) GetBuilderFeatures(ctx context.Context) (BuilderFeaturesResponse, error) {
-	req, err := http.NewRequest(http.MethodGet, c.builderHost+pathBuilderFeaturesOld, nil)
+	req, err := http.NewRequest(http.MethodGet, c.host+pathBuilderFeaturesOld, nil)
 	if err != nil {
 		return BuilderFeaturesResponse{}, errors.Wrap(err, "GetBuilderFeatures: http.NewRequest")
 	}
@@ -72,7 +72,7 @@ func (c *Client2) TestPluginDraft(ctx context.Context) (TestPluginDraftResponse,
 type GetPluginDraftResponse struct{}
 
 func (c *Client2) GetPluginDraft(ctx context.Context, token CreateSessionResponse) (GetPluginDraftResponse, error) {
-	req, err := http.NewRequest(http.MethodGet, c.builderHost+pathDraft, nil)
+	req, err := http.NewRequest(http.MethodGet, c.host+pathDraft, nil)
 	if err != nil {
 		return GetPluginDraftResponse{}, errors.Wrap(err, "GetPluginDraft: http.NewRequest")
 	}
@@ -92,6 +92,59 @@ func (c *Client2) GetPluginDraft(ctx context.Context, token CreateSessionRespons
 	err = dec.Decode(&t)
 	if err != nil {
 		return GetPluginDraftResponse{}, errors.Wrap(err, "GetPluginDraft: dec.Decode")
+	}
+
+	return t, nil
+}
+
+type CreateDraftResponse struct {
+	Lang     string `json:"lang"`
+	Contents string `json:"contents"`
+}
+
+type createDraftRequest struct {
+	Template string `json:"template"`
+}
+
+func (c *Client2) CreatePluginDraft(ctx context.Context, templateName string, token CreateSessionResponse) (CreateDraftResponse, error) {
+	if templateName == "" {
+		return CreateDraftResponse{}, errors.New("template name cannot be blank")
+	}
+
+	r := createDraftRequest{Template: templateName}
+	var b bytes.Buffer
+	err := json.NewEncoder(&b).Encode(r)
+	if err != nil {
+		return CreateDraftResponse{}, errors.Wrapf(err, "CreatePluginDraft: json.NewEncoder.Encode(createDraftRequest with template name '%s'", templateName)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, c.host+pathDraft, &b)
+	if err != nil {
+		return CreateDraftResponse{}, errors.Wrap(err, "CreatePluginDraft: http.NewRequest")
+	}
+
+	res, err := c.builderDo(ctx, req, token)
+	if err != nil {
+		return CreateDraftResponse{}, errors.Wrap(err, "CreatePluginDraft: c.builderDo")
+	}
+
+	defer func() {
+		_ = res.Body.Close()
+	}()
+
+	body, _ := io.ReadAll(res.Body)
+	fmt.Printf("returned body from create draft plugin\n\n%s\n\n", string(body))
+
+	if res.StatusCode != http.StatusOK {
+		return CreateDraftResponse{}, fmt.Errorf("CreatePluginDraft: unexpected response code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
+	}
+
+	var t CreateDraftResponse
+	dec := json.NewDecoder(bytes.NewReader(body))
+	dec.DisallowUnknownFields()
+	err = dec.Decode(&t)
+	if err != nil {
+		return CreateDraftResponse{}, errors.Wrap(err, "CreatePluginDraft: dec.Decode")
 	}
 
 	return t, nil
