@@ -50,15 +50,18 @@ func builderSession(client *se2.Client2) {
 		log.Fatal("there are no available templates")
 	}
 
-	printHeader("start a draft")
-	draft, err := client.CreatePluginDraft(ctx, templates.Templates[0].Name, s)
-	if err != nil {
-		log.Fatalf("create plugin draft failed with error '%s': Name: %s", err.Error(), templates.Templates[0].Name)
+	for _, localTemplate := range templates.Templates {
+		printHeader(fmt.Sprintf("start a draft for template named '%s'", localTemplate.Name))
+
+		draft, err := client.CreatePluginDraft(ctx, localTemplate.Name, s)
+		if err != nil {
+			log.Fatalf("create plugin draft failed with error '%s': Name: %s", err.Error(), localTemplate.Name)
+		}
+
+		fmt.Printf("returned draft response is\n\n%#v\n\n", draft)
 	}
 
-	fmt.Printf("returned draft response is\n\n%#v\n\n", draft)
-
-	printHeader("getting plugin drafts")
+	printHeader("getting plugin drafts saved on session")
 
 	pd, err := client.GetPluginDraft(ctx, s)
 	if err != nil {
