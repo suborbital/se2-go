@@ -18,6 +18,7 @@ const (
 	pathDraft              = pathBuilderPrefix + "/draft"
 	pathBuild              = pathDraft + "/build"
 	pathTest               = pathDraft + "/test"
+	pathPromote            = pathDraft + "/deploy"
 )
 
 type BuildPluginRequest struct{}
@@ -221,10 +222,38 @@ func (c *Client2) CreatePluginDraft(ctx context.Context, templateName string, to
 	return t, nil
 }
 
-type PromotePluginDraftResponse struct{}
+type PromotePluginDraftResponse struct {
+	Version string `json:"version"`
+}
 
-func (c *Client2) PromotePluginDraft(ctx context.Context) (PromotePluginDraftResponse, error) {
-	return PromotePluginDraftResponse{}, nil
+func (c *Client2) PromotePluginDraft(ctx context.Context, token CreateSessionResponse) (PromotePluginDraftResponse, error) {
+	req, err := http.NewRequest(http.MethodPost, c.host+pathPromote, nil)
+	if err != nil {
+		return PromotePluginDraftResponse{}, errors.Wrap(err, "PromotePluginDraft: http.NewRequest")
+	}
+
+	res, err := c.builderDo(ctx, req, token)
+	if err != nil {
+		return PromotePluginDraftResponse{}, errors.Wrap(err, "PromotePluginDraft: c.builderDo")
+	}
+
+	defer func() {
+		_ = res.Body.Close()
+	}()
+
+	if res.StatusCode != http.StatusOK {
+		return PromotePluginDraftResponse{}, fmt.Errorf("PromotePluginDraft: unexpected status code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
+	}
+
+	var t PromotePluginDraftResponse
+	dec := json.NewDecoder(res.Body)
+	dec.DisallowUnknownFields()
+	err = dec.Decode(&t)
+	if err != nil {
+		return PromotePluginDraftResponse{}, errors.Wrap(err, "PromotePluginDraft: dec.Decode")
+	}
+
+	return t, nil
 }
 
 // builderDo is a common method to work with requests against the builder where a session token is needed instead of the

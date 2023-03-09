@@ -112,17 +112,26 @@ export const run = (input) => {
 
 	printHeader("running test for the draft")
 
-	res, err := client.TestPluginDraft(buildCtx, []byte(`capt picard`), s)
+	testResult, err := client.TestPluginDraft(buildCtx, []byte(`capt picard`), s)
 	if err != nil {
 		log.Fatalf("running the test on the plugin draft failed with %s", err.Error())
 	}
 
-	fmt.Printf("response from the test plugin draft is\n\n%#v\n", res)
+	fmt.Printf("response from the test plugin draft is\n\n%#v\n", testResult)
+
+	printHeader("promoting current draft to be live")
+
+	promotionResult, err := client.PromotePluginDraft(buildCtx, s)
+	if err != nil {
+		log.Fatalf("promoting draft plugin failed with %s", err.Error())
+	}
+
+	fmt.Printf("this is the result of the promotion:\n%#v\n\n", promotionResult)
 
 	printHeader("deleting tenant of the session")
 
-	err = client.DeleteTenantByName(ctx, sessionTenant.Name)
+	err = client.DeleteTenantByName(buildCtx, sessionTenant.Name)
 	if err != nil {
-		log.Fatalf("could not delete tenant by name %s", sessionTenant.Name)
+		log.Fatalf("could not delete tenant by name %s: %s", sessionTenant.Name, err.Error())
 	}
 }
