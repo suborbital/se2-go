@@ -110,6 +110,15 @@ export const run = (input) => {
 
 	fmt.Printf("Current draft after a build is:\n\n%#v\n\n", draft)
 
+	printHeader("running test for the draft")
+
+	res, err := client.TestPluginDraft(buildCtx, []byte(`capt picard`), s)
+	if err != nil {
+		log.Fatalf("running the test on the plugin draft failed with %s", err.Error())
+	}
+
+	fmt.Printf("response from the test plugin draft is\n\n%#v\n", res)
+
 	printHeader("deleting tenant of the session")
 
 	err = client.DeleteTenantByName(ctx, sessionTenant.Name)

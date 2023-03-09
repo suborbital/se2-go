@@ -17,6 +17,7 @@ const (
 	pathBuilderFeaturesOld = "/api/v1/features"
 	pathDraft              = pathBuilderPrefix + "/draft"
 	pathBuild              = pathDraft + "/build"
+	pathTest               = pathDraft + "/test"
 )
 
 type BuildPluginRequest struct{}
@@ -90,10 +91,46 @@ func (c *Client2) GetBuilderFeatures(ctx context.Context) (BuilderFeaturesRespon
 	return t, nil
 }
 
-type TestPluginDraftResponse struct{}
+type runError struct {
+	Code    int    `json:"code,omitempty"`
+	Message string `json:"message,omitempty"`
+}
 
-func (c *Client2) TestPluginDraft(ctx context.Context) (TestPluginDraftResponse, error) {
-	return TestPluginDraftResponse{}, nil
+type TestPluginDraftResponse struct {
+	Result string   `json:"result"`
+	Error  runError `json:"error"`
+}
+
+// TestPluginDraft will send the testData byte slice to the plugin that's currently in the draft as input, and return
+// the response that came back from the plugin.
+func (c *Client2) TestPluginDraft(ctx context.Context, testData []byte, token CreateSessionResponse) (TestPluginDraftResponse, error) {
+	req, err := http.NewRequest(http.MethodPost, c.host+pathTest, bytes.NewReader(testData))
+	if err != nil {
+		return TestPluginDraftResponse{}, errors.Wrap(err, "TestPluginDraft: http.NewRequest")
+	}
+
+	res, err := c.builderDo(ctx, req, token)
+	if err != nil {
+		return TestPluginDraftResponse{}, errors.Wrap(err, "TestPluginDraft: c.builderDo")
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return TestPluginDraftResponse{}, fmt.Errorf("TestPluginDraft: unexpected response code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
+	}
+
+	b, _ := io.ReadAll(res.Body)
+
+	fmt.Printf("response body after test\n\n%s\n", string(b))
+
+	var t TestPluginDraftResponse
+	dec := json.NewDecoder(bytes.NewReader(b))
+	dec.DisallowUnknownFields()
+	err = dec.Decode(&t)
+	if err != nil {
+		return TestPluginDraftResponse{}, errors.Wrap(err, "TestPluginDraft: dec.Decode")
+	}
+
+	return t, nil
 }
 
 // GetPluginDraft returns the currently set plugin draft for the given session token. To change the draft or the
