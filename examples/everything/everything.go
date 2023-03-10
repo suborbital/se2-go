@@ -22,9 +22,9 @@ func main() {
 	}
 
 	// Function
-	// tenants(client)
-	//
-	// templates(client)
+	tenants(client)
+
+	templates(client)
 
 	builder(client)
 
