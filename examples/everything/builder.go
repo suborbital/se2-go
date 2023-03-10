@@ -10,9 +10,14 @@ import (
 	"github.com/suborbital/se2-go"
 )
 
-func builderSession(client *se2.Client2) {
+func builder(client *se2.Client2) {
 	ctx, cxl := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cxl()
+
+	const (
+		pluginName = "everythingbagel"
+		namespace  = "everythingns"
+	)
 
 	m := ulid.Make()
 
@@ -23,7 +28,7 @@ func builderSession(client *se2.Client2) {
 	}
 
 	printHeader(fmt.Sprintf("creating session for tenant '%s', namespace 'everythingns' and plugin 'everythingbagel'", sessionTenant.Name))
-	s, err := client.CreateSession(ctx, sessionTenant.Name, "everythingns", "everythingbagel")
+	s, err := client.CreateSession(ctx, sessionTenant.Name, namespace, pluginName)
 	if err != nil {
 		log.Fatalf("creating a new session for 'everythingns.everythingbagel' failed with %s", err.Error())
 	}
@@ -127,6 +132,14 @@ export const run = (input) => {
 	}
 
 	fmt.Printf("this is the result of the promotion:\n%#v\n\n", promotionResult)
+
+	printHeader("execution")
+	exec, err := client.Exec(buildCtx, []byte(`uh hi`), "testing.env."+sessionTenant.Name, namespace, pluginName)
+	if err != nil {
+		log.Fatalf("client.Exec: %s", err.Error())
+	}
+
+	fmt.Printf("exec result is\n%#v\n", exec)
 
 	printHeader("deleting tenant of the session")
 

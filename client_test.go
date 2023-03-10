@@ -9,7 +9,7 @@ import (
 
 func TestNewClient2(t *testing.T) {
 	type args struct {
-		host    se2.ServerURL
+		mode    se2.ServerMode
 		ak      string
 		options []se2.ClientOption
 	}
@@ -21,7 +21,7 @@ func TestNewClient2(t *testing.T) {
 		{
 			name: "correct for production, valid key, no options",
 			args: args{
-				host: se2.HostProduction,
+				mode: se2.ModeProduction,
 				ak:   "eyJrZXkiOjQwNywic2VjcmV0IjoiZWsvNFV3VTBnZ2VHUjdQanF1MmlyaWJacGR1MXZvcWNhMXl3eDE3aWhpTT0ifQ==",
 			},
 			wantErr: assert.NoError,
@@ -29,7 +29,7 @@ func TestNewClient2(t *testing.T) {
 		{
 			name: "correct for staging, valid key, no options",
 			args: args{
-				host: se2.HostStaging,
+				mode: se2.ModeStaging,
 				ak:   "eyJrZXkiOjQwNywic2VjcmV0IjoiZWsvNFV3VTBnZ2VHUjdQanF1MmlyaWJacGR1MXZvcWNhMXl3eDE3aWhpTT0ifQ==",
 			},
 			wantErr: assert.NoError,
@@ -37,7 +37,7 @@ func TestNewClient2(t *testing.T) {
 		{
 			name: "correct for prod, empty key, no options",
 			args: args{
-				host: se2.HostProduction,
+				mode: se2.ModeProduction,
 				ak:   "",
 			},
 			wantErr: assert.Error,
@@ -45,7 +45,7 @@ func TestNewClient2(t *testing.T) {
 		{
 			name: "correct for prod, decode error key, no options",
 			args: args{
-				host: se2.HostProduction,
+				mode: se2.ModeProduction,
 				ak:   "eJrZXkiOjQwNywic2VjcmV0IjoiZWs3VTBnZ2VHUjdQanF1MmlyaWJacGR1MXZvcWNheDE3aWhpTT0ifQ",
 			},
 			wantErr: assert.Error,
@@ -53,7 +53,7 @@ func TestNewClient2(t *testing.T) {
 		{
 			name: "correct for prod, short key, no options",
 			args: args{
-				host: se2.HostProduction,
+				mode: se2.ModeProduction,
 				ak:   "eJrZXkiOjQwNywic2VjcmV0IjoiZWs3VTB",
 			},
 			wantErr: assert.Error,
@@ -61,7 +61,7 @@ func TestNewClient2(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := se2.NewClient2(tt.args.host, tt.args.ak, tt.args.options...)
+			_, err := se2.NewClient2(tt.args.mode, tt.args.ak, tt.args.options...)
 
 			tt.wantErr(t, err)
 		})

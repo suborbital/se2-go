@@ -18,11 +18,13 @@ type Client struct {
 }
 
 const (
-	modeUnset serverMode = iota
+	modeUnset ServerMode = iota
 	ModeStaging
 	ModeProduction
 	hostProduction     string = "https://api.suborbital.network"
 	hostStaging        string = "https://stg.api.suborbital.network"
+	hostExecProduction string = "https://edge.suborbital.network"
+	hostExecStaging    string = "https://stg.edge.suborbital.network"
 	minAccessKeyLength        = 60
 )
 
@@ -31,7 +33,7 @@ var (
 	ErrUnknownMode = errors.New("Unknown client mode set. Use one of the ModeStaging or ModeProduction constants.")
 )
 
-type serverMode int
+type ServerMode int
 
 type accessKey struct {
 	Key    int    `json:"key"`
@@ -41,18 +43,19 @@ type accessKey struct {
 type Client2 struct {
 	httpClient *http.Client
 	host       string
+	execHost   string
 	token      string
 }
 
 type ClientOption func(*Client2)
 
-// NewClient2 returns a configured instance of a configured client for SE2. Required parameters are the endpoint,
+// NewClient2 returns a configured instance of a configured client for SE2. Required parameters are the mode to specify
 // whether it's the production or the staging environment, and an access key you can grab from the SE2 admin area for
 // an environment.
 //
 // By default, the underlying http client has a 60-second timeout. Otherwise, you can use the
 // WithHttpClient(*http.Client) function to use your own configured version for it.
-func NewClient2(mode serverMode, token string, options ...ClientOption) (*Client2, error) {
+func NewClient2(mode ServerMode, token string, options ...ClientOption) (*Client2, error) {
 	// Create zero value client with default http client.
 	nc := Client2{
 		httpClient: defaultHttpClient(),
@@ -62,8 +65,10 @@ func NewClient2(mode serverMode, token string, options ...ClientOption) (*Client
 	switch mode {
 	case ModeStaging:
 		nc.host = hostStaging
+		nc.execHost = hostExecStaging
 	case ModeProduction:
 		nc.host = hostProduction
+		nc.execHost = hostExecProduction
 	default:
 		return nil, ErrUnknownMode
 	}
