@@ -25,7 +25,7 @@ type PluginResponse struct {
 	Plugins []Plugin2 `json:"plugins"`
 }
 
-func (c *Client2) GetPlugins(ctx context.Context, tenantName string) (PluginResponse, error) {
+func (c *Client) GetPlugins(ctx context.Context, tenantName string) (PluginResponse, error) {
 	if tenantName == "" {
 		return PluginResponse{}, errors.New("tenant name cannot be blank")
 	}

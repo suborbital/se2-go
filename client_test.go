@@ -61,7 +61,7 @@ func TestNewClient2(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := se2.NewClient2(tt.args.mode, tt.args.ak, tt.args.options...)
+			_, err := se2.NewClient(tt.args.mode, tt.args.ak, tt.args.options...)
 
 			tt.wantErr(t, err)
 		})

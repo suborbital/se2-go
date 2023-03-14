@@ -33,24 +33,24 @@ type accessKey struct {
 	Secret string `json:"secret"`
 }
 
-type Client2 struct {
+type Client struct {
 	httpClient *http.Client
 	host       string
 	execHost   string
 	token      string
 }
 
-type ClientOption func(*Client2)
+type ClientOption func(*Client)
 
-// NewClient2 returns a configured instance of a configured client for SE2. Required parameters are the mode to specify
+// NewClient returns a configured instance of a configured client for SE2. Required parameters are the mode to specify
 // whether it's the production or the staging environment, and an access key you can grab from the SE2 admin area for
 // an environment.
 //
 // By default, the underlying http client has a 60-second timeout. Otherwise, you can use the
 // WithHttpClient(*http.Client) function to use your own configured version for it.
-func NewClient2(mode ServerMode, token string, options ...ClientOption) (*Client2, error) {
+func NewClient(mode ServerMode, token string, options ...ClientOption) (*Client, error) {
 	// Create zero value client with default http client.
-	nc := Client2{
+	nc := Client{
 		httpClient: defaultHttpClient(),
 	}
 
@@ -102,14 +102,14 @@ func defaultHttpClient() *http.Client {
 }
 
 // WithHttpClient allows you to configure the http.Client used in the SE2 client.
-func WithHttpClient(client *http.Client) func(*Client2) {
-	return func(c *Client2) {
+func WithHttpClient(client *http.Client) func(*Client) {
+	return func(c *Client) {
 		c.httpClient = client
 	}
 }
 
 // do is the meat of the client, every other exported method sets up the request and the context.
-func (c *Client2) do(ctx context.Context, req *http.Request) (*http.Response, error) {
+func (c *Client) do(ctx context.Context, req *http.Request) (*http.Response, error) {
 	req = req.WithContext(ctx)
 	req.Header.Set("Authorization", "Bearer "+c.token)
 

@@ -9,7 +9,7 @@ import (
 	"github.com/suborbital/se2-go"
 )
 
-func templates(client *se2.Client2) {
+func templates(client *se2.Client) {
 	ctx, cxl := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cxl()
 

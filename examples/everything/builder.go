@@ -10,7 +10,7 @@ import (
 	"github.com/suborbital/se2-go"
 )
 
-func builder(client *se2.Client2) {
+func builder(client *se2.Client) {
 	ctx, cxl := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cxl()
 

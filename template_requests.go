@@ -31,7 +31,7 @@ type Template struct {
 
 // ListTemplates will return a ListTemplatesResponse which contains a slice of Template that are available to the
 // environment specified by the API key of the client.
-func (c *Client2) ListTemplates(ctx context.Context) (ListTemplatesResponse, error) {
+func (c *Client) ListTemplates(ctx context.Context) (ListTemplatesResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, c.host+pathTemplate, nil)
 	if err != nil {
 		return ListTemplatesResponse{}, errors.Wrap(err, "ListTemplates: http.NewRequest")
@@ -63,7 +63,7 @@ func (c *Client2) ListTemplates(ctx context.Context) (ListTemplatesResponse, err
 
 // GetTemplate takes a name and will return information about a template by that name, or an error if no templates are
 // found.
-func (c *Client2) GetTemplate(ctx context.Context, name string) (Template, error) {
+func (c *Client) GetTemplate(ctx context.Context, name string) (Template, error) {
 	if name == "" {
 		return Template{}, errors.New("name cannot be blank")
 	}
@@ -114,7 +114,7 @@ type ImportRequest struct {
 //
 // The repository needs to be publicly accessible; private repositories are not supported. Right now only GitHub is the
 // only available provider we can pull source code from.
-func (c *Client2) ImportTemplatesFromGitHub(ctx context.Context, repo, ref, path string) error {
+func (c *Client) ImportTemplatesFromGitHub(ctx context.Context, repo, ref, path string) error {
 	if repo == "" {
 		return errors.New("repo cannot be blank")
 	}

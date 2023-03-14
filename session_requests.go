@@ -22,7 +22,7 @@ type CreateSessionResponse struct {
 }
 
 // CreateSession will create a session for a given tenant, namespace, and plugin to be used in the builder.
-func (c *Client2) CreateSession(ctx context.Context, tenantName, namespace, plugin string) (CreateSessionResponse, error) {
+func (c *Client) CreateSession(ctx context.Context, tenantName, namespace, plugin string) (CreateSessionResponse, error) {
 	// Check arguments.
 	if tenantName == "" {
 		return CreateSessionResponse{}, errors.New("tenant name cannot be blank")

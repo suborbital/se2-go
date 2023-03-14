@@ -28,7 +28,7 @@ type BuildPluginResponse struct {
 // BuildPlugin will attempt to build a plugin supplied by the raw byteslice in the context of the current session. The
 // language is set by the template, which you can control by calling the CreatePluginDraft method with the template
 // name.
-func (c *Client2) BuildPlugin(ctx context.Context, pluginCode []byte, token CreateSessionResponse) (BuildPluginResponse, error) {
+func (c *Client) BuildPlugin(ctx context.Context, pluginCode []byte, token CreateSessionResponse) (BuildPluginResponse, error) {
 	if len(pluginCode) == 0 {
 		return BuildPluginResponse{}, errors.New("can not build empty code")
 	}
@@ -69,7 +69,7 @@ type BuilderFeaturesResponse struct {
 }
 
 // GetBuilderFeatures will return the features that the builder can provide.
-func (c *Client2) GetBuilderFeatures(ctx context.Context) (BuilderFeaturesResponse, error) {
+func (c *Client) GetBuilderFeatures(ctx context.Context) (BuilderFeaturesResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, c.host+pathBuilderFeatures, nil)
 	if err != nil {
 		return BuilderFeaturesResponse{}, errors.Wrap(err, "GetBuilderFeatures: http.NewRequest")
@@ -115,7 +115,7 @@ type TestPluginDraftResponse struct {
 
 // TestPluginDraft will send the testData byte slice to the plugin that's currently in the draft as input, and return
 // the response that came back from the plugin.
-func (c *Client2) TestPluginDraft(ctx context.Context, testData []byte, token CreateSessionResponse) (TestPluginDraftResponse, error) {
+func (c *Client) TestPluginDraft(ctx context.Context, testData []byte, token CreateSessionResponse) (TestPluginDraftResponse, error) {
 	req, err := http.NewRequest(http.MethodPost, c.host+pathTest, bytes.NewReader(testData))
 	if err != nil {
 		return TestPluginDraftResponse{}, errors.Wrap(err, "TestPluginDraft: http.NewRequest")
@@ -147,7 +147,7 @@ func (c *Client2) TestPluginDraft(ctx context.Context, testData []byte, token Cr
 
 // GetPluginDraft returns the currently set plugin draft for the given session token. To change the draft or the
 // language you can use the CreatePluginDraft method instead with the name of a template.
-func (c *Client2) GetPluginDraft(ctx context.Context, token CreateSessionResponse) (DraftResponse, error) {
+func (c *Client) GetPluginDraft(ctx context.Context, token CreateSessionResponse) (DraftResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, c.host+pathDraft, nil)
 	if err != nil {
 		return DraftResponse{}, errors.Wrap(err, "GetPluginDraft: http.NewRequest")
@@ -189,7 +189,7 @@ type createDraftRequest struct {
 // template for building and executing.
 //
 // To see available templates, use the ListTemplates method.
-func (c *Client2) CreatePluginDraft(ctx context.Context, templateName string, token CreateSessionResponse) (DraftResponse, error) {
+func (c *Client) CreatePluginDraft(ctx context.Context, templateName string, token CreateSessionResponse) (DraftResponse, error) {
 	if templateName == "" {
 		return DraftResponse{}, errors.New("template name cannot be blank")
 	}
@@ -236,7 +236,7 @@ type PromotePluginDraftResponse struct {
 }
 
 // PromotePluginDraft promotes the current version of the draft to the live version of the plugin.
-func (c *Client2) PromotePluginDraft(ctx context.Context, token CreateSessionResponse) (PromotePluginDraftResponse, error) {
+func (c *Client) PromotePluginDraft(ctx context.Context, token CreateSessionResponse) (PromotePluginDraftResponse, error) {
 	req, err := http.NewRequest(http.MethodPost, c.host+pathPromote, nil)
 	if err != nil {
 		return PromotePluginDraftResponse{}, errors.Wrap(err, "PromotePluginDraft: http.NewRequest")
@@ -268,7 +268,7 @@ func (c *Client2) PromotePluginDraft(ctx context.Context, token CreateSessionRes
 
 // builderDo is a common method to work with requests against the builder where a session token is needed instead of the
 // environment token that the do method uses.
-func (c *Client2) builderDo(ctx context.Context, req *http.Request, token CreateSessionResponse) (*http.Response, error) {
+func (c *Client) builderDo(ctx context.Context, req *http.Request, token CreateSessionResponse) (*http.Response, error) {
 	req = req.WithContext(ctx)
 	req.Header.Add("Authorization", "Bearer "+token.Token)
 	res, err := c.httpClient.Do(req)

@@ -10,7 +10,7 @@ import (
 	"github.com/suborbital/se2-go"
 )
 
-func tenants(client *se2.Client2) {
+func tenants(client *se2.Client) {
 	// Create a context for the requests.
 	ctx, cxl := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cxl()

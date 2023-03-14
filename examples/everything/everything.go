@@ -16,7 +16,7 @@ func main() {
 	}
 
 	// Set up the client to point at staging (admin and builder) with a valid access token.
-	client, err := se2.NewClient2(se2.ModeStaging, token)
+	client, err := se2.NewClient(se2.ModeStaging, token)
 	if err != nil {
 		log.Fatalf("encountered new client error: %s", err.Error())
 	}

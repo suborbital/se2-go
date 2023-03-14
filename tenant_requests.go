@@ -26,7 +26,7 @@ type TenantResponse struct {
 }
 
 // GetTenantByName returns the tenant by name.
-func (c *Client2) GetTenantByName(ctx context.Context, name string) (TenantResponse, error) {
+func (c *Client) GetTenantByName(ctx context.Context, name string) (TenantResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, c.host+fmt.Sprintf(pathTenantByName, name), nil)
 	if err != nil {
 		return TenantResponse{}, errors.Wrap(err, "GetTenantByName: http.NewRequest")
@@ -60,7 +60,7 @@ type createTenantRequest struct {
 
 // CreateTenant creates a new tenant with the given name and description. Description is optional, it can be an
 // empty string.
-func (c *Client2) CreateTenant(ctx context.Context, name, description string) (TenantResponse, error) {
+func (c *Client) CreateTenant(ctx context.Context, name, description string) (TenantResponse, error) {
 	if name == "" {
 		return TenantResponse{}, errors.New("CreateTenant: tenant name cannot be empty")
 	}
@@ -106,7 +106,7 @@ type ListTenantResponse struct {
 }
 
 // ListTenants will list the tenants that the configured API key can access.
-func (c *Client2) ListTenants(ctx context.Context) (ListTenantResponse, error) {
+func (c *Client) ListTenants(ctx context.Context) (ListTenantResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, c.host+pathTenant, nil)
 	if err != nil {
 		return ListTenantResponse{}, errors.Wrap(err, "ListTenants: http.NewRequest")
@@ -139,7 +139,7 @@ type updateTenantRequest struct {
 }
 
 // UpdateTenantByName updates the description of the tenant identified by its name. A tenant's name cannot be changed.
-func (c *Client2) UpdateTenantByName(ctx context.Context, name, description string) (TenantResponse, error) {
+func (c *Client) UpdateTenantByName(ctx context.Context, name, description string) (TenantResponse, error) {
 	if name == "" {
 		return TenantResponse{}, errors.New("UpdateTenantByName: tenant name cannot be empty")
 	}
@@ -175,7 +175,7 @@ func (c *Client2) UpdateTenantByName(ctx context.Context, name, description stri
 }
 
 // DeleteTenantByName deletes the tenant identified by its name.
-func (c *Client2) DeleteTenantByName(ctx context.Context, name string) error {
+func (c *Client) DeleteTenantByName(ctx context.Context, name string) error {
 	if name == "" {
 		return errors.New("DeleteTenantByName: tenant name cannot be empty")
 	}
