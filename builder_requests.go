@@ -38,9 +38,9 @@ func (c *Client) BuildPlugin(ctx context.Context, pluginCode []byte, token Creat
 		return BuildPluginResponse{}, errors.Wrap(err, "BuildPlugin: http.NewRequest")
 	}
 
-	res, err := c.builderDo(ctx, req, token)
+	res, err := c.sessionDo(ctx, req, token)
 	if err != nil {
-		return BuildPluginResponse{}, errors.Wrap(err, "BuildPlugin: c.builderDo")
+		return BuildPluginResponse{}, errors.Wrap(err, "BuildPlugin: c.sessionDo")
 	}
 
 	defer func() {
@@ -121,9 +121,9 @@ func (c *Client) TestPluginDraft(ctx context.Context, testData []byte, token Cre
 		return TestPluginDraftResponse{}, errors.Wrap(err, "TestPluginDraft: http.NewRequest")
 	}
 
-	res, err := c.builderDo(ctx, req, token)
+	res, err := c.sessionDo(ctx, req, token)
 	if err != nil {
-		return TestPluginDraftResponse{}, errors.Wrap(err, "TestPluginDraft: c.builderDo")
+		return TestPluginDraftResponse{}, errors.Wrap(err, "TestPluginDraft: c.sessionDo")
 	}
 
 	defer func() {
@@ -153,9 +153,9 @@ func (c *Client) GetPluginDraft(ctx context.Context, token CreateSessionResponse
 		return DraftResponse{}, errors.Wrap(err, "GetPluginDraft: http.NewRequest")
 	}
 
-	res, err := c.builderDo(ctx, req, token)
+	res, err := c.sessionDo(ctx, req, token)
 	if err != nil {
-		return DraftResponse{}, errors.Wrap(err, "GetPluginDraft: c.builderDo")
+		return DraftResponse{}, errors.Wrap(err, "GetPluginDraft: c.sessionDo")
 	}
 
 	defer func() {
@@ -206,9 +206,9 @@ func (c *Client) CreatePluginDraft(ctx context.Context, templateName string, tok
 		return DraftResponse{}, errors.Wrap(err, "CreatePluginDraft: http.NewRequest")
 	}
 
-	res, err := c.builderDo(ctx, req, token)
+	res, err := c.sessionDo(ctx, req, token)
 	if err != nil {
-		return DraftResponse{}, errors.Wrap(err, "CreatePluginDraft: c.builderDo")
+		return DraftResponse{}, errors.Wrap(err, "CreatePluginDraft: c.sessionDo")
 	}
 
 	defer func() {
@@ -242,9 +242,9 @@ func (c *Client) PromotePluginDraft(ctx context.Context, token CreateSessionResp
 		return PromotePluginDraftResponse{}, errors.Wrap(err, "PromotePluginDraft: http.NewRequest")
 	}
 
-	res, err := c.builderDo(ctx, req, token)
+	res, err := c.sessionDo(ctx, req, token)
 	if err != nil {
-		return PromotePluginDraftResponse{}, errors.Wrap(err, "PromotePluginDraft: c.builderDo")
+		return PromotePluginDraftResponse{}, errors.Wrap(err, "PromotePluginDraft: c.sessionDo")
 	}
 
 	defer func() {
@@ -264,17 +264,4 @@ func (c *Client) PromotePluginDraft(ctx context.Context, token CreateSessionResp
 	}
 
 	return t, nil
-}
-
-// builderDo is a common method to work with requests against the builder where a session token is needed instead of the
-// environment token that the do method uses.
-func (c *Client) builderDo(ctx context.Context, req *http.Request, token CreateSessionResponse) (*http.Response, error) {
-	req = req.WithContext(ctx)
-	req.Header.Add("Authorization", "Bearer "+token.Token)
-	res, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, errors.Wrap(err, "c.builderDo: c.httpClient.Do")
-	}
-
-	return res, nil
 }

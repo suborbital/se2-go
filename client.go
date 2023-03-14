@@ -115,3 +115,16 @@ func (c *Client) do(ctx context.Context, req *http.Request) (*http.Response, err
 
 	return c.httpClient.Do(req)
 }
+
+// sessionDo is a common method to work with requests against the builder where a session token is needed instead of the
+// environment token that the do method uses.
+func (c *Client) sessionDo(ctx context.Context, req *http.Request, token CreateSessionResponse) (*http.Response, error) {
+	req = req.WithContext(ctx)
+	req.Header.Add("Authorization", "Bearer "+token.Token)
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "c.sessionDo: c.httpClient.Do")
+	}
+
+	return res, nil
+}
