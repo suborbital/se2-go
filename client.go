@@ -14,18 +14,19 @@ const (
 	modeUnset ServerMode = iota
 	ModeStaging
 	ModeProduction
-	hostProduction     string = "https://api.suborbital.network"
-	hostStaging        string = "https://stg.api.suborbital.network"
-	hostExecProduction string = "https://edge.suborbital.network"
-	hostExecStaging    string = "https://stg.edge.suborbital.network"
-	minAccessKeyLength        = 60
-	defaultTimeout            = 60 * time.Second
-	emptyString        string = ""
+	hostProduction              string = "https://api.suborbital.network"
+	hostStaging                 string = "https://stg.api.suborbital.network"
+	hostExecProduction          string = "https://edge.suborbital.network"
+	hostExecStaging             string = "https://stg.edge.suborbital.network"
+	minAccessKeyLength                 = 60
+	defaultTimeout                     = 60 * time.Second
+	emptyString                 string = ""
+	httpResponseCodeErrorFormat        = "%s: expected http response code to be %d, got %d"
 )
 
 var (
-	ErrNoAccessKey = errors.New("No access key provided, or it's likely malformed.")
-	ErrUnknownMode = errors.New("Unknown client mode set. Use one of the ModeStaging or ModeProduction constants.")
+	ErrNoAccessKey = errors.New("no access key provided, or it's likely malformed")
+	ErrUnknownMode = errors.New("unknown client mode set. Use one of the ModeStaging or ModeProduction constants")
 )
 
 // ServerMode is an alias type to help ensure that only the options we declared here can be used.
@@ -104,7 +105,7 @@ func NewClient(mode ServerMode, token string, options ...ClientOption) (*Client,
 	return &nc, nil
 }
 
-// defaultHTTPClient returns an http.Client with a 60 second timeout that's used until the users decide to change it by
+// defaultHTTPClient returns an http.Client with a 60-second timeout that's used until the users decide to change it by
 // use the WithHTTPClient function.
 func defaultHTTPClient() *http.Client {
 	return &http.Client{

@@ -30,17 +30,17 @@ type BuildPluginResponse struct {
 // name.
 func (c *Client) BuildPlugin(ctx context.Context, pluginCode []byte, token CreateSessionResponse) (BuildPluginResponse, error) {
 	if len(pluginCode) == 0 {
-		return BuildPluginResponse{}, errors.New("can not build empty code")
+		return BuildPluginResponse{}, errors.New("client.BuildPlugin: can not build empty code")
 	}
 
 	req, err := http.NewRequest(http.MethodPost, c.host+pathBuild, bytes.NewReader(pluginCode))
 	if err != nil {
-		return BuildPluginResponse{}, errors.Wrap(err, "BuildPlugin: http.NewRequest")
+		return BuildPluginResponse{}, errors.Wrap(err, "client.BuildPlugin: http.NewRequest")
 	}
 
 	res, err := c.sessionDo(ctx, req, token)
 	if err != nil {
-		return BuildPluginResponse{}, errors.Wrap(err, "BuildPlugin: c.sessionDo")
+		return BuildPluginResponse{}, errors.Wrap(err, "client.BuildPlugin: c.sessionDo")
 	}
 
 	defer func() {
@@ -52,7 +52,7 @@ func (c *Client) BuildPlugin(ctx context.Context, pluginCode []byte, token Creat
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
-		return BuildPluginResponse{}, errors.Wrap(err, "GetBuilderFeatures: dec.Decode")
+		return BuildPluginResponse{}, errors.Wrap(err, "client.BuildPlugin: dec.Decode")
 	}
 
 	return t, nil
@@ -72,12 +72,12 @@ type BuilderFeaturesResponse struct {
 func (c *Client) GetBuilderFeatures(ctx context.Context) (BuilderFeaturesResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, c.host+pathBuilderFeatures, nil)
 	if err != nil {
-		return BuilderFeaturesResponse{}, errors.Wrap(err, "GetBuilderFeatures: http.NewRequest")
+		return BuilderFeaturesResponse{}, errors.Wrap(err, "client.GetBuilderFeatures: http.NewRequest")
 	}
 
 	res, err := c.do(ctx, req)
 	if err != nil {
-		return BuilderFeaturesResponse{}, errors.Wrap(err, "GetBuilderFeatures: c.do")
+		return BuilderFeaturesResponse{}, errors.Wrap(err, "client.GetBuilderFeatures: c.do")
 	}
 
 	defer func() {
@@ -85,7 +85,7 @@ func (c *Client) GetBuilderFeatures(ctx context.Context) (BuilderFeaturesRespons
 	}()
 
 	if res.StatusCode != http.StatusOK {
-		return BuilderFeaturesResponse{}, fmt.Errorf("GetBuilderFeatures: received non-200 response %d", res.StatusCode)
+		return BuilderFeaturesResponse{}, fmt.Errorf("client.GetBuilderFeatures: received non-200 response %d", res.StatusCode)
 	}
 
 	// Marshal response body into what we need to give back.
@@ -94,7 +94,7 @@ func (c *Client) GetBuilderFeatures(ctx context.Context) (BuilderFeaturesRespons
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
-		return BuilderFeaturesResponse{}, errors.Wrap(err, "GetBuilderFeatures: dec.Decode")
+		return BuilderFeaturesResponse{}, errors.Wrap(err, "client.GetBuilderFeatures: dec.Decode")
 	}
 
 	return t, nil
@@ -117,12 +117,12 @@ type TestPluginDraftResponse struct {
 func (c *Client) TestPluginDraft(ctx context.Context, testData []byte, token CreateSessionResponse) (TestPluginDraftResponse, error) {
 	req, err := http.NewRequest(http.MethodPost, c.host+pathTest, bytes.NewReader(testData))
 	if err != nil {
-		return TestPluginDraftResponse{}, errors.Wrap(err, "TestPluginDraft: http.NewRequest")
+		return TestPluginDraftResponse{}, errors.Wrap(err, "client.TestPluginDraft: http.NewRequest")
 	}
 
 	res, err := c.sessionDo(ctx, req, token)
 	if err != nil {
-		return TestPluginDraftResponse{}, errors.Wrap(err, "TestPluginDraft: c.sessionDo")
+		return TestPluginDraftResponse{}, errors.Wrap(err, "client.TestPluginDraft: c.sessionDo")
 	}
 
 	defer func() {
@@ -130,7 +130,7 @@ func (c *Client) TestPluginDraft(ctx context.Context, testData []byte, token Cre
 	}()
 
 	if res.StatusCode != http.StatusOK {
-		return TestPluginDraftResponse{}, fmt.Errorf("TestPluginDraft: unexpected response code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
+		return TestPluginDraftResponse{}, fmt.Errorf("client.TestPluginDraft: unexpected response code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
 	}
 
 	var t TestPluginDraftResponse
@@ -138,7 +138,7 @@ func (c *Client) TestPluginDraft(ctx context.Context, testData []byte, token Cre
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
-		return TestPluginDraftResponse{}, errors.Wrap(err, "TestPluginDraft: dec.Decode")
+		return TestPluginDraftResponse{}, errors.Wrap(err, "client.TestPluginDraft: dec.Decode")
 	}
 
 	return t, nil
@@ -149,12 +149,12 @@ func (c *Client) TestPluginDraft(ctx context.Context, testData []byte, token Cre
 func (c *Client) GetPluginDraft(ctx context.Context, token CreateSessionResponse) (DraftResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, c.host+pathDraft, nil)
 	if err != nil {
-		return DraftResponse{}, errors.Wrap(err, "GetPluginDraft: http.NewRequest")
+		return DraftResponse{}, errors.Wrap(err, "client.GetPluginDraft: http.NewRequest")
 	}
 
 	res, err := c.sessionDo(ctx, req, token)
 	if err != nil {
-		return DraftResponse{}, errors.Wrap(err, "GetPluginDraft: c.sessionDo")
+		return DraftResponse{}, errors.Wrap(err, "client.GetPluginDraft: c.sessionDo")
 	}
 
 	defer func() {
@@ -166,7 +166,7 @@ func (c *Client) GetPluginDraft(ctx context.Context, token CreateSessionResponse
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
-		return DraftResponse{}, errors.Wrap(err, "GetPluginDraft: dec.Decode")
+		return DraftResponse{}, errors.Wrap(err, "client.GetPluginDraft: dec.Decode")
 	}
 
 	return t, nil
@@ -190,24 +190,24 @@ type createDraftRequest struct {
 // To see available templates, use the ListTemplates method.
 func (c *Client) CreatePluginDraft(ctx context.Context, templateName string, token CreateSessionResponse) (DraftResponse, error) {
 	if templateName == emptyString {
-		return DraftResponse{}, errors.New("template name cannot be blank")
+		return DraftResponse{}, errors.New("client.CreatePluginDraft: template name cannot be blank")
 	}
 
 	r := createDraftRequest{Template: templateName}
 	var b bytes.Buffer
 	err := json.NewEncoder(&b).Encode(r)
 	if err != nil {
-		return DraftResponse{}, errors.Wrapf(err, "CreatePluginDraft: json.NewEncoder.Encode(createDraftRequest with template name '%s'", templateName)
+		return DraftResponse{}, errors.Wrapf(err, "client.CreatePluginDraft: json.NewEncoder.Encode(createDraftRequest with template name '%s'", templateName)
 	}
 
 	req, err := http.NewRequest(http.MethodPost, c.host+pathDraft, &b)
 	if err != nil {
-		return DraftResponse{}, errors.Wrap(err, "CreatePluginDraft: http.NewRequest")
+		return DraftResponse{}, errors.Wrap(err, "client.CreatePluginDraft: http.NewRequest")
 	}
 
 	res, err := c.sessionDo(ctx, req, token)
 	if err != nil {
-		return DraftResponse{}, errors.Wrap(err, "CreatePluginDraft: c.sessionDo")
+		return DraftResponse{}, errors.Wrap(err, "client.CreatePluginDraft: c.sessionDo")
 	}
 
 	defer func() {
@@ -215,7 +215,7 @@ func (c *Client) CreatePluginDraft(ctx context.Context, templateName string, tok
 	}()
 
 	if res.StatusCode != http.StatusOK {
-		return DraftResponse{}, fmt.Errorf("CreatePluginDraft: unexpected response code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
+		return DraftResponse{}, fmt.Errorf("client.CreatePluginDraft: unexpected response code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
 	}
 
 	var t DraftResponse
@@ -223,7 +223,7 @@ func (c *Client) CreatePluginDraft(ctx context.Context, templateName string, tok
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
-		return DraftResponse{}, errors.Wrap(err, "CreatePluginDraft: dec.Decode")
+		return DraftResponse{}, errors.Wrap(err, "client.CreatePluginDraft: dec.Decode")
 	}
 
 	return t, nil
@@ -238,12 +238,12 @@ type PromotePluginDraftResponse struct {
 func (c *Client) PromotePluginDraft(ctx context.Context, token CreateSessionResponse) (PromotePluginDraftResponse, error) {
 	req, err := http.NewRequest(http.MethodPost, c.host+pathPromote, nil)
 	if err != nil {
-		return PromotePluginDraftResponse{}, errors.Wrap(err, "PromotePluginDraft: http.NewRequest")
+		return PromotePluginDraftResponse{}, errors.Wrap(err, "client.PromotePluginDraft: http.NewRequest")
 	}
 
 	res, err := c.sessionDo(ctx, req, token)
 	if err != nil {
-		return PromotePluginDraftResponse{}, errors.Wrap(err, "PromotePluginDraft: c.sessionDo")
+		return PromotePluginDraftResponse{}, errors.Wrap(err, "client.PromotePluginDraft: c.sessionDo")
 	}
 
 	defer func() {
@@ -251,7 +251,7 @@ func (c *Client) PromotePluginDraft(ctx context.Context, token CreateSessionResp
 	}()
 
 	if res.StatusCode != http.StatusOK {
-		return PromotePluginDraftResponse{}, fmt.Errorf("PromotePluginDraft: unexpected status code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
+		return PromotePluginDraftResponse{}, fmt.Errorf("client.PromotePluginDraft: unexpected status code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
 	}
 
 	var t PromotePluginDraftResponse
@@ -259,7 +259,7 @@ func (c *Client) PromotePluginDraft(ctx context.Context, token CreateSessionResp
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
-		return PromotePluginDraftResponse{}, errors.Wrap(err, "PromotePluginDraft: dec.Decode")
+		return PromotePluginDraftResponse{}, errors.Wrap(err, "client.PromotePluginDraft: dec.Decode")
 	}
 
 	return t, nil

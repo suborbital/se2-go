@@ -30,15 +30,15 @@ type CreateSessionResponse struct {
 func (c *Client) CreateSession(ctx context.Context, tenantName, namespace, plugin string) (CreateSessionResponse, error) {
 	// Check arguments.
 	if tenantName == emptyString {
-		return CreateSessionResponse{}, errors.New("tenant name cannot be blank")
+		return CreateSessionResponse{}, errors.New("client.CreateSession: tenant name cannot be blank")
 	}
 
 	if namespace == emptyString {
-		return CreateSessionResponse{}, errors.New("namespace cannot be blank")
+		return CreateSessionResponse{}, errors.New("client.CreateSession: namespace cannot be blank")
 	}
 
 	if plugin == emptyString {
-		return CreateSessionResponse{}, errors.New("plugin cannot be blank")
+		return CreateSessionResponse{}, errors.New("client.CreateSession: plugin cannot be blank")
 	}
 
 	// Build a body, Dr. Frankenstein!
@@ -48,24 +48,24 @@ func (c *Client) CreateSession(ctx context.Context, tenantName, namespace, plugi
 		Namespace: namespace,
 	})
 	if err != nil {
-		return CreateSessionResponse{}, errors.Wrap(err, "CreateSession: json.NewEncoder().Encode")
+		return CreateSessionResponse{}, errors.Wrap(err, "client.CreateSession: json.NewEncoder().Encode")
 	}
 
 	// Create the request with the body.
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf(c.host+pathCreateTenantSession, tenantName), &body)
 	if err != nil {
-		return CreateSessionResponse{}, errors.Wrap(err, "CreateSession: http.NewRequest")
+		return CreateSessionResponse{}, errors.Wrap(err, "client.CreateSession: http.NewRequest")
 	}
 
 	// Do the request.
 	res, err := c.do(ctx, req)
 	if err != nil {
-		return CreateSessionResponse{}, errors.Wrap(err, "CreateSession: c.do")
+		return CreateSessionResponse{}, errors.Wrap(err, "client.CreateSession: c.do")
 	}
 
 	// Check response code.
 	if res.StatusCode != http.StatusCreated {
-		return CreateSessionResponse{}, fmt.Errorf("")
+		return CreateSessionResponse{}, fmt.Errorf("client.CreateSession: expected http response code to be %d, got %d instead", http.StatusCreated, res.StatusCode)
 	}
 
 	// Marshal response body into what we need to give back.
@@ -74,7 +74,7 @@ func (c *Client) CreateSession(ctx context.Context, tenantName, namespace, plugi
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
-		return CreateSessionResponse{}, errors.Wrap(err, "GetPlugins: dec.Decode")
+		return CreateSessionResponse{}, errors.Wrap(err, "client.CreateSession: dec.Decode")
 	}
 
 	return t, nil

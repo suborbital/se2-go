@@ -27,17 +27,17 @@ type PluginResponse struct {
 
 func (c *Client) GetPlugins(ctx context.Context, tenantName string) (PluginResponse, error) {
 	if tenantName == emptyString {
-		return PluginResponse{}, errors.New("tenant name cannot be blank")
+		return PluginResponse{}, errors.New("client.GetPlugins: tenant name cannot be blank")
 	}
 
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(c.host+pathPlugins, tenantName), nil)
 	if err != nil {
-		return PluginResponse{}, errors.Wrap(err, "GetPlugins: http.NewRequest")
+		return PluginResponse{}, errors.Wrap(err, "client.GetPlugins: http.NewRequest")
 	}
 
 	res, err := c.do(ctx, req)
 	if err != nil {
-		return PluginResponse{}, errors.Wrap(err, "GetPlugins: c.do")
+		return PluginResponse{}, errors.Wrap(err, "client.GetPlugins: c.do")
 	}
 
 	var t PluginResponse
@@ -45,7 +45,7 @@ func (c *Client) GetPlugins(ctx context.Context, tenantName string) (PluginRespo
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
-		return PluginResponse{}, errors.Wrap(err, "GetPlugins: dec.Decode")
+		return PluginResponse{}, errors.Wrap(err, "client.GetPlugins: dec.Decode")
 	}
 
 	return t, nil

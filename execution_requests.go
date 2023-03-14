@@ -19,12 +19,12 @@ const (
 func (c *Client) Exec(ctx context.Context, payload []byte, ident, namespace, plugin string) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf(c.execHost+pathExec, ident, namespace, plugin), bytes.NewReader(payload))
 	if err != nil {
-		return nil, errors.Wrap(err, "Exec: http.NewRequest")
+		return nil, errors.Wrap(err, "client.Exec: http.NewRequest")
 	}
 
 	res, err := c.do(ctx, req)
 	if err != nil {
-		return nil, errors.Wrap(err, "Exec: c.do")
+		return nil, errors.Wrap(err, "client.Exec: c.do")
 	}
 
 	defer func() {
@@ -33,7 +33,7 @@ func (c *Client) Exec(ctx context.Context, payload []byte, ident, namespace, plu
 
 	b, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, errors.Wrap(err, "Exec: io.ReadAll(res.Body)")
+		return nil, errors.Wrap(err, "client.Exec: io.ReadAll(res.Body)")
 	}
 
 	return b, nil

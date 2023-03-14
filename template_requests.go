@@ -34,12 +34,12 @@ type Template struct {
 func (c *Client) ListTemplates(ctx context.Context) (ListTemplatesResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, c.host+pathTemplate, nil)
 	if err != nil {
-		return ListTemplatesResponse{}, errors.Wrap(err, "ListTemplates: http.NewRequest")
+		return ListTemplatesResponse{}, errors.Wrap(err, "client.ListTemplates: http.NewRequest")
 	}
 
 	res, err := c.do(ctx, req)
 	if err != nil {
-		return ListTemplatesResponse{}, errors.Wrap(err, "ListTemplates: c.do")
+		return ListTemplatesResponse{}, errors.Wrap(err, "client.ListTemplates: c.do")
 	}
 
 	defer func() {
@@ -47,7 +47,7 @@ func (c *Client) ListTemplates(ctx context.Context) (ListTemplatesResponse, erro
 	}()
 
 	if res.StatusCode != http.StatusOK {
-		return ListTemplatesResponse{}, fmt.Errorf("ListTemplates: unexpected status code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
+		return ListTemplatesResponse{}, fmt.Errorf("client.ListTemplates: unexpected status code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
 	}
 
 	var t ListTemplatesResponse
@@ -55,7 +55,7 @@ func (c *Client) ListTemplates(ctx context.Context) (ListTemplatesResponse, erro
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
-		return ListTemplatesResponse{}, errors.Wrap(err, "ListTemplates: dec.Decode")
+		return ListTemplatesResponse{}, errors.Wrap(err, "client.ListTemplates: dec.Decode")
 	}
 
 	return t, nil
@@ -65,17 +65,17 @@ func (c *Client) ListTemplates(ctx context.Context) (ListTemplatesResponse, erro
 // found.
 func (c *Client) GetTemplate(ctx context.Context, name string) (Template, error) {
 	if name == emptyString {
-		return Template{}, errors.New("name cannot be blank")
+		return Template{}, errors.New("client.GetTemplate: name cannot be blank")
 	}
 
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(c.host+pathTemplateByName, name), nil)
 	if err != nil {
-		return Template{}, errors.Wrap(err, "GetTemplate: http.NewRequest")
+		return Template{}, errors.Wrap(err, "client.GetTemplate: http.NewRequest")
 	}
 
 	res, err := c.do(ctx, req)
 	if err != nil {
-		return Template{}, errors.Wrap(err, "GetTemplate: c.do")
+		return Template{}, errors.Wrap(err, "client.GetTemplate: c.do")
 	}
 
 	defer func() {
@@ -87,7 +87,7 @@ func (c *Client) GetTemplate(ctx context.Context, name string) (Template, error)
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)
 	if err != nil {
-		return Template{}, errors.Wrap(err, "GetTemplate: dec.Decode")
+		return Template{}, errors.Wrap(err, "client.GetTemplate: dec.Decode")
 	}
 
 	return t, nil
@@ -119,15 +119,15 @@ type importParams struct {
 // only available provider we can pull source code from.
 func (c *Client) ImportTemplatesFromGitHub(ctx context.Context, repo, ref, path string) error {
 	if repo == emptyString {
-		return errors.New("repo cannot be blank")
+		return errors.New("client.ImportTemplatesFromGitHub: repo cannot be blank")
 	}
 
 	if ref == emptyString {
-		return errors.New("ref cannot be blank")
+		return errors.New("client.ImportTemplatesFromGitHub: ref cannot be blank")
 	}
 
 	if path == emptyString {
-		return errors.New("path cannot be blank. If files are on the root of the repository, use '.'")
+		return errors.New("client.ImportTemplatesFromGitHub: path cannot be blank. If files are on the root of the repository, use '.'")
 	}
 
 	var requestBody bytes.Buffer
@@ -140,17 +140,17 @@ func (c *Client) ImportTemplatesFromGitHub(ctx context.Context, repo, ref, path 
 		},
 	})
 	if err != nil {
-		return errors.Wrap(err, "ImportTemplatesFromGit: json.NewEncoder.Encode")
+		return errors.Wrap(err, "client.ImportTemplatesFromGitHub: json.NewEncoder.Encode")
 	}
 
 	req, err := http.NewRequest(http.MethodPost, c.host+pathTemplateImport, &requestBody)
 	if err != nil {
-		return errors.Wrap(err, "ImportTemplatesFromGit: http.NewRequest")
+		return errors.Wrap(err, "client.ImportTemplatesFromGitHub: http.NewRequest")
 	}
 
 	res, err := c.do(ctx, req)
 	if err != nil {
-		return errors.Wrap(err, "ImportTemplatesFromGit: c.do")
+		return errors.Wrap(err, "client.ImportTemplatesFromGitHub: c.do")
 	}
 
 	defer func() {
@@ -158,7 +158,7 @@ func (c *Client) ImportTemplatesFromGitHub(ctx context.Context, repo, ref, path 
 	}()
 
 	if res.StatusCode != http.StatusCreated {
-		return fmt.Errorf("ImportTemplatesFromGit: expected response to be %d, got %d instead", http.StatusOK, res.StatusCode)
+		return fmt.Errorf("client.ImportTemplatesFromGitHub: expected http response code to be %d, got %d instead", http.StatusOK, res.StatusCode)
 	}
 
 	return nil
