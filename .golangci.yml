@@ -1,0 +1,80 @@
+run:
+  timeout: 5m
+  skip-dirs-use-default: true
+  modules-download-mode: readonly
+  allow-parallel-runners: true
+  go: '1.20'
+
+output:
+  sort-results: true
+
+linters:
+  disable-all: true
+  enable:
+    - gci
+    - ineffassign
+    - revive
+    - staticcheck
+    - typecheck
+    - bodyclose
+    - contextcheck
+    - godot
+    - gosec
+    - noctx
+    - reassign
+    - whitespace
+    - wsl
+    - wrapcheck
+linters-settings:
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/suborbital/se2-go)
+      - blank
+      - dot
+    custom-order: true
+  revive:
+    max-open-files: 2048
+    ignore-generated-header: true
+    severity: error
+    enable-all-rules: false
+    confidence: 0.1
+    rules:
+      - name: add-constant
+        maxLitCount: 1
+      - name: bool-literal-in-expr
+      - name: comment-spacings
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: deep-exit
+      - name: defer
+      - name: duplicated-imports
+        severity: error
+        disabled: false
+      - name: early-return
+      - name: empty-block
+      - name: empty-lines
+      - name: error-naming
+      - name: error-return
+      - name: error-strings
+      - name: errorf
+      - name: exported
+      - name: identical-branches
+      - name: import-shadowing
+        severity: error
+        disabled: false
+      - name: modifies-parameter
+      - name: modifies-value-receiver
+      - name: nested-structs
+      - name: redefines-builtin-id
+      - name: superfluous-else
+      - name: var-naming
+      - name: unexported-return
+      - name: unhandled-error
+      - name: unnecessary-stmt
+      - name: unreachable-code
+      - name: unused-parameter
+      - name: unused-receiver
+      - name: use-any
+      - name: useless-break
