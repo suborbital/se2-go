@@ -19,7 +19,7 @@ const (
 // TenantResponse captures the JSON data returned from the endpoints.
 type TenantResponse struct {
 	AuthorizedParty string `json:"authorized_party"`
-	Id              string `json:"id"`
+	ID              string `json:"id"`
 	Environment     string `json:"environment"`
 	Name            string `json:"name"`
 	Description     string `json:"description"`

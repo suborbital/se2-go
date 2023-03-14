@@ -16,9 +16,9 @@ type Plugin struct {
 	Namespace  string `json:"namespace"`
 	Lang       string `json:"lang"`
 	Ref        string `json:"ref"`
-	ApiVersion string `json:"apiVersion"`
-	Fqmn       string `json:"fqmn"`
-	Uri        string `json:"uri"`
+	APIVersion string `json:"apiVersion"`
+	FQMN       string `json:"fqmn"`
+	URI        string `json:"uri"`
 }
 
 type PluginResponse struct {

@@ -56,11 +56,11 @@ type ClientOption func(*Client)
 // an environment.
 //
 // By default, the underlying http client has a 60-second timeout. Otherwise, you can use the
-// WithHttpClient(*http.Client) function to use your own configured version for it.
+// WithHTTPClient(*http.Client) function to use your own configured version for it.
 func NewClient(mode ServerMode, token string, options ...ClientOption) (*Client, error) {
 	// Create zero value client with default http client.
 	nc := Client{
-		httpClient: defaultHttpClient(),
+		httpClient: defaultHTTPClient(),
 	}
 
 	// Set hosts based on mode, if somehow it's an unknown mode, return error.
@@ -104,16 +104,16 @@ func NewClient(mode ServerMode, token string, options ...ClientOption) (*Client,
 	return &nc, nil
 }
 
-// defaultHttpClient returns an http.Client with a 60 second timeout that's used until the users decide to change it by
-// use the WithHttpClient function.
-func defaultHttpClient() *http.Client {
+// defaultHTTPClient returns an http.Client with a 60 second timeout that's used until the users decide to change it by
+// use the WithHTTPClient function.
+func defaultHTTPClient() *http.Client {
 	return &http.Client{
 		Timeout: defaultTimeout,
 	}
 }
 
-// WithHttpClient allows you to configure the http.Client used in the SE2 client.
-func WithHttpClient(client *http.Client) func(*Client) {
+// WithHTTPClient allows you to configure the http.Client used in the SE2 client.
+func WithHTTPClient(client *http.Client) func(*Client) {
 	return func(c *Client) {
 		c.httpClient = client
 	}
