@@ -93,14 +93,17 @@ func (c *Client) GetTemplate(ctx context.Context, name string) (Template, error)
 	return t, nil
 }
 
-// ImportRequest is the shape of the data we need to send to the SE2 backend.
-type ImportRequest struct {
-	Source string `json:"source"`
-	Params struct {
-		Repo string `json:"repo"`
-		Ref  string `json:"ref"`
-		Path string `json:"path"`
-	}
+// importRequest is an internal shape of the data we need to send to the SE2 backend.
+type importRequest struct {
+	Source string       `json:"source"`
+	Params importParams `json:"params"`
+}
+
+// importParams is an internal shape to help describe data to send to the import endpoint on the API.
+type importParams struct {
+	Repo string `json:"repo"`
+	Ref  string `json:"ref"`
+	Path string `json:"path"`
 }
 
 // ImportTemplatesFromGitHub takes a repo, ref, and a path as arguments. It will call the appropriate endpoint on the
@@ -128,13 +131,9 @@ func (c *Client) ImportTemplatesFromGitHub(ctx context.Context, repo, ref, path 
 	}
 
 	var requestBody bytes.Buffer
-	err := json.NewEncoder(&requestBody).Encode(ImportRequest{
+	err := json.NewEncoder(&requestBody).Encode(importRequest{
 		Source: "git",
-		Params: struct {
-			Repo string `json:"repo"`
-			Ref  string `json:"ref"`
-			Path string `json:"path"`
-		}{
+		Params: importParams{
 			Repo: repo,
 			Ref:  ref,
 			Path: path,

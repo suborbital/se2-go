@@ -25,7 +25,7 @@ type BuildPluginResponse struct {
 	OutputLog string `json:"outputLog"`
 }
 
-// BuildPlugin will attempt to build a plugin supplied by the raw byteslice in the context of the current session. The
+// BuildPlugin will attempt to build a plugin supplied by the raw byte slice in the context of the current session. The
 // language is set by the template, which you can control by calling the CreatePluginDraft method with the template
 // name.
 func (c *Client) BuildPlugin(ctx context.Context, pluginCode []byte, token CreateSessionResponse) (BuildPluginResponse, error) {
@@ -90,7 +90,6 @@ func (c *Client) GetBuilderFeatures(ctx context.Context) (BuilderFeaturesRespons
 
 	// Marshal response body into what we need to give back.
 	var t BuilderFeaturesResponse
-
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)

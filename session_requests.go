@@ -12,16 +12,21 @@ import (
 
 const pathCreateTenantSession = pathTenantByName + "/session"
 
+// createSessionRequest is an internal struct to help with converting data into a json payload we can send against the
+// API.
 type createSessionRequest struct {
 	Plugin    string `json:"fn"`
 	Namespace string `json:"namespace"`
 }
 
+// CreateSessionResponse has a token inside of it. This token is used in queries against the builder service. Those
+// methods will require one of their parameters to be of this type.
 type CreateSessionResponse struct {
 	Token string `json:"token"`
 }
 
-// CreateSession will create a session for a given tenant, namespace, and plugin to be used in the builder.
+// CreateSession will create a session for a given tenant, namespace, and plugin to be used in the builder. You should
+// keep track of the return argument and reuse it in later requests.
 func (c *Client) CreateSession(ctx context.Context, tenantName, namespace, plugin string) (CreateSessionResponse, error) {
 	// Check arguments.
 	if tenantName == "" {
@@ -65,7 +70,6 @@ func (c *Client) CreateSession(ctx context.Context, tenantName, namespace, plugi
 
 	// Marshal response body into what we need to give back.
 	var t CreateSessionResponse
-
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
 	err = dec.Decode(&t)

@@ -10,10 +10,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-type ExecResponse struct {
-	Response []byte
-}
-
 const (
 	pathExec = "/name/%s/%s/%s"
 )
@@ -28,7 +24,7 @@ func (c *Client) Exec(ctx context.Context, payload []byte, ident, namespace, plu
 
 	res, err := c.do(ctx, req)
 	if err != nil {
-		return nil, errors.Wrap(err, "Exec: c.builderDo")
+		return nil, errors.Wrap(err, "Exec: c.do")
 	}
 
 	defer func() {

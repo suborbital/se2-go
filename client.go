@@ -26,13 +26,18 @@ var (
 	ErrUnknownMode = errors.New("Unknown client mode set. Use one of the ModeStaging or ModeProduction constants.")
 )
 
+// ServerMode is an alias type to help ensure that only the options we declared here can be used.
 type ServerMode int
 
+// accessKey is a transitive type that helps the NewClient constructor make sure that the passed in token is of the
+// correct form and structure.
 type accessKey struct {
 	Key    int    `json:"key"`
 	Secret string `json:"secret"`
 }
 
+// Client holds our configured http client, its methods, and all the functionality necessary so users can interact with
+// our API without having to call actual http requests.
 type Client struct {
 	httpClient *http.Client
 	host       string
@@ -40,6 +45,8 @@ type Client struct {
 	token      string
 }
 
+// ClientOption is a function signature users can use to configure different parts of the client. They are run at the
+// very end of initialization, once we know that the mode and the access key are correct.
 type ClientOption func(*Client)
 
 // NewClient returns a configured instance of a configured client for SE2. Required parameters are the mode to specify
@@ -95,6 +102,8 @@ func NewClient(mode ServerMode, token string, options ...ClientOption) (*Client,
 	return &nc, nil
 }
 
+// defaultHttpClient returns an http.Client with a 60 second timeout that's used until the users decide to change it by
+// use the WithHttpClient function.
 func defaultHttpClient() *http.Client {
 	return &http.Client{
 		Timeout: 60 * time.Second,
@@ -108,7 +117,8 @@ func WithHttpClient(client *http.Client) func(*Client) {
 	}
 }
 
-// do is the meat of the client, every other exported method sets up the request and the context.
+// do is the meat of the client, every other admin level exported method uses this. Its main job is to attach the
+// context and the access key to outgoing requests.
 func (c *Client) do(ctx context.Context, req *http.Request) (*http.Response, error) {
 	req = req.WithContext(ctx)
 	req.Header.Set("Authorization", "Bearer "+c.token)
