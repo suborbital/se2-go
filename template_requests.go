@@ -32,12 +32,12 @@ type Template struct {
 // ListTemplates will return a ListTemplatesResponse which contains a slice of Template that are available to the
 // environment specified by the API key of the client.
 func (c *Client) ListTemplates(ctx context.Context) (ListTemplatesResponse, error) {
-	req, err := http.NewRequest(http.MethodGet, c.host+pathTemplate, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.host+pathTemplate, nil)
 	if err != nil {
 		return ListTemplatesResponse{}, errors.Wrap(err, "client.ListTemplates: http.NewRequest")
 	}
 
-	res, err := c.do(ctx, req)
+	res, err := c.do(req)
 	if err != nil {
 		return ListTemplatesResponse{}, errors.Wrap(err, "client.ListTemplates: c.do")
 	}
@@ -68,12 +68,12 @@ func (c *Client) GetTemplate(ctx context.Context, name string) (Template, error)
 		return Template{}, errors.New("client.GetTemplate: name cannot be blank")
 	}
 
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(c.host+pathTemplateByName, name), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf(c.host+pathTemplateByName, name), nil)
 	if err != nil {
 		return Template{}, errors.Wrap(err, "client.GetTemplate: http.NewRequest")
 	}
 
-	res, err := c.do(ctx, req)
+	res, err := c.do(req)
 	if err != nil {
 		return Template{}, errors.Wrap(err, "client.GetTemplate: c.do")
 	}
@@ -147,12 +147,12 @@ func (c *Client) ImportTemplatesFromGitHub(ctx context.Context, repo, ref, path 
 		return errors.Wrap(err, "client.ImportTemplatesFromGitHub: json.NewEncoder.Encode")
 	}
 
-	req, err := http.NewRequest(http.MethodPost, c.host+pathTemplateImport, &requestBody)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.host+pathTemplateImport, &requestBody)
 	if err != nil {
 		return errors.Wrap(err, "client.ImportTemplatesFromGitHub: http.NewRequest")
 	}
 
-	res, err := c.do(ctx, req)
+	res, err := c.do(req)
 	if err != nil {
 		return errors.Wrap(err, "client.ImportTemplatesFromGitHub: c.do")
 	}

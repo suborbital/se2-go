@@ -27,12 +27,12 @@ type TenantResponse struct {
 
 // GetTenantByName returns the tenant by name.
 func (c *Client) GetTenantByName(ctx context.Context, name string) (TenantResponse, error) {
-	req, err := http.NewRequest(http.MethodGet, c.host+fmt.Sprintf(pathTenantByName, name), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.host+fmt.Sprintf(pathTenantByName, name), nil)
 	if err != nil {
 		return TenantResponse{}, errors.Wrap(err, "client.GetTenantByName: http.NewRequest")
 	}
 
-	res, err := c.do(ctx, req)
+	res, err := c.do(req)
 	if err != nil {
 		return TenantResponse{}, errors.Wrap(err, "client.GetTenantByName: c.do")
 	}
@@ -79,12 +79,12 @@ func (c *Client) CreateTenant(ctx context.Context, name, description string) (Te
 		requestBody = bytes.NewReader(m)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, c.host+fmt.Sprintf(pathTenantByName, name), requestBody)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.host+fmt.Sprintf(pathTenantByName, name), requestBody)
 	if err != nil {
 		return TenantResponse{}, errors.Wrap(err, "client.CreateTenant: http.NewRequest for POST create tenant")
 	}
 
-	res, err := c.do(ctx, req)
+	res, err := c.do(req)
 	if err != nil {
 		return TenantResponse{}, errors.Wrap(err, "client.CreateTenant: c.do")
 	}
@@ -115,12 +115,12 @@ type ListTenantResponse struct {
 
 // ListTenants will list the tenants that the configured API key can access.
 func (c *Client) ListTenants(ctx context.Context) (ListTenantResponse, error) {
-	req, err := http.NewRequest(http.MethodGet, c.host+pathTenant, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.host+pathTenant, nil)
 	if err != nil {
 		return ListTenantResponse{}, errors.Wrap(err, "client.ListTenants: http.NewRequest")
 	}
 
-	res, err := c.do(ctx, req)
+	res, err := c.do(req)
 	if err != nil {
 		return ListTenantResponse{}, errors.Wrap(err, "client.ListTenants: c.do")
 	}
@@ -161,12 +161,12 @@ func (c *Client) UpdateTenantByName(ctx context.Context, name, description strin
 		return TenantResponse{}, errors.Wrap(err, "client.UpdateTenantByName: json marshal update tenant request")
 	}
 
-	req, err := http.NewRequest(http.MethodPatch, c.host+fmt.Sprintf(pathTenantByName, name), bytes.NewReader(m))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, c.host+fmt.Sprintf(pathTenantByName, name), bytes.NewReader(m))
 	if err != nil {
 		return TenantResponse{}, errors.Wrap(err, "client.UpdateTenantByName: http.NewRequest for POST create tenant")
 	}
 
-	res, err := c.do(ctx, req)
+	res, err := c.do(req)
 	if err != nil {
 		return TenantResponse{}, errors.Wrap(err, "client.UpdateTenantByName: c.do")
 	}
@@ -195,12 +195,12 @@ func (c *Client) DeleteTenantByName(ctx context.Context, name string) error {
 	if name == emptyString {
 		return errors.New("client.DeleteTenantByName: tenant name cannot be empty")
 	}
-	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf(c.host+pathTenantByName, name), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, fmt.Sprintf(c.host+pathTenantByName, name), nil)
 	if err != nil {
 		return errors.Wrap(err, "client.DeleteTenantByName: http.NewRequest")
 	}
 
-	res, err := c.do(ctx, req)
+	res, err := c.do(req)
 	if err != nil {
 		return errors.Wrap(err, "client.DeleteTenantByName: c.do")
 	}

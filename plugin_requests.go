@@ -30,12 +30,12 @@ func (c *Client) GetPlugins(ctx context.Context, tenantName string) (PluginRespo
 		return PluginResponse{}, errors.New("client.GetPlugins: tenant name cannot be blank")
 	}
 
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(c.host+pathPlugins, tenantName), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf(c.host+pathPlugins, tenantName), nil)
 	if err != nil {
 		return PluginResponse{}, errors.Wrap(err, "client.GetPlugins: http.NewRequest")
 	}
 
-	res, err := c.do(ctx, req)
+	res, err := c.do(req)
 	if err != nil {
 		return PluginResponse{}, errors.Wrap(err, "client.GetPlugins: c.do")
 	}

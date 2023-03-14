@@ -33,12 +33,12 @@ func (c *Client) BuildPlugin(ctx context.Context, pluginCode []byte, token Creat
 		return BuildPluginResponse{}, errors.New("client.BuildPlugin: can not build empty code")
 	}
 
-	req, err := http.NewRequest(http.MethodPost, c.host+pathBuild, bytes.NewReader(pluginCode))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.host+pathBuild, bytes.NewReader(pluginCode))
 	if err != nil {
 		return BuildPluginResponse{}, errors.Wrap(err, "client.BuildPlugin: http.NewRequest")
 	}
 
-	res, err := c.sessionDo(ctx, req, token)
+	res, err := c.sessionDo(req, token)
 	if err != nil {
 		return BuildPluginResponse{}, errors.Wrap(err, "client.BuildPlugin: c.sessionDo")
 	}
@@ -77,12 +77,12 @@ type Languages struct {
 
 // GetBuilderFeatures will return the features that the builder can provide.
 func (c *Client) GetBuilderFeatures(ctx context.Context) (BuilderFeaturesResponse, error) {
-	req, err := http.NewRequest(http.MethodGet, c.host+pathBuilderFeatures, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.host+pathBuilderFeatures, nil)
 	if err != nil {
 		return BuilderFeaturesResponse{}, errors.Wrap(err, "client.GetBuilderFeatures: http.NewRequest")
 	}
 
-	res, err := c.do(ctx, req)
+	res, err := c.do(req)
 	if err != nil {
 		return BuilderFeaturesResponse{}, errors.Wrap(err, "client.GetBuilderFeatures: c.do")
 	}
@@ -122,12 +122,12 @@ type TestPluginDraftResponse struct {
 // TestPluginDraft will send the testData byte slice to the plugin that's currently in the draft as input, and return
 // the response that came back from the plugin.
 func (c *Client) TestPluginDraft(ctx context.Context, testData []byte, token CreateSessionResponse) (TestPluginDraftResponse, error) {
-	req, err := http.NewRequest(http.MethodPost, c.host+pathTest, bytes.NewReader(testData))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.host+pathTest, bytes.NewReader(testData))
 	if err != nil {
 		return TestPluginDraftResponse{}, errors.Wrap(err, "client.TestPluginDraft: http.NewRequest")
 	}
 
-	res, err := c.sessionDo(ctx, req, token)
+	res, err := c.sessionDo(req, token)
 	if err != nil {
 		return TestPluginDraftResponse{}, errors.Wrap(err, "client.TestPluginDraft: c.sessionDo")
 	}
@@ -154,12 +154,12 @@ func (c *Client) TestPluginDraft(ctx context.Context, testData []byte, token Cre
 // GetPluginDraft returns the currently set plugin draft for the given session token. To change the draft or the
 // language you can use the CreatePluginDraft method instead with the name of a template.
 func (c *Client) GetPluginDraft(ctx context.Context, token CreateSessionResponse) (DraftResponse, error) {
-	req, err := http.NewRequest(http.MethodGet, c.host+pathDraft, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.host+pathDraft, nil)
 	if err != nil {
 		return DraftResponse{}, errors.Wrap(err, "client.GetPluginDraft: http.NewRequest")
 	}
 
-	res, err := c.sessionDo(ctx, req, token)
+	res, err := c.sessionDo(req, token)
 	if err != nil {
 		return DraftResponse{}, errors.Wrap(err, "client.GetPluginDraft: c.sessionDo")
 	}
@@ -211,12 +211,12 @@ func (c *Client) CreatePluginDraft(ctx context.Context, templateName string, tok
 		return DraftResponse{}, errors.Wrapf(err, "client.CreatePluginDraft: json.NewEncoder.Encode(createDraftRequest with template name '%s'", templateName)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, c.host+pathDraft, &b)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.host+pathDraft, &b)
 	if err != nil {
 		return DraftResponse{}, errors.Wrap(err, "client.CreatePluginDraft: http.NewRequest")
 	}
 
-	res, err := c.sessionDo(ctx, req, token)
+	res, err := c.sessionDo(req, token)
 	if err != nil {
 		return DraftResponse{}, errors.Wrap(err, "client.CreatePluginDraft: c.sessionDo")
 	}
@@ -247,12 +247,12 @@ type PromotePluginDraftResponse struct {
 
 // PromotePluginDraft promotes the current version of the draft to the live version of the plugin.
 func (c *Client) PromotePluginDraft(ctx context.Context, token CreateSessionResponse) (PromotePluginDraftResponse, error) {
-	req, err := http.NewRequest(http.MethodPost, c.host+pathPromote, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.host+pathPromote, nil)
 	if err != nil {
 		return PromotePluginDraftResponse{}, errors.Wrap(err, "client.PromotePluginDraft: http.NewRequest")
 	}
 
-	res, err := c.sessionDo(ctx, req, token)
+	res, err := c.sessionDo(req, token)
 	if err != nil {
 		return PromotePluginDraftResponse{}, errors.Wrap(err, "client.PromotePluginDraft: c.sessionDo")
 	}

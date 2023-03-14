@@ -17,12 +17,12 @@ const (
 // Exec takes a context, a byte slice payload, an ident, namespace, and plugin triad to identify the plugin to run with
 // the payload as input. It returns a byte slice as output, and an error if something went wrong.
 func (c *Client) Exec(ctx context.Context, payload []byte, ident, namespace, plugin string) ([]byte, error) {
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf(c.execHost+pathExec, ident, namespace, plugin), bytes.NewReader(payload))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf(c.execHost+pathExec, ident, namespace, plugin), bytes.NewReader(payload))
 	if err != nil {
 		return nil, errors.Wrap(err, "client.Exec: http.NewRequest")
 	}
 
-	res, err := c.do(ctx, req)
+	res, err := c.do(req)
 	if err != nil {
 		return nil, errors.Wrap(err, "client.Exec: c.do")
 	}

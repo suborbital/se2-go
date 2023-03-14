@@ -1,7 +1,6 @@
 package se2
 
 import (
-	"context"
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
@@ -121,20 +120,18 @@ func WithHTTPClient(client *http.Client) func(*Client) {
 	}
 }
 
-// do is the meat of the client, every other admin level exported method uses this. Its main job is to attach the
-// context and the access key to outgoing requests.
-func (c *Client) do(ctx context.Context, req *http.Request) (*http.Response, error) {
-	cReq := req.WithContext(ctx)
-	cReq.Header.Set("Authorization", "Bearer "+c.token)
+// do is the meat of the client, every other admin level exported method uses this. Its main job is to add the
+// authorization header with the access key to outgoing requests.
+func (c *Client) do(req *http.Request) (*http.Response, error) {
+	req.Header.Set("Authorization", "Bearer "+c.token)
 
-	return c.httpClient.Do(cReq)
+	return c.httpClient.Do(req)
 }
 
 // sessionDo is a common method to work with requests against the builder where a session token is needed instead of the
 // environment token that the do method uses.
-func (c *Client) sessionDo(ctx context.Context, req *http.Request, token CreateSessionResponse) (*http.Response, error) {
-	cReq := req.WithContext(ctx)
-	cReq.Header.Add("Authorization", "Bearer "+token.Token)
+func (c *Client) sessionDo(req *http.Request, token CreateSessionResponse) (*http.Response, error) {
+	req.Header.Add("Authorization", "Bearer "+token.Token)
 
-	return c.httpClient.Do(cReq)
+	return c.httpClient.Do(req)
 }

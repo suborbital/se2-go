@@ -52,13 +52,13 @@ func (c *Client) CreateSession(ctx context.Context, tenantName, namespace, plugi
 	}
 
 	// Create the request with the body.
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf(c.host+pathCreateTenantSession, tenantName), &body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf(c.host+pathCreateTenantSession, tenantName), &body)
 	if err != nil {
 		return CreateSessionResponse{}, errors.Wrap(err, "client.CreateSession: http.NewRequest")
 	}
 
 	// Do the request.
-	res, err := c.do(ctx, req)
+	res, err := c.do(req)
 	if err != nil {
 		return CreateSessionResponse{}, errors.Wrap(err, "client.CreateSession: c.do")
 	}
