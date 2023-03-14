@@ -11,7 +11,7 @@ import (
 
 const pathPlugins = pathTenantByName + "/plugins"
 
-type Plugin2 struct {
+type Plugin struct {
 	Name       string `json:"name"`
 	Namespace  string `json:"namespace"`
 	Lang       string `json:"lang"`
@@ -22,7 +22,7 @@ type Plugin2 struct {
 }
 
 type PluginResponse struct {
-	Plugins []Plugin2 `json:"plugins"`
+	Plugins []Plugin `json:"plugins"`
 }
 
 func (c *Client) GetPlugins(ctx context.Context, tenantName string) (PluginResponse, error) {
