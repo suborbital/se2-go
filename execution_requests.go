@@ -14,45 +14,35 @@ import (
 
 type ExecResponse struct {
 	Response []byte
-	UUID     string
 }
 
 const (
 	pathExec = "/name/%s/%s/%s"
 )
 
-type claims struct {
-	Fn         string `json:"fn"`
-	Identifier string `json:"identifier"`
-	Namespace  string `json:"namespace"`
-}
-
-type tokenPart struct {
-	Claims claims `json:"claims"`
-}
-
-func (c *Client2) Exec(ctx context.Context, payload []byte, ident, namespace, plugin string) (ExecResponse, error) {
-
+// Exec takes a context, a byte slice payload, an ident, namespace, and plugin triad to identify the plugin to run with
+// the payload as input. It returns a byte slice as output, and an error if something went wrong.
+func (c *Client2) Exec(ctx context.Context, payload []byte, ident, namespace, plugin string) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf(c.execHost+pathExec, ident, namespace, plugin), bytes.NewReader(payload))
 	if err != nil {
-		return ExecResponse{}, errors.Wrap(err, "Exec: http.NewRequest")
+		return nil, errors.Wrap(err, "Exec: http.NewRequest")
 	}
 
 	res, err := c.do(ctx, req)
 	if err != nil {
-		return ExecResponse{}, errors.Wrap(err, "Exec: c.builderDo")
+		return nil, errors.Wrap(err, "Exec: c.builderDo")
 	}
 
 	defer func() {
 		_ = res.Body.Close()
 	}()
 
-	b, _ := io.ReadAll(res.Body)
-	fmt.Printf("this is the response from the exec call:\n\n%s\n\n", string(b))
+	b, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "Exec: io.ReadAll(res.Body)")
+	}
 
-	var t ExecResponse
-
-	return t, nil
+	return b, nil
 }
 
 // execPlugin remotely executes the provided plugin using the body as input. See also: ExecString()
