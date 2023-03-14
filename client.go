@@ -126,7 +126,12 @@ func WithHTTPClient(client *http.Client) func(*Client) {
 func (c *Client) do(req *http.Request) (*http.Response, error) {
 	req.Header.Set("Authorization", "Bearer "+c.token)
 
-	return c.httpClient.Do(req)
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "c.httpClient.do")
+	}
+
+	return res, nil
 }
 
 // sessionDo is a common method to work with requests against the builder where a session token is needed instead of the
@@ -134,5 +139,10 @@ func (c *Client) do(req *http.Request) (*http.Response, error) {
 func (c *Client) sessionDo(req *http.Request, token CreateSessionResponse) (*http.Response, error) {
 	req.Header.Add("Authorization", "Bearer "+token.Token)
 
-	return c.httpClient.Do(req)
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "c.httpClient.do")
+	}
+
+	return res, nil
 }
