@@ -133,8 +133,11 @@ export const run = (input) => {
 
 	fmt.Printf("this is the result of the promotion:\n%#v\n\n", promotionResult)
 
+	printHeader("sleep for 8 seconds to wait until module gets propagated")
+	time.Sleep(8 * time.Second)
+
 	printHeader("execution")
-	exec, err := client.Exec(buildCtx, []byte(`uh hi`), "testing.env."+sessionTenant.Name, namespace, pluginName)
+	exec, err := client.Exec(buildCtx, []byte(`uh hi`), sessionTenant.Name, namespace, pluginName)
 	if err != nil {
 		log.Fatalf("client.Exec: %s", err.Error())
 	}

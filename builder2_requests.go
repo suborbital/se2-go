@@ -232,7 +232,7 @@ func (c *Client2) CreatePluginDraft(ctx context.Context, templateName string, to
 
 // PromotePluginDraftResponse captures the json returned by a successful call to the promote endpoint.
 type PromotePluginDraftResponse struct {
-	Version string `json:"version"`
+	Ref string `json:"ref"`
 }
 
 // PromotePluginDraft promotes the current version of the draft to the live version of the plugin.
