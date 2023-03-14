@@ -40,6 +40,14 @@ func (c *Client) GetPlugins(ctx context.Context, tenantName string) (PluginRespo
 		return PluginResponse{}, errors.Wrap(err, "client.GetPlugins: c.do")
 	}
 
+	defer func() {
+		_ = res.Body.Close()
+	}()
+
+	if res.StatusCode != http.StatusOK {
+		return PluginResponse{}, fmt.Errorf(httpResponseCodeErrorFormat, "client.GetPlugins", http.StatusOK, res.StatusCode)
+	}
+
 	var t PluginResponse
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()

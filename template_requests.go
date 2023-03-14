@@ -47,7 +47,7 @@ func (c *Client) ListTemplates(ctx context.Context) (ListTemplatesResponse, erro
 	}()
 
 	if res.StatusCode != http.StatusOK {
-		return ListTemplatesResponse{}, fmt.Errorf("client.ListTemplates: unexpected status code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
+		return ListTemplatesResponse{}, fmt.Errorf(httpResponseCodeErrorFormat, "client.ListTemplates", http.StatusOK, res.StatusCode)
 	}
 
 	var t ListTemplatesResponse
@@ -81,6 +81,10 @@ func (c *Client) GetTemplate(ctx context.Context, name string) (Template, error)
 	defer func() {
 		_ = res.Body.Close()
 	}()
+
+	if res.StatusCode != http.StatusOK {
+		return Template{}, fmt.Errorf(httpResponseCodeErrorFormat, "client.GetTemplate", http.StatusOK, res.StatusCode)
+	}
 
 	var t Template
 	dec := json.NewDecoder(res.Body)
@@ -158,7 +162,7 @@ func (c *Client) ImportTemplatesFromGitHub(ctx context.Context, repo, ref, path 
 	}()
 
 	if res.StatusCode != http.StatusCreated {
-		return fmt.Errorf("client.ImportTemplatesFromGitHub: expected http response code to be %d, got %d instead", http.StatusOK, res.StatusCode)
+		return fmt.Errorf(httpResponseCodeErrorFormat, "client.ImportTemplatesFromGitHub", http.StatusOK, res.StatusCode)
 	}
 
 	return nil

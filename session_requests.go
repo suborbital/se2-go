@@ -63,9 +63,13 @@ func (c *Client) CreateSession(ctx context.Context, tenantName, namespace, plugi
 		return CreateSessionResponse{}, errors.Wrap(err, "client.CreateSession: c.do")
 	}
 
+	defer func() {
+		_ = res.Body.Close()
+	}()
+
 	// Check response code.
 	if res.StatusCode != http.StatusCreated {
-		return CreateSessionResponse{}, fmt.Errorf("client.CreateSession: expected http response code to be %d, got %d instead", http.StatusCreated, res.StatusCode)
+		return CreateSessionResponse{}, fmt.Errorf(httpResponseCodeErrorFormat, "client.CreateSession", http.StatusCreated, res.StatusCode)
 	}
 
 	// Marshal response body into what we need to give back.

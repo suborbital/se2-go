@@ -41,6 +41,10 @@ func (c *Client) GetTenantByName(ctx context.Context, name string) (TenantRespon
 		_ = res.Body.Close()
 	}()
 
+	if res.StatusCode != http.StatusOK {
+		return TenantResponse{}, fmt.Errorf(httpResponseCodeErrorFormat, "client.GetTenantByName", http.StatusOK, res.StatusCode)
+	}
+
 	var t TenantResponse
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
@@ -89,6 +93,10 @@ func (c *Client) CreateTenant(ctx context.Context, name, description string) (Te
 		_ = res.Body.Close()
 	}()
 
+	if res.StatusCode != http.StatusCreated {
+		return TenantResponse{}, fmt.Errorf(httpResponseCodeErrorFormat, "client.CreateTenant", http.StatusCreated, res.StatusCode)
+	}
+
 	var t TenantResponse
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
@@ -120,6 +128,10 @@ func (c *Client) ListTenants(ctx context.Context) (ListTenantResponse, error) {
 	defer func() {
 		_ = res.Body.Close()
 	}()
+
+	if res.StatusCode != http.StatusOK {
+		return ListTenantResponse{}, fmt.Errorf(httpResponseCodeErrorFormat, "client.ListTenants", http.StatusOK, res.StatusCode)
+	}
 
 	var t ListTenantResponse
 	dec := json.NewDecoder(res.Body)
@@ -162,6 +174,10 @@ func (c *Client) UpdateTenantByName(ctx context.Context, name, description strin
 	defer func() {
 		_ = res.Body.Close()
 	}()
+
+	if res.StatusCode != http.StatusOK {
+		return TenantResponse{}, fmt.Errorf(httpResponseCodeErrorFormat, "client.UpdateTenantByName", http.StatusOK, res.StatusCode)
+	}
 
 	var t TenantResponse
 	dec := json.NewDecoder(res.Body)

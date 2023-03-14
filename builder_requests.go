@@ -47,6 +47,10 @@ func (c *Client) BuildPlugin(ctx context.Context, pluginCode []byte, token Creat
 		_ = res.Body.Close()
 	}()
 
+	if res.StatusCode != http.StatusOK {
+		return BuildPluginResponse{}, fmt.Errorf(httpResponseCodeErrorFormat, "client.BuildPlugin", http.StatusOK, res.StatusCode)
+	}
+
 	var t BuildPluginResponse
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
@@ -85,7 +89,7 @@ func (c *Client) GetBuilderFeatures(ctx context.Context) (BuilderFeaturesRespons
 	}()
 
 	if res.StatusCode != http.StatusOK {
-		return BuilderFeaturesResponse{}, fmt.Errorf("client.GetBuilderFeatures: received non-200 response %d", res.StatusCode)
+		return BuilderFeaturesResponse{}, fmt.Errorf(httpResponseCodeErrorFormat, "client.GetBuilderFeatures", http.StatusOK, res.StatusCode)
 	}
 
 	// Marshal response body into what we need to give back.
@@ -130,7 +134,7 @@ func (c *Client) TestPluginDraft(ctx context.Context, testData []byte, token Cre
 	}()
 
 	if res.StatusCode != http.StatusOK {
-		return TestPluginDraftResponse{}, fmt.Errorf("client.TestPluginDraft: unexpected response code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
+		return TestPluginDraftResponse{}, fmt.Errorf(httpResponseCodeErrorFormat, "client.TestPluginDraft", http.StatusOK, res.StatusCode)
 	}
 
 	var t TestPluginDraftResponse
@@ -160,6 +164,10 @@ func (c *Client) GetPluginDraft(ctx context.Context, token CreateSessionResponse
 	defer func() {
 		_ = res.Body.Close()
 	}()
+
+	if res.StatusCode != http.StatusOK {
+		return DraftResponse{}, fmt.Errorf(httpResponseCodeErrorFormat, "client.GetPluginDraft", http.StatusOK, res.StatusCode)
+	}
 
 	var t DraftResponse
 	dec := json.NewDecoder(res.Body)
@@ -215,7 +223,7 @@ func (c *Client) CreatePluginDraft(ctx context.Context, templateName string, tok
 	}()
 
 	if res.StatusCode != http.StatusOK {
-		return DraftResponse{}, fmt.Errorf("client.CreatePluginDraft: unexpected response code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
+		return DraftResponse{}, fmt.Errorf(httpResponseCodeErrorFormat, "client.CreatePluginDraft", http.StatusOK, res.StatusCode)
 	}
 
 	var t DraftResponse
@@ -251,7 +259,7 @@ func (c *Client) PromotePluginDraft(ctx context.Context, token CreateSessionResp
 	}()
 
 	if res.StatusCode != http.StatusOK {
-		return PromotePluginDraftResponse{}, fmt.Errorf("client.PromotePluginDraft: unexpected status code. Wanted %d, got %d", http.StatusOK, res.StatusCode)
+		return PromotePluginDraftResponse{}, fmt.Errorf(httpResponseCodeErrorFormat, "client.PromotePluginDraft", http.StatusOK, res.StatusCode)
 	}
 
 	var t PromotePluginDraftResponse

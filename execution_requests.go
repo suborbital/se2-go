@@ -31,6 +31,10 @@ func (c *Client) Exec(ctx context.Context, payload []byte, ident, namespace, plu
 		_ = res.Body.Close()
 	}()
 
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf(httpResponseCodeErrorFormat, "client.Exec", http.StatusOK, res.StatusCode)
+	}
+
 	b, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, errors.Wrap(err, "client.Exec: io.ReadAll(res.Body)")
