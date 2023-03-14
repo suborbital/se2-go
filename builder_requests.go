@@ -65,11 +65,14 @@ func (c *Client) BuildPlugin(ctx context.Context, pluginCode []byte, token Creat
 // BuilderFeaturesResponse captures the json response from the features endpoint.
 type BuilderFeaturesResponse struct {
 	Features  []string `json:"features"`
-	Languages []struct {
-		ID         string `json:"identifier"`
-		ShortName  string `json:"short"`
-		PrettyName string `json:"pretty"`
-	}
+	Languages []Languages
+}
+
+// Languages captures the json representation of an individual supported language.
+type Languages struct {
+	ID         string `json:"identifier"`
+	ShortName  string `json:"short"`
+	PrettyName string `json:"pretty"`
 }
 
 // GetBuilderFeatures will return the features that the builder can provide.
