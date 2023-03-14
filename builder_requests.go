@@ -47,8 +47,8 @@ func (c *Client) BuildPlugin(ctx context.Context, pluginCode []byte, token Creat
 		_ = res.Body.Close()
 	}()
 
-	if res.StatusCode != http.StatusOK {
-		return BuildPluginResponse{}, fmt.Errorf(httpResponseCodeErrorFormat, "client.BuildPlugin", http.StatusOK, res.StatusCode)
+	if res.StatusCode != http.StatusCreated {
+		return BuildPluginResponse{}, fmt.Errorf(httpResponseCodeErrorFormat, "client.BuildPlugin", http.StatusCreated, res.StatusCode)
 	}
 
 	var t BuildPluginResponse
