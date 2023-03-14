@@ -12,7 +12,7 @@ import (
 
 const pathCreateTenantSession = pathTenantByName + "/session"
 
-type CreateSessionRequest struct {
+type createSessionRequest struct {
 	Plugin    string `json:"fn"`
 	Namespace string `json:"namespace"`
 }
@@ -38,7 +38,7 @@ func (c *Client2) CreateSession(ctx context.Context, tenantName, namespace, plug
 
 	// Build a body, Dr. Frankenstein!
 	var body bytes.Buffer
-	err := json.NewEncoder(&body).Encode(CreateSessionRequest{
+	err := json.NewEncoder(&body).Encode(createSessionRequest{
 		Plugin:    plugin,
 		Namespace: namespace,
 	})
