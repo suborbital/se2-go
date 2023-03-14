@@ -26,7 +26,7 @@ type PluginResponse struct {
 }
 
 func (c *Client) GetPlugins(ctx context.Context, tenantName string) (PluginResponse, error) {
-	if tenantName == "" {
+	if tenantName == emptyString {
 		return PluginResponse{}, errors.New("tenant name cannot be blank")
 	}
 

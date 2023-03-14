@@ -19,6 +19,8 @@ const (
 	hostExecProduction string = "https://edge.suborbital.network"
 	hostExecStaging    string = "https://stg.edge.suborbital.network"
 	minAccessKeyLength        = 60
+	defaultTimeout            = 60 * time.Second
+	emptyString        string = ""
 )
 
 var (
@@ -106,7 +108,7 @@ func NewClient(mode ServerMode, token string, options ...ClientOption) (*Client,
 // use the WithHttpClient function.
 func defaultHttpClient() *http.Client {
 	return &http.Client{
-		Timeout: 60 * time.Second,
+		Timeout: defaultTimeout,
 	}
 }
 

@@ -189,7 +189,7 @@ type createDraftRequest struct {
 //
 // To see available templates, use the ListTemplates method.
 func (c *Client) CreatePluginDraft(ctx context.Context, templateName string, token CreateSessionResponse) (DraftResponse, error) {
-	if templateName == "" {
+	if templateName == emptyString {
 		return DraftResponse{}, errors.New("template name cannot be blank")
 	}
 

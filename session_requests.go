@@ -29,15 +29,15 @@ type CreateSessionResponse struct {
 // keep track of the return argument and reuse it in later requests.
 func (c *Client) CreateSession(ctx context.Context, tenantName, namespace, plugin string) (CreateSessionResponse, error) {
 	// Check arguments.
-	if tenantName == "" {
+	if tenantName == emptyString {
 		return CreateSessionResponse{}, errors.New("tenant name cannot be blank")
 	}
 
-	if namespace == "" {
+	if namespace == emptyString {
 		return CreateSessionResponse{}, errors.New("namespace cannot be blank")
 	}
 
-	if plugin == "" {
+	if plugin == emptyString {
 		return CreateSessionResponse{}, errors.New("plugin cannot be blank")
 	}
 

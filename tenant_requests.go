@@ -61,7 +61,7 @@ type createTenantRequest struct {
 // CreateTenant creates a new tenant with the given name and description. Description is optional, it can be an
 // empty string.
 func (c *Client) CreateTenant(ctx context.Context, name, description string) (TenantResponse, error) {
-	if name == "" {
+	if name == emptyString {
 		return TenantResponse{}, errors.New("CreateTenant: tenant name cannot be empty")
 	}
 
@@ -140,7 +140,7 @@ type updateTenantRequest struct {
 
 // UpdateTenantByName updates the description of the tenant identified by its name. A tenant's name cannot be changed.
 func (c *Client) UpdateTenantByName(ctx context.Context, name, description string) (TenantResponse, error) {
-	if name == "" {
+	if name == emptyString {
 		return TenantResponse{}, errors.New("UpdateTenantByName: tenant name cannot be empty")
 	}
 
@@ -176,7 +176,7 @@ func (c *Client) UpdateTenantByName(ctx context.Context, name, description strin
 
 // DeleteTenantByName deletes the tenant identified by its name.
 func (c *Client) DeleteTenantByName(ctx context.Context, name string) error {
-	if name == "" {
+	if name == emptyString {
 		return errors.New("DeleteTenantByName: tenant name cannot be empty")
 	}
 	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf(c.host+pathTenantByName, name), nil)

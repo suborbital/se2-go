@@ -64,7 +64,7 @@ func (c *Client) ListTemplates(ctx context.Context) (ListTemplatesResponse, erro
 // GetTemplate takes a name and will return information about a template by that name, or an error if no templates are
 // found.
 func (c *Client) GetTemplate(ctx context.Context, name string) (Template, error) {
-	if name == "" {
+	if name == emptyString {
 		return Template{}, errors.New("name cannot be blank")
 	}
 
@@ -118,15 +118,15 @@ type importParams struct {
 // The repository needs to be publicly accessible; private repositories are not supported. Right now only GitHub is the
 // only available provider we can pull source code from.
 func (c *Client) ImportTemplatesFromGitHub(ctx context.Context, repo, ref, path string) error {
-	if repo == "" {
+	if repo == emptyString {
 		return errors.New("repo cannot be blank")
 	}
 
-	if ref == "" {
+	if ref == emptyString {
 		return errors.New("ref cannot be blank")
 	}
 
-	if path == "" {
+	if path == emptyString {
 		return errors.New("path cannot be blank. If files are on the root of the repository, use '.'")
 	}
 
