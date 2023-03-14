@@ -21,6 +21,7 @@ const (
 	minAccessKeyLength                 = 60
 	defaultTimeout                     = 60 * time.Second
 	emptyString                 string = ""
+	zeroLength                  int    = 0
 	httpResponseCodeErrorFormat        = "%s: expected http response code to be %d, got %d"
 )
 

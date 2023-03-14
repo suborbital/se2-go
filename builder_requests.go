@@ -29,7 +29,7 @@ type BuildPluginResponse struct {
 // language is set by the template, which you can control by calling the CreatePluginDraft method with the template
 // name.
 func (c *Client) BuildPlugin(ctx context.Context, pluginCode []byte, token CreateSessionResponse) (BuildPluginResponse, error) {
-	if len(pluginCode) == 0 {
+	if len(pluginCode) == zeroLength {
 		return BuildPluginResponse{}, errors.New("client.BuildPlugin: can not build empty code")
 	}
 
