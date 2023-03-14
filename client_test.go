@@ -14,6 +14,7 @@ func TestNewClient2(t *testing.T) {
 		ak      string
 		options []se2.ClientOption
 	}
+
 	tests := []struct {
 		name    string
 		args    args
@@ -60,6 +61,7 @@ func TestNewClient2(t *testing.T) {
 			wantErr: assert.Error,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_, err := se2.NewClient(tt.args.mode, tt.args.ak, tt.args.options...)

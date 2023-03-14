@@ -49,8 +49,10 @@ func (c *Client) GetPlugins(ctx context.Context, tenantName string) (PluginRespo
 	}
 
 	var t PluginResponse
+
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
+
 	err = dec.Decode(&t)
 	if err != nil {
 		return PluginResponse{}, errors.Wrap(err, "client.GetPlugins: dec.Decode")

@@ -52,8 +52,10 @@ func (c *Client) BuildPlugin(ctx context.Context, pluginCode []byte, token Creat
 	}
 
 	var t BuildPluginResponse
+
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
+
 	err = dec.Decode(&t)
 	if err != nil {
 		return BuildPluginResponse{}, errors.Wrap(err, "client.BuildPlugin: dec.Decode")
@@ -97,8 +99,10 @@ func (c *Client) GetBuilderFeatures(ctx context.Context) (BuilderFeaturesRespons
 
 	// Marshal response body into what we need to give back.
 	var t BuilderFeaturesResponse
+
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
+
 	err = dec.Decode(&t)
 	if err != nil {
 		return BuilderFeaturesResponse{}, errors.Wrap(err, "client.GetBuilderFeatures: dec.Decode")
@@ -141,8 +145,10 @@ func (c *Client) TestPluginDraft(ctx context.Context, testData []byte, token Cre
 	}
 
 	var t TestPluginDraftResponse
+
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
+
 	err = dec.Decode(&t)
 	if err != nil {
 		return TestPluginDraftResponse{}, errors.Wrap(err, "client.TestPluginDraft: dec.Decode")
@@ -173,8 +179,10 @@ func (c *Client) GetPluginDraft(ctx context.Context, token CreateSessionResponse
 	}
 
 	var t DraftResponse
+
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
+
 	err = dec.Decode(&t)
 	if err != nil {
 		return DraftResponse{}, errors.Wrap(err, "client.GetPluginDraft: dec.Decode")
@@ -204,8 +212,10 @@ func (c *Client) CreatePluginDraft(ctx context.Context, templateName string, tok
 		return DraftResponse{}, errors.New("client.CreatePluginDraft: template name cannot be blank")
 	}
 
-	r := createDraftRequest{Template: templateName}
 	var b bytes.Buffer
+
+	r := createDraftRequest{Template: templateName}
+
 	err := json.NewEncoder(&b).Encode(r)
 	if err != nil {
 		return DraftResponse{}, errors.Wrapf(err, "client.CreatePluginDraft: json.NewEncoder.Encode(createDraftRequest with template name '%s'", templateName)
@@ -230,8 +240,10 @@ func (c *Client) CreatePluginDraft(ctx context.Context, templateName string, tok
 	}
 
 	var t DraftResponse
+
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
+
 	err = dec.Decode(&t)
 	if err != nil {
 		return DraftResponse{}, errors.Wrap(err, "client.CreatePluginDraft: dec.Decode")
@@ -266,8 +278,10 @@ func (c *Client) PromotePluginDraft(ctx context.Context, token CreateSessionResp
 	}
 
 	var t PromotePluginDraftResponse
+
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
+
 	err = dec.Decode(&t)
 	if err != nil {
 		return PromotePluginDraftResponse{}, errors.Wrap(err, "client.PromotePluginDraft: dec.Decode")

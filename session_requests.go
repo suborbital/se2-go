@@ -43,6 +43,7 @@ func (c *Client) CreateSession(ctx context.Context, tenantName, namespace, plugi
 
 	// Build a body, Dr. Frankenstein!
 	var body bytes.Buffer
+
 	err := json.NewEncoder(&body).Encode(createSessionRequest{
 		Plugin:    plugin,
 		Namespace: namespace,
@@ -74,8 +75,10 @@ func (c *Client) CreateSession(ctx context.Context, tenantName, namespace, plugi
 
 	// Marshal response body into what we need to give back.
 	var t CreateSessionResponse
+
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
+
 	err = dec.Decode(&t)
 	if err != nil {
 		return CreateSessionResponse{}, errors.Wrap(err, "client.CreateSession: dec.Decode")

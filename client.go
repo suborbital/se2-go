@@ -89,6 +89,7 @@ func NewClient(mode ServerMode, token string, options ...ClientOption) (*Client,
 
 	// If access key is not a valid JSON base64 encoded, return error.
 	var akUnmarshaled accessKey
+
 	err = json.Unmarshal(decoded, &akUnmarshaled)
 	if err != nil {
 		return nil, ErrNoAccessKey

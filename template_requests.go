@@ -51,8 +51,10 @@ func (c *Client) ListTemplates(ctx context.Context) (ListTemplatesResponse, erro
 	}
 
 	var t ListTemplatesResponse
+
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
+
 	err = dec.Decode(&t)
 	if err != nil {
 		return ListTemplatesResponse{}, errors.Wrap(err, "client.ListTemplates: dec.Decode")
@@ -87,8 +89,10 @@ func (c *Client) GetTemplate(ctx context.Context, name string) (Template, error)
 	}
 
 	var t Template
+
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
+
 	err = dec.Decode(&t)
 	if err != nil {
 		return Template{}, errors.Wrap(err, "client.GetTemplate: dec.Decode")
@@ -135,6 +139,7 @@ func (c *Client) ImportTemplatesFromGitHub(ctx context.Context, repo, ref, path 
 	}
 
 	var requestBody bytes.Buffer
+
 	err := json.NewEncoder(&requestBody).Encode(importRequest{
 		Source: "git",
 		Params: importParams{

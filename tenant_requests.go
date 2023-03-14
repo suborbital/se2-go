@@ -46,8 +46,10 @@ func (c *Client) GetTenantByName(ctx context.Context, name string) (TenantRespon
 	}
 
 	var t TenantResponse
+
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
+
 	err = dec.Decode(&t)
 	if err != nil {
 		return TenantResponse{}, errors.Wrap(err, "client.GetTenantByName: dec.Decode")
@@ -70,6 +72,7 @@ func (c *Client) CreateTenant(ctx context.Context, name, description string) (Te
 	}
 
 	var requestBody io.Reader
+
 	if description != "" {
 		m, err := json.Marshal(createTenantRequest{Description: description})
 		if err != nil {
@@ -98,8 +101,10 @@ func (c *Client) CreateTenant(ctx context.Context, name, description string) (Te
 	}
 
 	var t TenantResponse
+
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
+
 	err = dec.Decode(&t)
 	if err != nil {
 		return TenantResponse{}, errors.Wrap(err, "client.CreateTenant: dec.Decode")
@@ -134,8 +139,10 @@ func (c *Client) ListTenants(ctx context.Context) (ListTenantResponse, error) {
 	}
 
 	var t ListTenantResponse
+
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
+
 	err = dec.Decode(&t)
 	if err != nil {
 		return ListTenantResponse{}, errors.Wrap(err, "client.ListTenants: dec.Decode")
@@ -180,8 +187,10 @@ func (c *Client) UpdateTenantByName(ctx context.Context, name, description strin
 	}
 
 	var t TenantResponse
+
 	dec := json.NewDecoder(res.Body)
 	dec.DisallowUnknownFields()
+
 	err = dec.Decode(&t)
 	if err != nil {
 		return TenantResponse{}, errors.Wrap(err, "client.UpdateTenantByName: dec.Decode")
@@ -195,6 +204,7 @@ func (c *Client) DeleteTenantByName(ctx context.Context, name string) error {
 	if name == emptyString {
 		return errors.New("client.DeleteTenantByName: tenant name cannot be empty")
 	}
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, fmt.Sprintf(c.host+pathTenantByName, name), nil)
 	if err != nil {
 		return errors.Wrap(err, "client.DeleteTenantByName: http.NewRequest")
