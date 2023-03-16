@@ -2,75 +2,43 @@ package se2
 
 import (
 	"bytes"
-	"encoding/json"
+	"context"
+	"fmt"
 	"io"
 	"net/http"
-	"path"
 
 	"github.com/pkg/errors"
 )
 
-type ExecResponse struct {
-	Response []byte
-	UUID     string
-}
+const (
+	pathExec = "/name/%s/%s/%s"
+)
 
-// execPlugin remotely executes the provided plugin using the body as input. See also: ExecString()
-func (c *Client) execPlugin(endpoint string, body io.Reader) ([]byte, string, error) {
-	req, err := c.execRequestBuilder(http.MethodPost, endpoint, body)
-	req.Header.Set("Authorization", "Bearer "+c.envToken)
-
+// Exec takes a context, a byte slice payload, an ident, namespace, and plugin triad to identify the plugin to run with
+// the payload as input. It returns a byte slice as output, and an error if something went wrong.
+func (c *Client) Exec(ctx context.Context, payload []byte, ident, namespace, plugin string) ([]byte, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf(c.execHost+pathExec, ident, namespace, plugin), bytes.NewReader(payload))
 	if err != nil {
-		return nil, "", err
+		return nil, errors.Wrap(err, "client.Exec: http.NewRequest")
 	}
 
 	res, err := c.do(req)
-	if err != nil && res == nil {
-		return nil, "", err
-	}
-	defer res.Body.Close()
-
-	result, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, "", err
+		return nil, errors.Wrap(err, "client.Exec: c.do")
 	}
+
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	if res.StatusCode != http.StatusOK {
-		errRes := ExecError{}
-		err = json.Unmarshal(result, &errRes)
-		if err != nil {
-			return nil, "", err
-		}
-		newErr := errors.Errorf("[%d]: %s", errRes.Code, errRes.Message)
-
-		return nil, "", newErr
+		return nil, fmt.Errorf(httpResponseCodeErrorFormat, "client.Exec", http.StatusOK, res.StatusCode)
 	}
 
-	return result, res.Header.Get("x-suborbital-requestid"), nil
-}
-
-// Exec remotely executes the provided plugin using the body as input. See also: ExecString()
-func (c *Client) Exec(plugin *Plugin, body io.Reader) ([]byte, string, error) {
-	if plugin == nil {
-		return nil, "", errors.New("Plugin cannot be nil")
+	b, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "client.Exec: io.ReadAll(res.Body)")
 	}
 
-	return c.execPlugin(path.Join("/name", plugin.URI()), body)
-}
-
-// ExecString sets up a buffer with the provided string and calls Exec
-func (c *Client) ExecString(plugin *Plugin, body string) ([]byte, string, error) {
-	buf := bytes.NewBufferString(body)
-	return c.Exec(plugin, buf)
-}
-
-// ExecRef remotely executes the provided plugin using the body as input, by plugin reference. See also: ExecRefString()
-func (c *Client) ExecRef(ref string, body io.Reader) ([]byte, string, error) {
-	return c.execPlugin(path.Join("/ref", ref), body)
-}
-
-// ExecRefString sets up a buffer with the provided string and calls ExecRef
-func (c *Client) ExecRefString(ref string, body string) ([]byte, string, error) {
-	buf := bytes.NewBufferString(body)
-	return c.ExecRef(ref, buf)
+	return b, nil
 }
