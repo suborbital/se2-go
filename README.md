@@ -129,3 +129,63 @@ func example() {
     }
 }
 ```
+
+
+### Templates
+
+#### ListTemplates
+`ListTemplates` will list all the available templates for the environment specified by the API key. Requires a configured client and a valid API key.
+```go
+func example() {
+	templates, err := client.ListTemplates(ctx)
+	if err != nil {
+		// handle error
+    }
+}
+```
+Returned payload looks like this:
+```go
+type ListTemplatesResponse struct {
+	Templates []Template `json:"templates"`
+}
+
+type Template struct {
+    Name    string `json:"name"`
+    Lang    string `json:"lang"`
+    Main    string `json:"main,omitempty"`
+    Version string `json:"api_version"`
+}
+```
+
+#### GetTemplate
+
+`GetTemplate` will return a single template specified by its name in the environment the API key is for. It requires a configured client and a valid API key.
+
+```go
+func example() {
+	template, err := client.GetTemplate(ctx, "templateName")
+	if err != nil {
+		// handle error
+    }
+}
+```
+
+#### ImportTemplatesFromGitHub
+`ImportTemplatesFromGitHub` will import templates found in a GitHub repository. It takes a repository name in the form of `organization/repository`, a reference, which can be a branch, tag, or commit sha, and a path, which is where the templates are within the repository.
+
+To help with figuring out what either of those should be, the arguments will be substituted into this download link:
+```go
+https://github.com/{repository}/archive/{ref}.tar.gz
+```
+Any two values that would result in a 200 OK and a download response from GitHub will be valid arguments to the method.
+
+This requires a configured client, a valid API key, and that the repository is public and not archived.
+
+```go
+func example() {
+	err := client.ImportTemplatesFromGitHub(ctx, "suborbital/sdk", "main", "templates")
+	if err != nil {
+		// handle error
+    }
+}
+```
