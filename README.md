@@ -63,8 +63,8 @@ Each of these methods can be seen in the ["everything" annotated example](exampl
 ```go
 func example() {
     tenant, err := client.GetTenantByName(ctx, "tenantName")
-	if err != nil {
-		// handle error
+    if err != nil {
+        // handle error
     }
 }
 ```
@@ -73,11 +73,11 @@ func example() {
 The returned tenant's structure:
 ```go
 type TenantResponse struct {
-	AuthorizedParty string `json:"authorized_party"`
-	ID              string `json:"id"`
-	Environment     string `json:"environment"`
-	Name            string `json:"name"`
-	Description     string `json:"description"`
+    AuthorizedParty string `json:"authorized_party"`
+    ID              string `json:"id"`
+    Environment     string `json:"environment"`
+    Name            string `json:"name"`
+    Description     string `json:"description"`
 }
 ```
 
@@ -85,7 +85,7 @@ type TenantResponse struct {
 
 ```go
 func example() {
-	tenant, err := client.CreateTenant(ctx, "tenantName", "tenant description")
+    tenant, err := client.CreateTenant(ctx, "tenantName", "tenant description")
     if err != nil {
         // handle error
     }
@@ -97,16 +97,16 @@ func example() {
 
 ```go
 func example() {
-	tenants, err := client.ListTenants(ctx)
-	if err != nil {
-		// handle error
+    tenants, err := client.ListTenants(ctx)
+    if err != nil {
+        // handle error
     }
 }
 ```
 `ListTenants` will list all the tenants within the environment that the access key belongs to. The response looks like this:
 ```go
 type ListTenantResponse struct {
-	Tenants []TenantResponse
+    Tenants []TenantResponse
 }
 ```
 
@@ -116,7 +116,7 @@ type ListTenantResponse struct {
 This method requires a configured client with a valid API key.
 ```go
 func example() {
-	tenant, err := client.UpdateTenantByName(ctx, "tenantName", "new description")
+    tenant, err := client.UpdateTenantByName(ctx, "tenantName", "new description")
 }
 ```
 
@@ -126,9 +126,9 @@ func example() {
 
 ```go
 func example() {
-	err := client.DeleteTenantByName(ctx, "tenantName")
-	if err != nil {
-		// handle error
+    err := client.DeleteTenantByName(ctx, "tenantName")
+    if err != nil {
+        // handle error
     }
 }
 ``` 
@@ -139,16 +139,16 @@ func example() {
 `ListTemplates` will list all the available templates for the environment specified by the API key. Requires a configured client and a valid API key.
 ```go
 func example() {
-	templates, err := client.ListTemplates(ctx)
-	if err != nil {
-		// handle error
+    templates, err := client.ListTemplates(ctx)
+    if err != nil {
+        // handle error
     }
 }
 ```
 Returned payload looks like this:
 ```go
 type ListTemplatesResponse struct {
-	Templates []Template `json:"templates"`
+    Templates []Template `json:"templates"`
 }
 
 type Template struct {
@@ -165,9 +165,9 @@ type Template struct {
 
 ```go
 func example() {
-	template, err := client.GetTemplate(ctx, "templateName")
-	if err != nil {
-		// handle error
+    template, err := client.GetTemplate(ctx, "templateName")
+    if err != nil {
+        // handle error
     }
 }
 ```
@@ -185,9 +185,9 @@ This requires a configured client, a valid API key, and that the repository is p
 
 ```go
 func example() {
-	err := client.ImportTemplatesFromGitHub(ctx, "suborbital/sdk", "main", "templates")
-	if err != nil {
-		// handle error
+    err := client.ImportTemplatesFromGitHub(ctx, "suborbital/sdk", "main", "templates")
+    if err != nil {
+        // handle error
     }
 }
 ```
@@ -200,26 +200,26 @@ func example() {
 
 ```go
 func example() {
-	plugins, err := client.GetPlugins(ctx, "tenantName")
+    plugins, err := client.GetPlugins(ctx, "tenantName")
     if err != nil {
-		// handle error
+        // handle error
     }
 }
 ```
 The response shape is a `PluginResponse`, which looks like this:
 ```go
 type Plugin struct {
-	Name       string `json:"name"`
-	Namespace  string `json:"namespace"`
-	Lang       string `json:"lang"`
-	Ref        string `json:"ref"`
-	APIVersion string `json:"apiVersion"`
-	FQMN       string `json:"fqmn"`
-	URI        string `json:"uri"`
+    Name       string `json:"name"`
+    Namespace  string `json:"namespace"`
+    Lang       string `json:"lang"`
+    Ref        string `json:"ref"`
+    APIVersion string `json:"apiVersion"`
+    FQMN       string `json:"fqmn"`
+    URI        string `json:"uri"`
 }
 
 type PluginResponse struct {
-	Plugins []Plugin `json:"plugins"`
+    Plugins []Plugin `json:"plugins"`
 }
 ```
 
@@ -235,7 +235,7 @@ This requires a configured client with a valid API key.
 
 ```go
 func example() {
-	session, err := client.CreateSession(ctx, "tenantName", "namespace", "pluginName")
+    session, err := client.CreateSession(ctx, "tenantName", "namespace", "pluginName")
     if err != nil {
         // handle error
     }
@@ -249,8 +249,10 @@ func example() {
 
 ```go
 func example() {
-	features, err := client.GetBuilderFeatures(ctx)
-	
+    features, err := client.GetBuilderFeatures(ctx)
+    if err != nil {
+        // handle error
+    }
 }
 ```
 The shape of `features` is this:
@@ -276,22 +278,22 @@ This endpoint requires a [session token](#createsession) to work. Pass in the va
 
 ```go
 func example() {
-	session, err := client.CreateSession(ctx, "tenantName", "namespace", "pluginName")
-	if err != nil {
-		// handle error
-	}
-	
-	draft, err := client.CreatePluginDraft(ctx, "javascript", session)
-	if err != nil {
-		// handle error
+    session, err := client.CreateSession(ctx, "tenantName", "namespace", "pluginName")
+    if err != nil {
+        // handle error
+    }
+
+    draft, err := client.CreatePluginDraft(ctx, "javascript", session)
+    if err != nil {
+        // handle error
     }
 }
 ```
 The returned `draft` variable will be of this structure, where `Lang` is the programming language, and `Contents` is the actual code of the starter state of the plugin.
 ```go
 type DraftResponse struct {
-	Lang     string `json:"lang"`
-	Contents string `json:"contents"`
+    Lang     string `json:"lang"`
+    Contents string `json:"contents"`
 }
 ```
 
@@ -301,7 +303,7 @@ type DraftResponse struct {
 
 ```go
 func example() {
-	draft, err := client.GetPluginDraft(ctx, session)
+    draft, err := client.GetPluginDraft(ctx, session)
     if err != nil {
         // handle error
     }
@@ -314,7 +316,7 @@ func example() {
 
 ```go
 func example() {
-	output, err := client.BuildPlugin(ctx, pluginBody, session)
+    output, err := client.BuildPlugin(ctx, pluginBody, session)
     if err != nil {
         // handle error
     }
@@ -324,8 +326,8 @@ The returned `output` has the following structure:
 
 ```go
 type BuildPluginResponse struct {
-	Succeeded bool   `json:"succeeded"`
-	OutputLog string `json:"outputLog"`
+    Succeeded bool   `json:"succeeded"`
+    OutputLog string `json:"outputLog"`
 }
 ```
 The `OutputLog` is what the compiler printed to the terminal on the server. You can use it to debug what happened if the build did not succeed.
@@ -338,7 +340,7 @@ If `succeeded` is true, a new call to `GetPluginDraft` with the same session tok
 
 ```go
 func example() {
-	result, err := client.TestPluginDraft(ctx, []byte(`hello`), session)
+    result, err := client.TestPluginDraft(ctx, []byte(`hello`), session)
     if err != nil {
         // handle error
     }
@@ -347,8 +349,8 @@ func example() {
 The structure of the returned `result` is this:
 ```go
 type TestPluginDraftResponse struct {
-	Result string   `json:"result"`
-	Error  runError `json:"error"`
+    Result string   `json:"result"`
+    Error  runError `json:"error"`
 }
 
 type runError struct {
@@ -363,7 +365,7 @@ type runError struct {
 
 ```go
 func example() {
-	response, err := client.PromotePluginDraft(ctx, session)
+    response, err := client.PromotePluginDraft(ctx, session)
     if err != nil {
         // handle error
     }
@@ -387,7 +389,7 @@ This endpoint requires a configured client, and a valid API key, not a session t
 
 ```go
 func example() {
-	responseBytes, err := client.Exec(ctx, []byte(`hello`), "tenantName", "namespace", "pluginName")
+    responseBytes, err := client.Exec(ctx, []byte(`hello`), "tenantName", "namespace", "pluginName")
     if err != nil {
         // handle error
     }
