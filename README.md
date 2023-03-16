@@ -241,3 +241,156 @@ func example() {
     }
 }
 ```
+
+### Builder methods
+
+#### GetBuilderFeatures
+`GetBuilderFeatures` returns a list of things that the builder can do for you. This endpoint requires only a configured client and a valid API key. It does NOT need a session token.
+
+```go
+func example() {
+	features, err := client.GetBuilderFeatures(ctx)
+	
+}
+```
+The shape of `features` is this:
+
+```go
+type BuilderFeaturesResponse struct {
+    Features  []string `json:"features"`
+    Languages []Languages
+}
+
+type Languages struct {
+    ID         string `json:"identifier"`
+    ShortName  string `json:"short"`
+    PrettyName string `json:"pretty"`
+}
+```
+
+#### CreatePluginDraft
+
+`CreatePluginDraft` creates a plugin draft based on a template. You can query the list of available templates with the [`ListTemplates`](#listtemplates) call, or add new ones using the [`ImportTemplatesFromGitHub`](#importtemplatesfromgithub) method.
+
+This endpoint requires a [session token](#createsession) to work. Pass in the variable as is you get from the `CreateSession` method.
+
+```go
+func example() {
+	session, err := client.CreateSession(ctx, "tenantName", "namespace", "pluginName")
+	if err != nil {
+		// handle error
+	}
+	
+	draft, err := client.CreatePluginDraft(ctx, "javascript", session)
+	if err != nil {
+		// handle error
+    }
+}
+```
+The returned `draft` variable will be of this structure, where `Lang` is the programming language, and `Contents` is the actual code of the starter state of the plugin.
+```go
+type DraftResponse struct {
+	Lang     string `json:"lang"`
+	Contents string `json:"contents"`
+}
+```
+
+#### GetPluginDraft
+
+`GetPluginDraft` returns the current state of the draft plugin specified by the session token. The response is the same as you get from [`CreatePluginDraft`](#createplugindraft). It requires a [session token](#createsession).
+
+```go
+func example() {
+	draft, err := client.GetPluginDraft(ctx, session)
+    if err != nil {
+        // handle error
+    }
+}
+```
+
+#### BuildPlugin
+
+`BuildPlugin` takes in a new plugin code body as a byte slice and a session token, and builds the plugin. It returns a non nil error if something went wrong. This is most likely going to be a syntax error in the supplied code, or a form of authentication error. It requires a non empty plugin code body, and a [session token](#createsession).
+
+```go
+func example() {
+	output, err := client.BuildPlugin(ctx, pluginBody, session)
+    if err != nil {
+        // handle error
+    }
+}
+```
+The returned `output` has the following structure:
+
+```go
+type BuildPluginResponse struct {
+	Succeeded bool   `json:"succeeded"`
+	OutputLog string `json:"outputLog"`
+}
+```
+The `OutputLog` is what the compiler printed to the terminal on the server. You can use it to debug what happened if the build did not succeed.
+
+If `succeeded` is true, a new call to `GetPluginDraft` with the same session token will be the same code that you passed into the `BuildPlugin` method.
+
+#### TestPluginDraft
+
+`TestPluginDraft` takes in a byte slice to use as input to the current state of the plugin in the session, and will return a test response which has a string result for output, and an error if something went wrong while executing the plugin with the input.
+
+```go
+func example() {
+	result, err := client.TestPluginDraft(ctx, []byte(`hello`), session)
+    if err != nil {
+        // handle error
+    }
+}
+```
+The structure of the returned `result` is this:
+```go
+type TestPluginDraftResponse struct {
+	Result string   `json:"result"`
+	Error  runError `json:"error"`
+}
+
+type runError struct {
+    Code    int    `json:"code,omitempty"`
+    Message string `json:"message,omitempty"`
+}
+```
+
+#### PromotePluginDraft
+
+`PromotePluginDraft` will push the current draft version to the live edge servers. It will take a short time while code propagates, but after this executing the plugin on the edge will use the new code. This requires a [session token](#createsession).
+
+```go
+func example() {
+	response, err := client.PromotePluginDraft(ctx, session)
+    if err != nil {
+        // handle error
+    }
+}
+```
+If all went well, the structure of the returned `response` looks like this:
+```go
+type PromotePluginDraftResponse struct {
+    Ref string `json:"ref"`
+}
+```
+
+
+### Execution
+Contains a single method to execute published, or promoted, plugins.
+
+#### Exec
+`Exec` takes a byte slice payload that will be used as input for the plugin, and a trio of ident, namespace, and plugin name to specify which plugin to execute. The trio of inputs is the same as you used in the [`CreateSession`](#createsession) call. If execution failed, `err` is going to be non nil.
+
+This endpoint requires a configured client, and a valid API key, not a session token!
+
+```go
+func example() {
+	responseBytes, err := client.Exec(ctx, []byte(`hello`), "tenantName", "namespace", "pluginName")
+    if err != nil {
+        // handle error
+    }
+}
+```
+`responseBytes` is a `[]byte` type. This is a bytes in, bytes out operation.
