@@ -54,8 +54,11 @@ Some of the methods require an API key that you get by creating a new access key
 Others are session, or plugin specific. For those you need to first create a session, and then reuse the token with all the endpoints.
 
 ## Available methods
+
 Each of these methods can be seen in the ["everything" annotated example](examples/everything).
-### Tenants
+
+### Tenant methods
+
 #### GetTenantByName
 ```go
 func example() {
@@ -128,10 +131,9 @@ func example() {
 		// handle error
     }
 }
-```
+``` 
 
-
-### Templates
+### Template methods
 
 #### ListTemplates
 `ListTemplates` will list all the available templates for the environment specified by the API key. Requires a configured client and a valid API key.
@@ -187,5 +189,36 @@ func example() {
 	if err != nil {
 		// handle error
     }
+}
+```
+
+### Plugin methods
+
+#### GetPlugins
+
+`GetPlugins` will list the plugins for a given tenant, which is scoped to the environment the API key specifies. Requires a configured client and a valid API key.
+
+```go
+func example() {
+	plugins, err := client.GetPlugins(ctx, "tenantName")
+    if err != nil {
+		// handle error
+    }
+}
+```
+The response shape is a `PluginResponse`, which looks like this:
+```go
+type Plugin struct {
+	Name       string `json:"name"`
+	Namespace  string `json:"namespace"`
+	Lang       string `json:"lang"`
+	Ref        string `json:"ref"`
+	APIVersion string `json:"apiVersion"`
+	FQMN       string `json:"fqmn"`
+	URI        string `json:"uri"`
+}
+
+type PluginResponse struct {
+	Plugins []Plugin `json:"plugins"`
 }
 ```
