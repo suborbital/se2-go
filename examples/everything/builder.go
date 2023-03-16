@@ -133,6 +133,15 @@ export const run = (input) => {
 
 	fmt.Printf("this is the result of the promotion:\n%#v\n\n", promotionResult)
 
+	printHeader("List the plugins for tenant")
+
+	plugins, err := client.GetPlugins(buildCtx, sessionTenant.Name)
+	if err != nil {
+		log.Fatalf("listing plugins failed with %s", err.Error())
+	}
+
+	fmt.Printf("tenant %s has the following plugins:\n\n%#v\n\n", sessionTenant.Name, plugins)
+
 	printHeader("sleep for 8 seconds to wait until module gets propagated")
 	time.Sleep(8 * time.Second)
 
@@ -142,7 +151,7 @@ export const run = (input) => {
 		log.Fatalf("client.Exec: %s", err.Error())
 	}
 
-	fmt.Printf("exec result is\n%#v\n", exec)
+	fmt.Printf("exec result is\n%#v\nor in string: %s\n", exec, string(exec))
 
 	printHeader("deleting tenant of the session")
 
