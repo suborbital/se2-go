@@ -222,3 +222,22 @@ type PluginResponse struct {
 	Plugins []Plugin `json:"plugins"`
 }
 ```
+
+### Session methods
+
+There's only a single endpoint here. Use this to create a session to use with the builder methods.
+
+#### CreateSession
+
+`CreateSession` creates a session for a given tenant, namespace, and plugin name. Once you have the token, every request to the builder with the same session will relate to the same tenant-namespace-plugin.
+
+This requires a configured client with a valid API key.
+
+```go
+func example() {
+	session, err := client.CreateSession(ctx, "tenantName", "namespace", "pluginName")
+    if err != nil {
+        // handle error
+    }
+}
+```
