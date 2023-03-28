@@ -81,7 +81,7 @@ type TenantResponse struct {
 }
 ```
 
-#### CreteTenant
+#### CreateTenant
 
 ```go
 func example() {
@@ -91,7 +91,7 @@ func example() {
     }
 }
 ```
-`CrateTenant` will create tenant with a given name and description. A successful response looks like `TenantResponse`. Requires a configured client and a correct API key. If the tenant wasn't created, this method returns a non nil error.
+`CreateTenant` will create tenant with a given name and description. A successful response looks like `TenantResponse`. Requires a configured client and a correct API key. If the tenant wasn't created, this method returns a non nil error.
 
 #### ListTenants
 
